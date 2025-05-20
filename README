@@ -1,0 +1,10 @@
+PyRogue v01 By Andrew Butler, Summer 2025
+
+The goal of this project is to recreate a rogue-like game I built in C/C++ for a class at Iowa State University in Pyton. 
+This will a) allow me to build this without the same pressure of deadlines, 
+          b) implement some choice changes that I think are better, and 
+          c) gain experience building software in Python, particularly with a UI.
+
+My versions will loosely follow the original assignment structure used in the university class.
+I also acknowledge that building this in python removes dynamic memory management as a consideration, but taking advantage of Python's built in features doesn't seem like a bad thing to me.
+v01 involves dungeon generation, with variable dungeon size and room count, with Dijkstra algorithm pathfinding.
