@@ -1,5 +1,4 @@
 import random
-import math
 from enum import Enum
 from utility import exp_chancetime
 
@@ -38,11 +37,17 @@ class dungeon:
         self.roomc = 0
         self.stairc = 0
         # Declaring the rock hardness map; default max hardness of 255
-        rmap = [[255] * self.width for _ in range(self.height)]
+        self.rmap = [[255] * self.width for _ in range(self.height)]
         # Declaring the terrain map for the dungeon
-        tmap = [[self.terrain.debug] * self.width for _ in range(self.height)]
+        self.tmap = [[self.terrain.debug] * self.width for _ in range(self.height)]
+        
+    # Attempts to place a room into the dungeon terrain map
+    def _place_room(self, rooom):
+        # TODO
+        # copy of the terrain map to easily revert changes if room cannot be placed
+        tmap_copy = self.tmap.deepcopy()
 
-    # Generates rock hardness map, necessary for Dijkstra path generation + NPC pathfinding
+    # Generates dungeon rock hardness map, necessary for Dijkstra path generation + NPC pathfinding
     def _generate_rockmap(self):
         # TODO
         # This needs to generate the rockmap, preferably making it somewhat smoothish
@@ -59,13 +64,35 @@ class dungeon:
                 (random.random() % (self.height / 2)),
                 (random.random() % (self.width / 2)),
             )
-
+            
+    def print_terrain(self):
+        for r in range(self.height):
+            for c in range(self.width):
+                t_type = self.tmap[r][c]
+                if (t_type == self.terrain.floor):
+                    print(".")
+                elif (t_type == self.terrain.stair):
+                    print("<")
+                elif (t_type == self.terrain.stdrock):
+                    print(" ")
+                elif (t_type == self.terrain.immrock):
+                    print("X") # will want to be a proper border later
+                else:
+                    print("!") # issue flag
+            
+            print("\n")
+            
+    
+    # Generates a random dungeon
     def generate_dungeon(self):
         # TODO
+        self._generate_rockmap()
+        self._generate_terrain()
         return
 
 def main():
     d = dungeon(21, 80)
+    d.print_terrain()
 
 if __name__ == "__main__":
     main()
