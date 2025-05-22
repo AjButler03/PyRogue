@@ -41,11 +41,24 @@ class dungeon:
         # Declaring the terrain map for the dungeon
         self.tmap = [[self.terrain.debug] * self.width for _ in range(self.height)]
         
+    def valid_point(self, r, c):
+        # TODO
+        return
+        
     # Attempts to place a room into the dungeon terrain map
-    def _place_room(self, rooom):
+    def _place_room(self, room):
         # TODO
         # copy of the terrain map to easily revert changes if room cannot be placed
         tmap_copy = self.tmap.deepcopy()
+        r = room.origin_r
+        c = room.origin_c
+        last_r = r + room.rsize_h
+        last_c = c + room.rsize_w
+        
+        while (r <  last_r):
+            while (c < last_c):
+                return
+                
 
     # Generates dungeon rock hardness map, necessary for Dijkstra path generation + NPC pathfinding
     def _generate_rockmap(self):
@@ -70,18 +83,17 @@ class dungeon:
             for c in range(self.width):
                 t_type = self.tmap[r][c]
                 if (t_type == self.terrain.floor):
-                    print(".")
+                    print(".", end="")
                 elif (t_type == self.terrain.stair):
-                    print("<")
+                    print("<", end="")
                 elif (t_type == self.terrain.stdrock):
-                    print(" ")
+                    print(" ", end="")
                 elif (t_type == self.terrain.immrock):
-                    print("X") # will want to be a proper border later
+                    print("X", end="") # will want to be a proper border later
                 else:
-                    print("!") # issue flag
+                    print("!", end="") # issue flag
             
-            print("\n")
-            
+            print("") # Newline for end of row
     
     # Generates a random dungeon
     def generate_dungeon(self):
