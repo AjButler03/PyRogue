@@ -5,8 +5,7 @@ from enum import Enum
 from utility import exp_chancetime
 
 min_room_h = 3
-min_room_w = 3
-min_roomc = 4
+min_room_w = 4
 
 
 class dungeon:
@@ -44,7 +43,7 @@ class dungeon:
         self.roomc = 0
         self.stairc = 0
         # Declaring the rock hardness map; default max hardness of 255
-        self.rmap = [[255] * self.width for _ in range(self.height)]
+        self.rmap = [[0] * self.width for _ in range(self.height)]
         # Declaring the terrain map for the dungeon
         self.tmap = [[self.terrain.debug] * self.width for _ in range(self.height)]
 
@@ -98,40 +97,53 @@ class dungeon:
 
     # Generates dungeon rock hardness map, necessary for Dijkstra path generation + NPC pathfinding
     def _generate_rockmap(self):
-        # TODO
-        # This needs to generate the rockmap, preferably making it somewhat smoothish
-        return
-
+        # This can probably be optimized later. Hop to it, later me.
+        # Storing the origin points for rock hardness levels
+        rock_origin = [[0, 0] for _ in range(255)]
+        
+        # Marking immutable border
+        r = 0
+        while r < self.height:
+            c = 0
+            while c < self.width:
+                if (
+                    (r == 0)
+                    or (c == 0)
+                    or (r == self.height - 1)
+                    or (c == self.width - 1)
+                ):
+                    self.rmap[r][c] = 255
+                c += 1
+            r += 1
+        
+        # Create origin points for every rock level
+        rocklevel = 0
+        while rocklevel < 254:
+            rock_origin[rocklevel][0] = random.randint(2, self.height - 3)
+            rock_origin[rocklevel][1] = random.randint(2, self.width - 3)
+            rocklevel += 1
+            
     # Generates the dungeon rooms, cooridors, and staircases (terrain)
     # Cannot be called before generating the rockmap
     def _generate_terrain(self):
         # Creating rooms; at least 1
         attemptc = 0  # To keep track of the number of room placement attempts
         attempt_limit = min(self.width, self.height)
+        min_roomc = attempt_limit // 3
         # Right now it's just hardcoded to attempt 25 times (at least one success), but that could be changed later.
         while (self.roomc < min_roomc) or (attemptc < attempt_limit):
-            if (self.roomc == 0) or (exp_chancetime(self.roomc)):
-                new_room = self.room(
-                    (random.randint(1, self.height - 1)),
-                    (random.randint(1, self.width - 1)),
-                    (random.randint(min_room_h, self.height // 2)),
-                    (random.randint(min_room_w, self.width // 2)),
-                )
+            new_room = self.room(
+                (random.randint(1, self.height - 1)),
+                (random.randint(1, self.width - 1)),
+                (random.randint(min_room_h, self.height // 2)),
+                (random.randint(min_room_w, self.width // 2)),
+            )
+            if self.roomc < min_roomc:
                 if self._place_room(new_room):
                     self.roomc += 1
-                    print(
-                        "Room ",
-                        self.roomc,
-                        "@ (",
-                        new_room.origin_r,
-                        " ",
-                        new_room.origin_c,
-                        ") size (",
-                        new_room.rsize_h,
-                        " ",
-                        new_room.rsize_w,
-                        ")",
-                    )
+            elif exp_chancetime(self.roomc - min_roomc + 1):
+                if self._place_room(new_room):
+                    self.roomc += 1
             attemptc += 1
 
     # Method to show terrain in console
@@ -152,6 +164,14 @@ class dungeon:
 
             print("")  # Newline for end of row
 
+    # Method to show rock hardness map in console
+    def print_rockmap(self):
+        for r in range(self.height):
+            for c in range(self.width):
+                print(self.rmap[r][c] % 10, end="")
+
+            print("")  # Newline for end of row
+
     # Generates a random dungeon
     def generate_dungeon(self):
         self._generate_rockmap()
@@ -160,9 +180,10 @@ class dungeon:
 
 
 def main():
-    d = dungeon(21, 80)
+    d = dungeon(20, 80)
     d.generate_dungeon()
     d.print_terrain()
+    d.print_rockmap()
 
 
 if __name__ == "__main__":
