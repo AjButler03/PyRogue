@@ -100,7 +100,7 @@ class dungeon:
         # This can probably be optimized later. Hop to it, later me.
         # Storing the origin points for rock hardness levels
         rock_origin = [[0, 0] for _ in range(255)]
-        
+
         # Marking immutable border
         r = 0
         while r < self.height:
@@ -115,14 +115,56 @@ class dungeon:
                     self.rmap[r][c] = 255
                 c += 1
             r += 1
-        
+
         # Create origin points for every rock level
         rocklevel = 0
-        while rocklevel < 254:
+        while rocklevel < 255:
             rock_origin[rocklevel][0] = random.randint(2, self.height - 3)
             rock_origin[rocklevel][1] = random.randint(2, self.width - 3)
             rocklevel += 1
-            
+
+        # Now gradually expand each rock level outward one by one
+        expansion_pass = 0
+        num_passes = max(self.width, self.height)
+        while expansion_pass < num_passes:
+            rlev = 1
+            while rlev < 255:
+                r = rock_origin[rlev][0]
+                c = rock_origin[rlev][1]
+
+                # Now do Manhattan expansion
+                i = 1
+                while i <= expansion_pass:
+                    j = -i
+                    while j <= i:
+                        r2 = r + j
+                        pc2 = c + (i - abs(j))  # positive column coordinate
+                        nc2 = c - (i - abs(j))  # negative column coordinate
+
+                        # check point on right (positive) side
+                        if (
+                            r2 > 0
+                            and r2 < self.height - 1
+                            and pc2 > 0
+                            and pc2 < self.width - 1
+                        ):
+                            if self.rmap[r2][pc2] == 0:
+                                self.rmap[r2][pc2] = rlev
+
+                        # check point on left (negative) side
+                        if (
+                            r2 > 0
+                            and r2 < self.height - 1
+                            and nc2 > 0
+                            and nc2 < self.width - 1
+                        ):
+                            if self.rmap[r2][nc2] == 0:
+                                self.rmap[r2][nc2] = rlev
+                        j += 1
+                    i += 1
+                rlev += 1
+            expansion_pass += 1
+
     # Generates the dungeon rooms, cooridors, and staircases (terrain)
     # Cannot be called before generating the rockmap
     def _generate_terrain(self):
