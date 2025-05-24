@@ -3,9 +3,11 @@ import copy
 import math
 from enum import Enum
 from utility import exp_chancetime
+from collections import deque
 
 min_room_h = 3
 min_room_w = 4
+max_rock_hardness = 255
 
 
 class dungeon:
@@ -97,73 +99,39 @@ class dungeon:
 
     # Generates dungeon rock hardness map, necessary for Dijkstra path generation + NPC pathfinding
     def _generate_rockmap(self):
-        # This can probably be optimized later. Hop to it, later me.
-        # Storing the origin points for rock hardness levels
-        rock_origin = [[0, 0] for _ in range(255)]
+        # Step 1: Initialize immutable outer border to 255
+        for r in range(self.height):
+            for c in range(self.width):
+                if r == 0 or c == 0 or r == self.height - 1 or c == self.width - 1:
+                    self.rmap[r][c] = max_rock_hardness
+                else:
+                    self.rmap[r][c] = 0  # Explicitly clear previous runs if any
 
-        # Marking immutable border
-        r = 0
-        while r < self.height:
-            c = 0
-            while c < self.width:
-                if (
-                    (r == 0)
-                    or (c == 0)
-                    or (r == self.height - 1)
-                    or (c == self.width - 1)
-                ):
-                    self.rmap[r][c] = 255
-                c += 1
-            r += 1
+        # Step 2: Generate one random origin for each rock hardness level (1–254, 0 reserved for floor & 255 is immutable rock)
+        rock_origins = [(random.randint(1, self.height - 2), random.randint(1, self.width - 2))
+                        for _ in range(max_rock_hardness - 1)]
 
-        # Create origin points for every rock level
-        rocklevel = 0
-        while rocklevel < 255:
-            rock_origin[rocklevel][0] = random.randint(2, self.height - 3)
-            rock_origin[rocklevel][1] = random.randint(2, self.width - 3)
-            rocklevel += 1
+        # Step 3: BFS propagation from each origin with decaying hardness
+        for rlev in range(1, max_rock_hardness):
+            origin_r, origin_c = rock_origins[rlev - 1]
+            queue = deque()
+            queue.append((origin_r, origin_c, rlev))
 
-        # Now gradually expand each rock level outward one by one
-        expansion_pass = 0
-        num_passes = max(self.width, self.height)
-        while expansion_pass < num_passes:
-            rlev = 1
-            while rlev < 255:
-                r = rock_origin[rlev][0]
-                c = rock_origin[rlev][1]
+            while queue:
+                r, c, hardness = queue.popleft()
 
-                # Now do Manhattan expansion
-                i = 1
-                while i <= expansion_pass:
-                    j = -i
-                    while j <= i:
-                        r2 = r + j
-                        pc2 = c + (i - abs(j))  # positive column coordinate
-                        nc2 = c - (i - abs(j))  # negative column coordinate
+                # Skip out-of-bounds or immutable
+                if not (1 <= r < self.height - 1 and 1 <= c < self.width - 1):
+                    continue
 
-                        # check point on right (positive) side
-                        if (
-                            r2 > 0
-                            and r2 < self.height - 1
-                            and pc2 > 0
-                            and pc2 < self.width - 1
-                        ):
-                            if self.rmap[r2][pc2] == 0:
-                                self.rmap[r2][pc2] = rlev
+                # If this cell is unset or the new hardness is higher (stronger rock), update
+                if self.rmap[r][c] == 0 or hardness > self.rmap[r][c]:
+                    self.rmap[r][c] = hardness
 
-                        # check point on left (negative) side
-                        if (
-                            r2 > 0
-                            and r2 < self.height - 1
-                            and nc2 > 0
-                            and nc2 < self.width - 1
-                        ):
-                            if self.rmap[r2][nc2] == 0:
-                                self.rmap[r2][nc2] = rlev
-                        j += 1
-                    i += 1
-                rlev += 1
-            expansion_pass += 1
+                    # Spread to neighbors with decayed hardness (min = 1)
+                    if hardness > 1:
+                        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                            queue.append((r + dr, c + dc, hardness - 1))
 
     # Generates the dungeon rooms, cooridors, and staircases (terrain)
     # Cannot be called before generating the rockmap
@@ -210,7 +178,12 @@ class dungeon:
     def print_rockmap(self):
         for r in range(self.height):
             for c in range(self.width):
-                print(self.rmap[r][c] % 10, end="")
+                if (self.rmap[r][c] == 0):
+                    print(" ", end="")
+                elif (self.rmap[r][c] == max_rock_hardness):
+                    print("X", end="")
+                else:
+                    print(self.rmap[r][c] % 10, end="")
 
             print("")  # Newline for end of row
 
@@ -219,7 +192,6 @@ class dungeon:
         self._generate_rockmap()
         self._generate_terrain()
         return
-
 
 def main():
     d = dungeon(20, 80)
