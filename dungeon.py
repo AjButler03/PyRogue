@@ -1,5 +1,6 @@
 import random
 import copy
+import queue
 import math
 from enum import Enum
 from utility import exp_chancetime
@@ -20,8 +21,7 @@ class dungeon:
         stdrock = 3
         immrock = 4
 
-    # Classes to store individual room and starcase information
-    # Not strictly necessary atm, but will be helpful if I decide to create a saving/loading functionality
+    # Classes to store individual room information
     class room:
         # Room Constructor
         def __init__(self, origin_r, origin_c, rsize_h, rsize_w):
@@ -30,11 +30,21 @@ class dungeon:
             self.rsize_h = rsize_h
             self.rsize_w = rsize_w
 
+    # Class to store individual staircase information
     class staircase:
         # Staircase Constructor
         def __init__(self, origin_r, origin_c):
             self.origin_r = origin_r
             self.origin_c = origin_c
+            # True = up, False = down; Here in case I decide to make that matter
+            self.direction = True
+
+    # Simple class to queue different points in Dijkstra's algorithm
+    class dpoint:
+        def __init__(self, r, c, w):
+            self.r = r
+            self.c = c
+            self.w = w
 
     # Dungeon Constructor
     def __init__(self, size_h, size_w):
@@ -97,6 +107,11 @@ class dungeon:
         self.tmap = copy.deepcopy(tmap_copy)
         return True
 
+    # Attempts to place a staircase
+    def _place_stair(self, staircase):
+        # TODO
+        return
+
     # Generates dungeon rock hardness map, necessary for Dijkstra path generation + NPC pathfinding
     def _generate_rockmap(self):
         # Step 1: Initialize immutable outer border to 255
@@ -108,8 +123,10 @@ class dungeon:
                     self.rmap[r][c] = 0  # Explicitly clear previous runs if any
 
         # Step 2: Generate one random origin for each rock hardness level (1–254, 0 reserved for floor & 255 is immutable rock)
-        rock_origins = [(random.randint(1, self.height - 2), random.randint(1, self.width - 2))
-                        for _ in range(max_rock_hardness - 1)]
+        rock_origins = [
+            (random.randint(1, self.height - 2), random.randint(1, self.width - 2))
+            for _ in range(max_rock_hardness - 1)
+        ]
 
         # Step 3: BFS propagation from each origin with decaying hardness
         for rlev in range(1, max_rock_hardness):
@@ -132,6 +149,30 @@ class dungeon:
                     if hardness > 1:
                         for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                             queue.append((r + dr, c + dc, hardness - 1))
+
+    # Creates a corridor between point 1 and point 2
+    # Utilizing dijkstra's algoritm over the rockmap to
+    def _dijkstra_corridor(self, r1, c1, r2, c2):
+        pq = queue.PriorityQueue()
+
+        # initialize everything to 'infinite' cost (32 bit max, since python has no limit (?))
+        pmap = [
+            [self.dpoint(r, c, 4294967295) for c in range(self.width)]
+            for r in range(self.height)
+        ]
+        
+        # Cost to point 1 from point 1 is 0
+        pmap[r1][c1].w = 0
+        
+        # Now add all points into the priority queue
+        i = 0
+        while i < self.height:
+            j = 0
+            while j < self.width:
+                # do stuff
+                j += 1
+            i += 1
+        
 
     # Generates the dungeon rooms, cooridors, and staircases (terrain)
     # Cannot be called before generating the rockmap
@@ -178,9 +219,9 @@ class dungeon:
     def print_rockmap(self):
         for r in range(self.height):
             for c in range(self.width):
-                if (self.rmap[r][c] == 0):
+                if self.rmap[r][c] == 0:
                     print(" ", end="")
-                elif (self.rmap[r][c] == max_rock_hardness):
+                elif self.rmap[r][c] == max_rock_hardness:
                     print("X", end="")
                 else:
                     print(self.rmap[r][c] % 10, end="")
@@ -192,6 +233,7 @@ class dungeon:
         self._generate_rockmap()
         self._generate_terrain()
         return
+
 
 def main():
     d = dungeon(20, 80)
