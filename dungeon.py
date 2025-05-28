@@ -1,6 +1,6 @@
 import random
 import copy
-import queue
+import heapq
 import math
 from enum import Enum
 from utility import exp_chancetime
@@ -45,6 +45,10 @@ class dungeon:
             self.r = r
             self.c = c
             self.w = w
+            self.prev = None
+        
+        def __lt__(self, other):
+            return self.w < other.w
 
     # Dungeon Constructor
     def __init__(self, size_h, size_w):
@@ -153,25 +157,60 @@ class dungeon:
     # Creates a corridor between point 1 and point 2
     # Utilizing dijkstra's algoritm over the rockmap to
     def _dijkstra_corridor(self, r1, c1, r2, c2):
-        pq = queue.PriorityQueue()
-
-        # initialize everything to 'infinite' cost (32 bit max, since python has no limit (?))
-        pmap = [
-            [self.dpoint(r, c, 4294967295) for c in range(self.width)]
-            for r in range(self.height)
-        ]
+        # Init map for points + priority queue
+        pmap = [[None for _ in range(self.width)] for _ in range(self.height)]
+        pq = []
+        delta_r = [0, -1, 1, 0]
+        delta_c = [-1, 0, 0, 1]
         
-        # Cost to point 1 from point 1 is 0
-        pmap[r1][c1].w = 0
+        # create all points, populate grid, and add each to pq
+        for r in range(self.height):
+            for c in range(self.width):
+                if (r == r1 and c == c1):
+                    w = 0
+                else:
+                    w = float('inf')
+                point = self.dpoint(r, c, w)
+                pmap[r][c] = point
+                heapq.heappush(pq, point)
         
-        # Now add all points into the priority queue
-        i = 0
-        while i < self.height:
-            j = 0
-            while j < self.width:
-                # do stuff
-                j += 1
-            i += 1
+        # Pop points one by one, updating surrounding points' weights with new cost
+        while pq:
+            point = heapq.heappop(pq)
+            
+            # Check if we've reached point 2
+            if (point.r == r2 and point.c == c2):
+                p = point # Not necessary, but I don't want to confuse things here
+                
+                while((p.r != r1) or (p.c != c2)):
+                    if (self.dmap[p.r][p.c] == self.terrain.debug):
+                        self.dmap[p.r][p.c] = self.terrain.floor
+                        self.rockmap[p.r][p.c] = 0
+                    p = p.prev
+                return # All done
+            elif(pmap[point.r][point.c].w >= point):
+                # Itterate through coordinate deltas 
+                for i in range(4):
+                    new_r = point.r + delta_r[i]
+                    new_c = point.c + delta_c[i]
+                    
+                    # Check two things:
+                    # a) point is not immutable
+                    # b) cost for new point is lower via point from heap
+                    if( pmap[new_r][new_c].w > self.rockmap[new_r][new_c] + point.w + 1):
+                        pmap[new_r][new_c].w = point.w + self.rockmap[new_r][new_c] + 1
+                        pmap[new_r][new_c].prev.r = point.r
+                        pmap[new_r][new_c].prev.c = point.c
+                        heapq.heappush(pq, pmap[new_r][new_c]) # Push updated point
+            else:
+                # Weight mismatch; just ignore this intance of a point
+                continue
+                        
+                
+            
+            
+            
+        
         
 
     # Generates the dungeon rooms, cooridors, and staircases (terrain)
