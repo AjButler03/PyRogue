@@ -158,56 +158,57 @@ class dungeon:
     # Creates a corridor between point 1 and point 2
     # Utilizing dijkstra's algoritm over the rockmap
     def _dijkstra_corridor(self, r1, c1, r2, c2):
-        # Init map for points + priority queue
+        # Init fields
         pmap = [[None for _ in range(self.width)] for _ in range(self.height)]
+        visited = [[False for _ in range(self.width)] for _ in range(self.height)]
         pq = []
         delta_r = [0, -1, 1, 0]
         delta_c = [-1, 0, 0, 1]
-        
-        # create all points, populate grid, and add each to pq
+
+        # Populate point map, push points to heap
         for r in range(self.height):
             for c in range(self.width):
-                if (r == r1 and c == c1):
-                    w = 0
-                else:
-                    w = float('inf')
+                w = 0 if (r == r1 and c == c1) else float('inf')
                 point = self.dpoint(r, c, w)
                 pmap[r][c] = point
                 heapq.heappush(pq, point)
-        
-        # Pop points one by one, updating surrounding points' weights with new cost
+
+        # Main Dijkstra loop
         while pq:
             point = heapq.heappop(pq)
-            
-            # Check if we've reached point 2
-            if (point.r == r2 and point.c == c2):
-                p = point # Not necessary, but I don't want to confuse things here
-                
-                while((p.r != r1) or (p.c != c2)):
-                    if (self.tmap[p.r][p.c] == self.terrain.debug):
+
+            # if already visited, then move to next point in heap
+            if visited[point.r][point.c]:
+                continue
+            visited[point.r][point.c] = True
+
+            # Check if we'ved reached point 2; update dungeon if so
+            if point.r == r2 and point.c == c2:
+                p = point
+                while p.r != r1 or p.c != c1:
+                    if self.tmap[p.r][p.c] == self.terrain.debug:
                         self.tmap[p.r][p.c] = self.terrain.floor
-                        self.rockmap[p.r][p.c] = 0
+                        self.rmap[p.r][p.c] = 0
                     p = p.prev
                 print("Dijkstra Success")
-                return # All done
-            elif(pmap[point.r][point.c].w >= point.w):
-                # Itterate through coordinate deltas 
-                for i in range(4):
-                    new_r = point.r + delta_r[i]
-                    new_c = point.c + delta_c[i]
-                    
-                    # Check two things:
-                    # a) point is not immutable
-                    # b) cost for new point is lower via point from heap
-                    if( pmap[new_r][new_c].w > self.rmap[new_r][new_c] + point.w + 1):
-                        pmap[new_r][new_c].w = point.w + self.rmap[new_r][new_c] + 1
+                return
+
+            # Itterate through coordinate deltas to detect more optimal path
+            for i in range(4):
+                new_r = point.r + delta_r[i]
+                new_c = point.c + delta_c[i]
+
+                # Check that new point is valid
+                if self.valid_point(new_r, new_c):
+                    cost = self.rmap[new_r][new_c] + 1
+                    if not visited[new_r][new_c] and pmap[new_r][new_c].w > point.w + cost:
+                        pmap[new_r][new_c].w = point.w + cost
                         pmap[new_r][new_c].prev = point
-                        heapq.heappush(pq, pmap[new_r][new_c]) # Push updated point
-            else:
-                # Weight mismatch; just ignore this intance of a point
-                continue
+                        heapq.heappush(pq, pmap[new_r][new_c])
+
         print("Dijkstra Failure")
-                        
+        return
+               
     # Generates the dungeon rooms, cooridors, and staircases (terrain)
     # Cannot be called before generating the rockmap
     def _generate_terrain(self):
@@ -240,13 +241,22 @@ class dungeon:
                 # i at end of array; grab first entry
                 room2 = self.room_list[0]
             else:
-                room2 = self.room_list[i]
+                room2 = self.room_list[i + 1]
                 
             r1 = random.randint(room1.origin_r, room1.origin_r + room1.rsize_h - 1)
             c1 = random.randint(room1.origin_c, room1.origin_c + room1.rsize_w - 1)
             r2 = random.randint(room2.origin_r, room2.origin_r + room2.rsize_h - 1)
             c2 = random.randint(room2.origin_c, room2.origin_c + room2.rsize_w - 1)
             self._dijkstra_corridor(r1, c1, r2, c2)
+        
+        # Fill in remaining terrain as rock
+        for r in range(self.height):
+            for c in range(self.width):
+                if self.valid_point(r, c):
+                    if self.tmap[r][c] != self.terrain.floor:
+                        self.tmap[r][c] = self.terrain.stdrock
+                else:
+                    self.tmap[r][c] = self.terrain.immrock
 
     # Method to show terrain in console
     def print_terrain(self):

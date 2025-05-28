@@ -10,4 +10,4 @@ v01 ============================================================================
 5/23/2025
     - Rockmap generation; original + faster version
 5/27/2025
-    - Start on Dijkstra-based corridor generation
+    - First pass at dijkstra corridor generation; not strictly correct at the moment
