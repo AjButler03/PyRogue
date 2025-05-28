@@ -10,7 +10,6 @@ min_room_h = 3
 min_room_w = 4
 max_rock_hardness = 255
 
-
 class dungeon:
 
     # Enum to dictate the terrain types of a dungeon
@@ -57,7 +56,9 @@ class dungeon:
         self.width = size_w
         # Counts of rooms / stairs
         self.roomc = 0
+        self.room_list = []
         self.stairc = 0
+        self.stair_list = []
         # Declaring the rock hardness map; default max hardness of 255
         self.rmap = [[0] * self.width for _ in range(self.height)]
         # Declaring the terrain map for the dungeon
@@ -155,7 +156,7 @@ class dungeon:
                             queue.append((r + dr, c + dc, hardness - 1))
 
     # Creates a corridor between point 1 and point 2
-    # Utilizing dijkstra's algoritm over the rockmap to
+    # Utilizing dijkstra's algoritm over the rockmap
     def _dijkstra_corridor(self, r1, c1, r2, c2):
         # Init map for points + priority queue
         pmap = [[None for _ in range(self.width)] for _ in range(self.height)]
@@ -183,12 +184,13 @@ class dungeon:
                 p = point # Not necessary, but I don't want to confuse things here
                 
                 while((p.r != r1) or (p.c != c2)):
-                    if (self.dmap[p.r][p.c] == self.terrain.debug):
-                        self.dmap[p.r][p.c] = self.terrain.floor
+                    if (self.tmap[p.r][p.c] == self.terrain.debug):
+                        self.tmap[p.r][p.c] = self.terrain.floor
                         self.rockmap[p.r][p.c] = 0
                     p = p.prev
+                print("Dijkstra Success")
                 return # All done
-            elif(pmap[point.r][point.c].w >= point):
+            elif(pmap[point.r][point.c].w >= point.w):
                 # Itterate through coordinate deltas 
                 for i in range(4):
                     new_r = point.r + delta_r[i]
@@ -197,30 +199,23 @@ class dungeon:
                     # Check two things:
                     # a) point is not immutable
                     # b) cost for new point is lower via point from heap
-                    if( pmap[new_r][new_c].w > self.rockmap[new_r][new_c] + point.w + 1):
-                        pmap[new_r][new_c].w = point.w + self.rockmap[new_r][new_c] + 1
-                        pmap[new_r][new_c].prev.r = point.r
-                        pmap[new_r][new_c].prev.c = point.c
+                    if( pmap[new_r][new_c].w > self.rmap[new_r][new_c] + point.w + 1):
+                        pmap[new_r][new_c].w = point.w + self.rmap[new_r][new_c] + 1
+                        pmap[new_r][new_c].prev = point
                         heapq.heappush(pq, pmap[new_r][new_c]) # Push updated point
             else:
                 # Weight mismatch; just ignore this intance of a point
                 continue
+        print("Dijkstra Failure")
                         
-                
-            
-            
-            
-        
-        
-
     # Generates the dungeon rooms, cooridors, and staircases (terrain)
     # Cannot be called before generating the rockmap
     def _generate_terrain(self):
         # Creating rooms; at least 1
         attemptc = 0  # To keep track of the number of room placement attempts
         attempt_limit = min(self.width, self.height)
-        min_roomc = attempt_limit // 3
-        # Right now it's just hardcoded to attempt 25 times (at least one success), but that could be changed later.
+        min_roomc = attempt_limit // 3 # arbitrary; at least a few
+        # Attempts either self.width or self.height times, whichever is smaller
         while (self.roomc < min_roomc) or (attemptc < attempt_limit):
             new_room = self.room(
                 (random.randint(1, self.height - 1)),
@@ -231,10 +226,27 @@ class dungeon:
             if self.roomc < min_roomc:
                 if self._place_room(new_room):
                     self.roomc += 1
+                    self.room_list.append(new_room)
             elif exp_chancetime(self.roomc - min_roomc + 1):
                 if self._place_room(new_room):
                     self.roomc += 1
+                    self.room_list.append(new_room)
             attemptc += 1
+            
+        # Now create corridors between rooms
+        for i in range(len(self.room_list)):
+            room1 = self.room_list[i]
+            if (i == (self.roomc -1)):
+                # i at end of array; grab first entry
+                room2 = self.room_list[0]
+            else:
+                room2 = self.room_list[i]
+                
+            r1 = random.randint(room1.origin_r, room1.origin_r + room1.rsize_h - 1)
+            c1 = random.randint(room1.origin_c, room1.origin_c + room1.rsize_w - 1)
+            r2 = random.randint(room2.origin_r, room2.origin_r + room2.rsize_h - 1)
+            c2 = random.randint(room2.origin_c, room2.origin_c + room2.rsize_w - 1)
+            self._dijkstra_corridor(r1, c1, r2, c2)
 
     # Method to show terrain in console
     def print_terrain(self):
@@ -273,13 +285,11 @@ class dungeon:
         self._generate_terrain()
         return
 
-
 def main():
     d = dungeon(20, 80)
     d.generate_dungeon()
     d.print_terrain()
     d.print_rockmap()
-
 
 if __name__ == "__main__":
     main()
