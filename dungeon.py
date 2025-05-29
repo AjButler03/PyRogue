@@ -1,7 +1,7 @@
 import random
 import copy
-import heapq
 import math
+from utility import PriorityQueue
 from enum import Enum
 from utility import exp_chancetime
 from collections import deque
@@ -48,6 +48,12 @@ class dungeon:
         
         def __lt__(self, other):
             return self.w < other.w
+        
+        def __eq__(self, other):
+            return (self.r, self.c) == (other.r, other.c)
+
+        def __hash__(self):
+            return hash((self.r, self.c))
 
     # Dungeon Constructor
     def __init__(self, size_h, size_w):
@@ -158,34 +164,31 @@ class dungeon:
     # Creates a corridor between point 1 and point 2
     # Utilizing dijkstra's algoritm over the rockmap
     def _dijkstra_corridor(self, r1, c1, r2, c2):
-        # Init fields
-        pmap = [[None for _ in range(self.width)] for _ in range(self.height)]
-        visited = [[False for _ in range(self.width)] for _ in range(self.height)]
-        pq = []
+        pq = PriorityQueue()
+        visited = set()
+        pmap = {}
+
+        # Initialize starting point
+        start = self.dpoint(r1, c1, 0)
+        pq.push(start, 0)
+        pmap[(r1, c1)] = start
+
         delta_r = [0, -1, 1, 0]
         delta_c = [-1, 0, 0, 1]
 
-        # Populate point map, push points to heap
-        for r in range(self.height):
-            for c in range(self.width):
-                w = 0 if (r == r1 and c == c1) else float('inf')
-                point = self.dpoint(r, c, w)
-                pmap[r][c] = point
-                heapq.heappush(pq, point)
+        # Repeatedly pop points until queue is empty
+        while len(pq) > 0:
+            _, curr = pq.pop()
 
-        # Main Dijkstra loop
-        while pq:
-            point = heapq.heappop(pq)
-
-            # if already visited, then move to next point in heap
-            if visited[point.r][point.c]:
+            # Check if point has already been visited; ignore if so
+            if (curr.r, curr.c) in visited:
                 continue
-            visited[point.r][point.c] = True
+            visited.add((curr.r, curr.c))
 
-            # Check if we'ved reached point 2; update dungeon if so
-            if point.r == r2 and point.c == c2:
-                p = point
-                while p.r != r1 or p.c != c1:
+            if curr.r == r2 and curr.c == c2:
+                # Reached destination; trace back path
+                p = curr
+                while p and (p.r != r1 or p.c != c1):
                     if self.tmap[p.r][p.c] == self.terrain.debug:
                         self.tmap[p.r][p.c] = self.terrain.floor
                         self.rmap[p.r][p.c] = 0
@@ -193,22 +196,32 @@ class dungeon:
                 print("Dijkstra Success")
                 return
 
-            # Itterate through coordinate deltas to detect more optimal path
-            for i in range(4):
-                new_r = point.r + delta_r[i]
-                new_c = point.c + delta_c[i]
+            # Itterate through surrounding points of curr
+            for dr, dc in zip(delta_r, delta_c):
+                nr, nc = curr.r + dr, curr.c + dc
+                # Check that point is valid and unvisited; otherwise ignore
+                if not self.valid_point(nr, nc) or (nr, nc) in visited:
+                    continue
 
-                # Check that new point is valid
-                if self.valid_point(new_r, new_c):
-                    cost = self.rmap[new_r][new_c] + 1
-                    if not visited[new_r][new_c] and pmap[new_r][new_c].w > point.w + cost:
-                        pmap[new_r][new_c].w = point.w + cost
-                        pmap[new_r][new_c].prev = point
-                        heapq.heappush(pq, pmap[new_r][new_c])
+                cost = self.rmap[nr][nc] + 1
+                new_dist = curr.w + cost
+                neighbor = pmap.get((nr, nc))
+
+                # Evaluate neighbor point
+                if neighbor is None:
+                    # Ungenerated in pmap, so creating and pushing to queue
+                    neighbor = self.dpoint(nr, nc, new_dist)
+                    neighbor.prev = curr
+                    pmap[(nr, nc)] = neighbor
+                    pq.push(neighbor, new_dist)
+                elif new_dist < neighbor.w:
+                    # Neighbor weight is better through curr, so update and decrease key
+                    neighbor.w = new_dist
+                    neighbor.prev = curr
+                    pq.decrease_key(neighbor, new_dist)
 
         print("Dijkstra Failure")
-        return
-               
+
     # Generates the dungeon rooms, cooridors, and staircases (terrain)
     # Cannot be called before generating the rockmap
     def _generate_terrain(self):
@@ -299,6 +312,7 @@ def main():
     d = dungeon(20, 80)
     d.generate_dungeon()
     d.print_terrain()
+    print()
     d.print_rockmap()
 
 if __name__ == "__main__":

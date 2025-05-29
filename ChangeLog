@@ -11,3 +11,5 @@ v01 ============================================================================
     - Rockmap generation; original + faster version
 5/27/2025
     - First pass at dijkstra corridor generation; not strictly correct at the moment
+5/28/2025
+    - Moved from heapq to custom priorityqueue implementation
