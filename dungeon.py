@@ -33,9 +33,9 @@ class dungeon:
     # Class to store individual staircase information
     class staircase:
         # Staircase Constructor
-        def __init__(self, origin_r, origin_c):
-            self.origin_r = origin_r
-            self.origin_c = origin_c
+        def __init__(self, r, c):
+            self.r = r
+            self.c = c
             # True = up, False = down; Here in case I decide to make that matter
             self.direction = True
 
@@ -121,8 +121,11 @@ class dungeon:
 
     # Attempts to place a staircase
     def _place_stair(self, staircase):
-        # TODO
-        return
+        if self.valid_point(staircase.r, staircase.c) and self.tmap[staircase.r][staircase.c] == self.terrain.floor:
+            self.tmap[staircase.r][staircase.c] = self.terrain.stair
+            return True
+        else:
+            return False
 
     # Generates dungeon rock hardness map, necessary for Dijkstra path generation + NPC pathfinding
     def _generate_rockmap(self):
@@ -226,7 +229,7 @@ class dungeon:
         # Creating rooms; at least 1
         attemptc = 0  # To keep track of the number of room placement attempts
         attempt_limit = max(self.width, self.height) * 10
-        print(attempt_limit, "attempt limit on room placement")
+        # print(attempt_limit, "attempt limit on room placement")
         min_roomc = max(1, attempt_limit // 100)  # arbitrary; at least a few
         print(min_roomc, "Minimum rooms")
         # Attempts either self.width or self.height times, whichever is smaller
@@ -265,8 +268,8 @@ class dungeon:
             self._dijkstra_corridor(r1, c1, r2, c2)
 
         # Create staircases in dungeon
-        attempt_limit = max(1, min(self.height // 10, self.width // 10))
-        min_stairc = max(1, attempt_limit // 3)
+        attempt_limit = self.roomc * 4
+        min_stairc = max(1, self.roomc // 2)
         attemptc = 0
         while (self.stairc < min_stairc) or (attemptc < attempt_limit):
             stair = self.staircase(
@@ -275,17 +278,17 @@ class dungeon:
             if self.stairc <= min_stairc:
                 if self._place_stair(stair):
                     self.stairc += 1
-            elif exp_chancetime(self.stairc - attemptc + 1):
+            elif exp_chancetime(self.stairc - min_stairc + 1):
                 if self._place_stair(stair):
                     self.stairc += 1
-            self.stairc += 1 # Remove line when staircase placement is actually implemented
+            # self.stairc += 1 # Remove line when staircase placement is actually implemented
             attemptc += 1
 
         # Fill in remaining terrain as rock
         for r in range(self.height):
             for c in range(self.width):
                 if self.valid_point(r, c):
-                    if self.tmap[r][c] != self.terrain.floor:
+                    if self.tmap[r][c] == self.terrain.debug:
                         self.tmap[r][c] = self.terrain.stdrock
                 else:
                     self.tmap[r][c] = self.terrain.immrock
@@ -326,7 +329,6 @@ class dungeon:
         self._generate_rockmap()
         self._generate_terrain()
         return
-
 
 def main():
     d = dungeon(20, 80)

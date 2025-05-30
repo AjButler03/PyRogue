@@ -15,3 +15,4 @@ v01 ============================================================================
     - Moved from heapq to custom priorityqueue implementation
 5/30/2025
     - Room generation improved to be a little more random in room count (generation is slower as a result)
+    - Staircases are now generated (at least one for every 2 rooms)
