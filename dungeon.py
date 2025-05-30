@@ -10,6 +10,7 @@ min_room_h = 3
 min_room_w = 4
 max_rock_hardness = 255
 
+
 class dungeon:
 
     # Enum to dictate the terrain types of a dungeon
@@ -45,10 +46,10 @@ class dungeon:
             self.c = c
             self.w = w
             self.prev = None
-        
+
         def __lt__(self, other):
             return self.w < other.w
-        
+
         def __eq__(self, other):
             return (self.r, self.c) == (other.r, other.c)
 
@@ -193,7 +194,6 @@ class dungeon:
                         self.tmap[p.r][p.c] = self.terrain.floor
                         self.rmap[p.r][p.c] = 0
                     p = p.prev
-                print("Dijkstra Success")
                 return
 
             # Itterate through surrounding points of curr
@@ -220,15 +220,15 @@ class dungeon:
                     neighbor.prev = curr
                     pq.decrease_key(neighbor, new_dist)
 
-        print("Dijkstra Failure")
-
     # Generates the dungeon rooms, cooridors, and staircases (terrain)
     # Cannot be called before generating the rockmap
     def _generate_terrain(self):
         # Creating rooms; at least 1
         attemptc = 0  # To keep track of the number of room placement attempts
-        attempt_limit = min(self.width, self.height)
-        min_roomc = attempt_limit // 3 # arbitrary; at least a few
+        attempt_limit = max(self.width, self.height) * 10
+        print(attempt_limit, "attempt limit on room placement")
+        min_roomc = max(1, attempt_limit // 100)  # arbitrary; at least a few
+        print(min_roomc, "Minimum rooms")
         # Attempts either self.width or self.height times, whichever is smaller
         while (self.roomc < min_roomc) or (attemptc < attempt_limit):
             new_room = self.room(
@@ -237,7 +237,7 @@ class dungeon:
                 (random.randint(min_room_h, self.height // 2)),
                 (random.randint(min_room_w, self.width // 2)),
             )
-            if self.roomc < min_roomc:
+            if self.roomc <= min_roomc:
                 if self._place_room(new_room):
                     self.roomc += 1
                     self.room_list.append(new_room)
@@ -246,22 +246,41 @@ class dungeon:
                     self.roomc += 1
                     self.room_list.append(new_room)
             attemptc += 1
-            
+        print(attemptc, "Room placement attempts made")
+        print(len(self.room_list), "Rooms successfully placed")
+
         # Now create corridors between rooms
         for i in range(len(self.room_list)):
             room1 = self.room_list[i]
-            if (i == (self.roomc -1)):
+            if i == (self.roomc - 1):
                 # i at end of array; grab first entry
                 room2 = self.room_list[0]
             else:
                 room2 = self.room_list[i + 1]
-                
+
             r1 = random.randint(room1.origin_r, room1.origin_r + room1.rsize_h - 1)
             c1 = random.randint(room1.origin_c, room1.origin_c + room1.rsize_w - 1)
             r2 = random.randint(room2.origin_r, room2.origin_r + room2.rsize_h - 1)
             c2 = random.randint(room2.origin_c, room2.origin_c + room2.rsize_w - 1)
             self._dijkstra_corridor(r1, c1, r2, c2)
-        
+
+        # Create staircases in dungeon
+        attempt_limit = max(1, min(self.height // 10, self.width // 10))
+        min_stairc = max(1, attempt_limit // 3)
+        attemptc = 0
+        while (self.stairc < min_stairc) or (attemptc < attempt_limit):
+            stair = self.staircase(
+                random.randint(1, self.height - 1), random.randint(1, self.width - 1)
+            )
+            if self.stairc <= min_stairc:
+                if self._place_stair(stair):
+                    self.stairc += 1
+            elif exp_chancetime(self.stairc - attemptc + 1):
+                if self._place_stair(stair):
+                    self.stairc += 1
+            self.stairc += 1 # Remove line when staircase placement is actually implemented
+            attemptc += 1
+
         # Fill in remaining terrain as rock
         for r in range(self.height):
             for c in range(self.width):
@@ -308,12 +327,14 @@ class dungeon:
         self._generate_terrain()
         return
 
+
 def main():
     d = dungeon(20, 80)
     d.generate_dungeon()
     d.print_terrain()
     print()
     d.print_rockmap()
+
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,7 @@
 import random
 import math
 
-def exp_chancetime(n, decay_rate=0.01):
+def exp_chancetime(n, decay_rate=0.9):
     """
     Returns True with a probability that decays exponentially with n.
     decay_rate: controls how fast the probability drops. Default gives ~93% at n=7.
