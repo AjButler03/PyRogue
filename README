@@ -1,12 +1,10 @@
-PyRogue v01 By Andrew Butler, Summer 2025
+PyRogue v02 By Andrew Butler, Summer 2025
+Built to run using Python 3.12
 
-The goal of this project is to recreate a rogue-like game I built in C/C++ for a class at Iowa State University in Python. 
-This will a) allow me to build this without the same pressure of deadlines, 
-          b) implement some choice changes that I think are better, and 
-          c) gain experience building software in Python, particularly with a UI.
+Running dungeon.py will do the following:
+    - Generate a dungeon (currently hardcoded to 20 * 80 char size)
+    - generate a 'player character', represented by a @, and place in dungeon
+    - Calculate distance maps for walking and tunneling in dungeon to @
+    - Display the dungeon terrain, rock hardness map, walking distance map, then tunneling distance map
 
-My versions will loosely follow the original assignment structure used in the university class.
-I also acknowledge that building this in python removes dynamic memory management as a consideration, but taking advantage of Python's built in features doesn't seem like a bad thing to me.
-v01 involves dungeon generation, with variable dungeon size and room count, with Dijkstra algorithm corridor generation.
-
-Simply running the program will generate a dungeon, displaying the number of rooms, the number of attempted room placements, then the dungeon terrain followed by the dungeon's rockmap.
+New features with v02 include player character placement and distance map calculation
