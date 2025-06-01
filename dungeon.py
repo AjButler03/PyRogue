@@ -6,10 +6,11 @@ from enum import Enum
 from utility import exp_chancetime
 from collections import deque
 
+# This file is to handle all functions that deal with the dungeon itself.
+
 min_room_h = 3
 min_room_w = 4
 max_rock_hardness = 255
-
 
 class dungeon:
 
@@ -70,7 +71,13 @@ class dungeon:
         self.rmap = [[0] * self.width for _ in range(self.height)]
         # Declaring the terrain map for the dungeon
         self.tmap = [[self.terrain.debug] * self.width for _ in range(self.height)]
-
+        # Declare walking and tunneling distance maps
+        self.walk_distmap = [[0] * self.width for _ in range(self.height)]
+        self.tunn_distmap = [[0] * self.width for _ in range(self.height)]
+        # Internal idea of the player character for distance calculations
+        pc_r = 0
+        pc_c = 0
+        
     # Boolean function; checks if point is within immutable outer border of dungeon
     def valid_point(self, r, c):
         if (r < 1) or (c < 1) or (r > self.height - 2) or (c > self.width - 2):
@@ -231,7 +238,7 @@ class dungeon:
         attempt_limit = max(self.width, self.height) * 10
         # print(attempt_limit, "attempt limit on room placement")
         min_roomc = max(1, attempt_limit // 100)  # arbitrary; at least a few
-        print(min_roomc, "Minimum rooms")
+        # print(min_roomc, "Minimum rooms")
         # Attempts either self.width or self.height times, whichever is smaller
         while (self.roomc < min_roomc) or (attemptc < attempt_limit):
             new_room = self.room(
@@ -249,8 +256,8 @@ class dungeon:
                     self.roomc += 1
                     self.room_list.append(new_room)
             attemptc += 1
-        print(attemptc, "Room placement attempts made")
-        print(len(self.room_list), "Rooms successfully placed")
+        # print(attemptc, "Room placement attempts made")
+        # print(len(self.room_list), "Rooms successfully placed")
 
         # Now create corridors between rooms
         for i in range(len(self.room_list)):
@@ -329,14 +336,3 @@ class dungeon:
         self._generate_rockmap()
         self._generate_terrain()
         return
-
-def main():
-    d = dungeon(20, 80)
-    d.generate_dungeon()
-    d.print_terrain()
-    print()
-    d.print_rockmap()
-
-
-if __name__ == "__main__":
-    main()
