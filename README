@@ -1,7 +1,17 @@
 PyRogue v02 By Andrew Butler, Summer 2025
 Built to run using Python 3.12
 
-Running pyrogue.py will do the following:
+-- About --
+In the spring semester of 2025 I built a rogue-like game as a series of assignments for a programming course at Iowa State University. 
+The original was built in C/C++, and had many unoptimized / poorly written aspects to it. Regardless, I was proud of having built it from scratch myself. The goal of this project is to build (roughly) the same game, but written in Python.
+My reasons for doing this:
+    a) I think it is easier to showcase and run python code to people. 
+    b) I want to gain more experience programming full projects in python, given that it is decently widely used.
+    c) Re-building the game allows me to implement optimizations and choice changes that I believe are 'better'.
+    d) I can share this code, since it cannot be directly used to solve the assignments from the aforementioned programming course.
+On point a in particular, I want this code to only rely on Python itself to be runable. In doing so, it is easily shared and ran by whoever would want to play the game or see how it works.
+
+pyrogue.py is the main file, and running it will do the following:
     - Generate a dungeon (currently hardcoded to 20 * 80 char size)
     - generate a 'player character', represented by a @, and place in dungeon
     - Calculate distance maps for walking and tunneling in dungeon to @

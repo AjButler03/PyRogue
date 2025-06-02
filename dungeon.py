@@ -12,6 +12,7 @@ min_room_h = 3
 min_room_w = 4
 max_rock_hardness = 255
 
+
 class dungeon:
 
     # Enum to dictate the terrain types of a dungeon
@@ -67,17 +68,16 @@ class dungeon:
         self.room_list = []
         self.stairc = 0
         self.stair_list = []
+
+        # These should be declared in a single loop for better performance; I'll get there
         # Declaring the rock hardness map; default max hardness of 255
         self.rmap = [[0] * self.width for _ in range(self.height)]
         # Declaring the terrain map for the dungeon
         self.tmap = [[self.terrain.debug] * self.width for _ in range(self.height)]
         # Declare walking and tunneling distance maps
-        self.walk_distmap = [[0] * self.width for _ in range(self.height)]
-        self.tunn_distmap = [[0] * self.width for _ in range(self.height)]
-        # Internal idea of the player character for distance calculations
-        pc_r = 0
-        pc_c = 0
-        
+        self.walk_distmap = [[float('inf')] * self.width for _ in range(self.height)]
+        self.tunn_distmap = [[float('inf')] * self.width for _ in range(self.height)]
+
     # Boolean function; checks if point is within immutable outer border of dungeon
     def valid_point(self, r, c):
         if (r < 1) or (c < 1) or (r > self.height - 2) or (c > self.width - 2):
@@ -128,7 +128,10 @@ class dungeon:
 
     # Attempts to place a staircase
     def _place_stair(self, staircase):
-        if self.valid_point(staircase.r, staircase.c) and self.tmap[staircase.r][staircase.c] == self.terrain.floor:
+        if (
+            self.valid_point(staircase.r, staircase.c)
+            and self.tmap[staircase.r][staircase.c] == self.terrain.floor
+        ):
             self.tmap[staircase.r][staircase.c] = self.terrain.stair
             return True
         else:
@@ -300,6 +303,64 @@ class dungeon:
                 else:
                     self.tmap[r][c] = self.terrain.immrock
 
+    # Calculates distance from point via walking using Dijkstra's algorithm.
+    def _calc_walk_distmap(self, r, c):
+        pq = PriorityQueue()
+        visited = set()
+        pmap = {}
+
+        # Initialize starting point
+        start = self.dpoint(r, c, 0)
+        self.walk_distmap[r][c] = 0
+        pq.push(start, 0)
+        pmap[(r, c)] = start
+
+        delta_r = [0, -1, 1, 0]
+        delta_c = [-1, 0, 0, 1]
+
+        # Repeatedly pop points until queue is empty
+        while len(pq) > 0:
+            _, curr = pq.pop()
+
+            # Check if point has already been visited; ignore if so
+            if ((curr.r, curr.c) in visited) or self.rmap[curr.r][curr.c] != 0:
+                continue
+            visited.add((curr.r, curr.c))
+
+            # Itterate through surrounding points of curr
+            for dr, dc in zip(delta_r, delta_c):
+                nr, nc = curr.r + dr, curr.c + dc
+                # Check that point is valid and unvisited; otherwise ignore
+                if (
+                    not self.valid_point(nr, nc)
+                    or (nr, nc) in visited
+                    or self.rmap[nr][nc] != 0
+                ):
+                    continue
+
+                new_dist = curr.w + 1
+                neighbor = pmap.get((nr, nc))
+
+                # Evaluate neighbor point
+                if neighbor is None:
+                    # Ungenerated in pmap, so creating and pushing to queue
+                    neighbor = self.dpoint(nr, nc, new_dist)
+                    neighbor.prev = curr
+                    pmap[(nr, nc)] = neighbor
+                    self.walk_distmap[nr][nc] = new_dist
+                    pq.push(neighbor, new_dist)
+                elif new_dist < neighbor.w:
+                    # Neighbor weight is better through curr, so update and decrease key
+                    neighbor.w = new_dist
+                    self.walk_distmap[nr][nc] = new_dist
+                    neighbor.prev = curr
+                    pq.decrease_key(neighbor, new_dist)
+
+    # Calculates distance from point via any movement using Dijkstra's algorithm.
+    def _calc_tunn_distmap(self, r, c):
+        # TODO
+        return
+
     # Method to show terrain in console
     def print_terrain(self):
         for r in range(self.height):
@@ -330,6 +391,41 @@ class dungeon:
                     print(self.rmap[r][c] % 10, end="")
 
             print("")  # Newline for end of row
+
+    # Method to show walking distance map in console
+    def print_walk_distmap(self):
+        for r in range(self.height):
+            for c in range(self.width):
+                if self.walk_distmap[r][c] == 0:
+                    print("@", end="")
+                elif self.rmap[r][c] == max_rock_hardness:
+                    print("X", end="")
+                elif (self.walk_distmap[r][c] == float('inf')):
+                    print(" ", end="")
+                else:
+                    print(self.walk_distmap[r][c] % 10, end="")
+
+            print("")  # Newline for end of row
+
+    # Method to show tunneling distance map in console
+    def print_tunn_distmap(self):
+        for r in range(self.height):
+            for c in range(self.width):
+                if self.tunn_distmap[r][c] == 0:
+                    print("@", end="")
+                elif self.rmap[r][c] == max_rock_hardness:
+                    print("X", end="")
+                elif (self.tunn_distmap[r][c] == float('inf')):
+                    print(" ", end="")
+                else:
+                    print(self.walk_distmap[r][c] % 10, end="")
+
+            print("")  # Newline for end of row
+
+    # Calculates the distance maps from specified point
+    def calc_dist_maps(self, r, c):
+        self._calc_walk_distmap(r, c)
+        self._calc_tunn_distmap(r, c)
 
     # Generates a random dungeon
     def generate_dungeon(self):

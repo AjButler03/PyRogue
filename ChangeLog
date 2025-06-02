@@ -2,21 +2,24 @@ v02 ============================================================================
 05/31/2025
     - Start v02; update ChangeLog + README
     - Init pyrogue.py as the main file to run
+06/02/2025
+    - Added methods to display walking/tunneling distance maps
+    - Implemented walking distance calculation
 v01 ===========================================================================================================================
-5/20/2025
+05/20/2025
     - Starting this Project
-5/21/2025
+05/21/2025
     - Created dungeon terrain print method for testing
     - Working on creating methods to generate dungeons
-5/22/2025
+05/22/2025
     - Room generation done
     - Rockmap generation start
-5/23/2025
+05/23/2025
     - Rockmap generation; original + faster version
-5/27/2025
+05/27/2025
     - First pass at dijkstra corridor generation; not strictly correct at the moment
-5/29/2025
+05/29/2025
     - Moved from heapq to custom priorityqueue implementation
-5/30/2025
+05/30/2025
     - Room generation improved to be a little more random in room count (generation is slower as a result)
     - Staircases are now generated (at least one for every 2 rooms)
