@@ -19,5 +19,9 @@ def main():
     print()
     print("Walking Distance Map:")
     d.print_walk_distmap()
+    print()
+    print("Tunneling Distance Map:")
+    d.print_tunn_distmap()
+    
 if __name__ == "__main__":
     main()

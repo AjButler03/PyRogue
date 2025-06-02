@@ -358,8 +358,56 @@ class dungeon:
 
     # Calculates distance from point via any movement using Dijkstra's algorithm.
     def _calc_tunn_distmap(self, r, c):
-        # TODO
-        return
+        pq = PriorityQueue()
+        visited = set()
+        pmap = {}
+
+        # Initialize starting point
+        start = self.dpoint(r, c, 0)
+        self.tunn_distmap[r][c] = 0
+        pq.push(start, 0)
+        pmap[(r, c)] = start
+
+        delta_r = [0, -1, 1, 0]
+        delta_c = [-1, 0, 0, 1]
+
+        # Repeatedly pop points until queue is empty
+        while len(pq) > 0:
+            _, curr = pq.pop()
+
+            # Check if point has already been visited; ignore if so
+            if ((curr.r, curr.c) in visited):
+                continue
+            visited.add((curr.r, curr.c))
+
+            # Itterate through surrounding points of curr
+            for dr, dc in zip(delta_r, delta_c):
+                nr, nc = curr.r + dr, curr.c + dc
+                # Check that point is valid and unvisited; otherwise ignore
+                if (
+                    not self.valid_point(nr, nc)
+                    or (nr, nc) in visited
+                ):
+                    continue
+                
+                # 85 will be the amount that a tunneling monster can 'drill' per turn; i.e., the amount it can reduce hardness
+                new_dist = curr.w + (self.rmap[nr][nc] // 85) + 1
+                neighbor = pmap.get((nr, nc))
+
+                # Evaluate neighbor point
+                if neighbor is None:
+                    # Ungenerated in pmap, so creating and pushing to queue
+                    neighbor = self.dpoint(nr, nc, new_dist)
+                    neighbor.prev = curr
+                    pmap[(nr, nc)] = neighbor
+                    self.tunn_distmap[nr][nc] = new_dist
+                    pq.push(neighbor, new_dist)
+                elif new_dist < neighbor.w:
+                    # Neighbor weight is better through curr, so update and decrease key
+                    neighbor.w = new_dist
+                    self.tunn_distmap[nr][nc] = new_dist
+                    neighbor.prev = curr
+                    pq.decrease_key(neighbor, new_dist)
 
     # Method to show terrain in console
     def print_terrain(self):
@@ -418,7 +466,7 @@ class dungeon:
                 elif (self.tunn_distmap[r][c] == float('inf')):
                     print(" ", end="")
                 else:
-                    print(self.walk_distmap[r][c] % 10, end="")
+                    print(self.tunn_distmap[r][c] % 10, end="")
 
             print("")  # Newline for end of row
 
