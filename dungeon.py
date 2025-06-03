@@ -1,6 +1,5 @@
 import random
 import copy
-import math
 from utility import PriorityQueue
 from enum import Enum
 from utility import exp_chancetime
@@ -11,7 +10,6 @@ from collections import deque
 min_room_h = 3
 min_room_w = 4
 max_rock_hardness = 255
-
 
 class dungeon:
 
@@ -187,6 +185,7 @@ class dungeon:
         pq.push(start, 0)
         pmap[(r1, c1)] = start
 
+        # 4 Surrounding points in cardinal directions
         delta_r = [0, -1, 1, 0]
         delta_c = [-1, 0, 0, 1]
 
@@ -315,8 +314,9 @@ class dungeon:
         pq.push(start, 0)
         pmap[(r, c)] = start
 
-        delta_r = [0, -1, 1, 0]
-        delta_c = [-1, 0, 0, 1]
+        # All 8 surrounding points, including diagonal
+        delta_r = [-1, -1, -1, 0, 0, 1, 1, 1]
+        delta_c = [-1, 0, 1, -1, 1, -1, 0, 1]
 
         # Repeatedly pop points until queue is empty
         while len(pq) > 0:
@@ -368,8 +368,9 @@ class dungeon:
         pq.push(start, 0)
         pmap[(r, c)] = start
 
-        delta_r = [0, -1, 1, 0]
-        delta_c = [-1, 0, 0, 1]
+        # All 8 surrounding points, including diagonal
+        delta_r = [-1, -1, -1, 0, 0, 1, 1, 1]
+        delta_c = [-1, 0, 1, -1, 1, -1, 0, 1]
 
         # Repeatedly pop points until queue is empty
         while len(pq) > 0:

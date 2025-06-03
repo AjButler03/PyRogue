@@ -1,4 +1,5 @@
 import dungeon
+import actor
 import random
 
 # This is the main game file. Run This one.
@@ -15,7 +16,14 @@ def main():
     # print("Dungeon Rock Hardness Map:")
     # d.print_rockmap()
     
-    d.calc_dist_maps(random.randint(1, h - 2), random.randint(1, w - 2))
+    # Create player character
+    pc = actor.player()
+    
+    # Place pc into the dungeon
+    while not pc.init_pos(d, random.randint(1, h - 2), random.randint(1, w - 2)):
+        pass
+    
+    d.calc_dist_maps(pc.r, pc.c)
     print()
     print("Walking Distance Map:")
     d.print_walk_distmap()

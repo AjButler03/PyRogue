@@ -6,6 +6,8 @@ v02 ============================================================================
     - Added methods to display walking/tunneling distance maps
     - Implemented walking distance calculation
     - Implemented tunneling distance calculation
+06/03/2025
+    - Init actor.py; only basic player class implemented
 v01 ===========================================================================================================================
 05/20/2025
     - Starting this Project
