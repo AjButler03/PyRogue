@@ -8,6 +8,10 @@ v02 ============================================================================
     - Implemented tunneling distance calculation
 06/03/2025
     - Init actor.py; only basic player class implemented
+06/04/2025
+    - Created actor class (abstract), which player class inherits from
+    - Created proper actor map to store actor locations
+    - pyrogue.py now has render method to show terrain and actor positions
 v01 ===========================================================================================================================
 05/20/2025
     - Starting this Project

@@ -66,13 +66,12 @@ class dungeon:
         self.room_list = []
         self.stairc = 0
         self.stair_list = []
-
-        # These should be declared in a single loop for better performance; I'll get there
-        # Declaring the rock hardness map; default max hardness of 255
+                                
+        # Declaring the rock hardness map (used in terrain generation, pathfinding calculations)
         self.rmap = [[0] * self.width for _ in range(self.height)]
         # Declaring the terrain map for the dungeon
         self.tmap = [[self.terrain.debug] * self.width for _ in range(self.height)]
-        # Declare walking and tunneling distance maps
+        # Declare walking and tunneling distance maps used in monster pathfinding
         self.walk_distmap = [[float('inf')] * self.width for _ in range(self.height)]
         self.tunn_distmap = [[float('inf')] * self.width for _ in range(self.height)]
 
@@ -446,7 +445,7 @@ class dungeon:
         for r in range(self.height):
             for c in range(self.width):
                 if self.walk_distmap[r][c] == 0:
-                    print("@", end="")
+                    print('\033[94m@\033[0m', end="")
                 elif self.rmap[r][c] == max_rock_hardness:
                     print("X", end="")
                 elif (self.walk_distmap[r][c] == float('inf')):
@@ -461,7 +460,7 @@ class dungeon:
         for r in range(self.height):
             for c in range(self.width):
                 if self.tunn_distmap[r][c] == 0:
-                    print("@", end="")
+                    print('\033[94m@\033[0m', end="")
                 elif self.rmap[r][c] == max_rock_hardness:
                     print("X", end="")
                 elif (self.tunn_distmap[r][c] == float('inf')):
