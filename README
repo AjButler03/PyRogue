@@ -1,4 +1,4 @@
-PyRogue v02 By Andrew Butler, Summer 2025
+PyRogue v03 By Andrew Butler, Summer 2025
 Built to run using Python 3.12
 
 -- About --
@@ -17,4 +17,4 @@ pyrogue.py is the main file, and running it will do the following:
     - Calculate distance maps for walking and tunneling in dungeon to @
     - Display the dungeon terrain, rock hardness map, walking distance map, tunneling distance map, then standard dungeon render
 
-New features with v02 include player character placement and distance map calculation.
+New features with v03 include monsters and a turnloop for movement, although it is completely automated for now.

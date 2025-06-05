@@ -16,7 +16,7 @@ class player(actor):
     
     # Player constructor
     def __init__(self):
-        # player location
+        # Declare fields for location
         self.r = 0
         self.c = 0
         # Player character's memory of the dungeon, as it appeared on sight.
@@ -31,4 +31,17 @@ class player(actor):
             actor_map[r][c] = self
             return True
         else:
-            return False            
+            return False
+        
+# This is the class for monsters and their turn/movement methods.        
+class monster(actor):
+    
+    # Monster constructor
+    def __init__(self, attributes):
+        # Declare fields for location
+        self.r = 0
+        self.c = 0
+        # Monster's 'path'; this is a distance map of the dungeon to determine where to move next
+        self.path = []
+        # bitfield to indicate what sort of attributes that the monster has
+        self.attributes = attributes

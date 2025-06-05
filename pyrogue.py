@@ -25,17 +25,20 @@ def render_dungeon(dungeon, actor_map):
                 print("!", end="")  # issue flag
         print("")  # Newline for end of row
 
+# Populates the actor_map with a dungeon size proportionate number of monsters.
+# Difficulty is a modifier for the density of monsters in the dungeon.
+def generate_monsters(dungeon, actor_map, monster_list, difficulty):
+    attemptc = 0
+    attempt_limit = int(difficulty * max(dungeon.width, dungeon.height))
+    min_monsterc = max(1, attempt_limit // 10)
+    print("Min # Monsters: ", min_monsterc)
+    print("Monster Placement Attempt Limit:", attempt_limit)
+
 def main():
     h = 20
     w = 80
     d = dungeon.dungeon(h, w)
     d.generate_dungeon()
-    print("Dungeon Terrain Map:")
-    d.print_terrain()
-    
-    print()
-    print("Dungeon Rock Hardness Map:")
-    d.print_rockmap()
     
     # Init actor map, storing where actors are relative to the dungeon
     actor_map = [[None] * d.width for _ in range(d.height)]
@@ -48,14 +51,11 @@ def main():
         pass
     
     d.calc_dist_maps(pc.r, pc.c)
-    print()
-    print("Walking Distance Map:")
-    d.print_walk_distmap()
-    print()
-    print("Tunneling Distance Map:")
-    d.print_tunn_distmap()
     
-    print()
+    # Generate the monsters
+    monster_list = []
+    generate_monsters(d, actor_map, monster_list, 1)
+    
     print("Dungeon Render:")
     render_dungeon(d, actor_map)
     
