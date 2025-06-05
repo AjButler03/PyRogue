@@ -11,6 +11,7 @@ min_room_h = 3
 min_room_w = 4
 max_rock_hardness = 255
 
+
 class dungeon:
 
     # Enum to dictate the terrain types of a dungeon
@@ -66,14 +67,14 @@ class dungeon:
         self.room_list = []
         self.stairc = 0
         self.stair_list = []
-                                
+
         # Declaring the rock hardness map (used in terrain generation, pathfinding calculations)
         self.rmap = [[0] * self.width for _ in range(self.height)]
         # Declaring the terrain map for the dungeon
         self.tmap = [[self.terrain.debug] * self.width for _ in range(self.height)]
         # Declare walking and tunneling distance maps used in monster pathfinding
-        self.walk_distmap = [[float('inf')] * self.width for _ in range(self.height)]
-        self.tunn_distmap = [[float('inf')] * self.width for _ in range(self.height)]
+        self.walk_distmap = [[float("inf")] * self.width for _ in range(self.height)]
+        self.tunn_distmap = [[float("inf")] * self.width for _ in range(self.height)]
 
     # Boolean function; checks if point is within immutable outer border of dungeon
     def valid_point(self, r, c):
@@ -248,11 +249,7 @@ class dungeon:
                 (random.randint(min_room_h, self.height // 2)),
                 (random.randint(min_room_w, self.width // 2)),
             )
-            if self.roomc <= min_roomc:
-                if self._place_room(new_room):
-                    self.roomc += 1
-                    self.room_list.append(new_room)
-            elif exp_chancetime(self.roomc - min_roomc + 1):
+            if self.roomc <= min_roomc or exp_chancetime(self.roomc - min_roomc + 1):
                 if self._place_room(new_room):
                     self.roomc += 1
                     self.room_list.append(new_room)
@@ -376,7 +373,7 @@ class dungeon:
             _, curr = pq.pop()
 
             # Check if point has already been visited; ignore if so
-            if ((curr.r, curr.c) in visited):
+            if (curr.r, curr.c) in visited:
                 continue
             visited.add((curr.r, curr.c))
 
@@ -384,12 +381,9 @@ class dungeon:
             for dr, dc in zip(delta_r, delta_c):
                 nr, nc = curr.r + dr, curr.c + dc
                 # Check that point is valid and unvisited; otherwise ignore
-                if (
-                    not self.valid_point(nr, nc)
-                    or (nr, nc) in visited
-                ):
+                if not self.valid_point(nr, nc) or (nr, nc) in visited:
                     continue
-                
+
                 # 85 will be the amount that a tunneling monster can 'drill' per turn; i.e., the amount it can reduce hardness
                 new_dist = curr.w + (self.rmap[nr][nc] // 85) + 1
                 neighbor = pmap.get((nr, nc))
@@ -445,10 +439,10 @@ class dungeon:
         for r in range(self.height):
             for c in range(self.width):
                 if self.walk_distmap[r][c] == 0:
-                    print('\033[94m@\033[0m', end="")
+                    print("\033[94m@\033[0m", end="")
                 elif self.rmap[r][c] == max_rock_hardness:
                     print("X", end="")
-                elif (self.walk_distmap[r][c] == float('inf')):
+                elif self.walk_distmap[r][c] == float("inf"):
                     print(" ", end="")
                 else:
                     print(self.walk_distmap[r][c] % 10, end="")
@@ -460,10 +454,10 @@ class dungeon:
         for r in range(self.height):
             for c in range(self.width):
                 if self.tunn_distmap[r][c] == 0:
-                    print('\033[94m@\033[0m', end="")
+                    print("\033[94m@\033[0m", end="")
                 elif self.rmap[r][c] == max_rock_hardness:
                     print("X", end="")
-                elif (self.tunn_distmap[r][c] == float('inf')):
+                elif self.tunn_distmap[r][c] == float("inf"):
                     print(" ", end="")
                 else:
                     print(self.tunn_distmap[r][c] % 10, end="")

@@ -4,10 +4,6 @@ import math
 # This file contains a few utilitarian methods that the others will use.
 
 def exp_chancetime(n, decay_rate=0.9):
-    """
-    Returns True with a probability that decays exponentially with n.
-    decay_rate: controls how fast the probability drops. Default gives ~93% at n=7.
-    """
     if n <= 0:
         raise ValueError("Input must be a positive integer.")
 

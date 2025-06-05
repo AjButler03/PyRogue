@@ -45,3 +45,13 @@ class monster(actor):
         self.path = []
         # bitfield to indicate what sort of attributes that the monster has
         self.attributes = attributes
+    
+    def init_pos(self, dungeon, actor_map, r, c):
+        if dungeon.valid_point(r, c) and dungeon.rmap[r][c] == 0 and actor_map[r][c] == None:
+            self.r = r
+            self.c = c
+            actor_map[r][c] = self
+            return True
+        else:
+            return False
+        
