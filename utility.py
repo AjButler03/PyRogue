@@ -3,12 +3,14 @@ import math
 
 # This file contains a few utilitarian methods that the others will use.
 
-def exp_chancetime(n, decay_rate=0.9):
+
+def exp_chancetime(n, decay_rate):
     if n <= 0:
         raise ValueError("Input must be a positive integer.")
 
     probability = math.exp(-decay_rate * n)
     return random.random() < probability
+
 
 # Custom Implementation of a Priority Queue, with decrease-key functionality
 # For full transparancy, this was ChatGPT generated while debugging why heapq wasn't really working.

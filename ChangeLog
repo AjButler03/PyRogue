@@ -2,6 +2,8 @@ v03 ============================================================================
 06/04/2025
     - Start v03; update ChangeLog + README
     - Monster Class + monster generation method
+06/05/2025
+    - Laid some groundwork for actors to have turn methods, as well as death detection
 v02 ===========================================================================================================================
 05/31/2025
     - Start v02; update ChangeLog + README

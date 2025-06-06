@@ -6,6 +6,7 @@ from utility import PriorityQueue
 
 # This is the main game file. Run This one.
 
+
 # This prints the dungeon to console, overlaying actor positions on the terrain.
 def render_dungeon(dungeon, actor_map):
     for r in range(dungeon.height):
@@ -30,6 +31,7 @@ def render_dungeon(dungeon, actor_map):
                 print("!", end="")  # issue flag
         print("")  # Newline for end of row
 
+
 # Populates the actor_map with a dungeon size proportionate number of monsters.
 # Difficulty is a modifier for the spawn rate of monsters in the dungeon.
 def generate_monsters(dungeon, actor_map, monster_list, difficulty):
@@ -47,7 +49,9 @@ def generate_monsters(dungeon, actor_map, monster_list, difficulty):
     while (monsterc < min_monsterc) or (attemptc < attempt_limit):
         # Create monster
         monster = actor.monster(0)
-        if monsterc <= min_monsterc or exp_chancetime(monsterc - min_monsterc, decay_rate):
+        if monsterc <= min_monsterc or exp_chancetime(
+            monsterc - min_monsterc, decay_rate
+        ):
             if monster.init_pos(
                 dungeon,
                 actor_map,
@@ -58,6 +62,7 @@ def generate_monsters(dungeon, actor_map, monster_list, difficulty):
                 monster_list.append(monster)
         attemptc += 1
     print("Monsters placed:", monsterc)
+
 
 def main():
     h = 20
@@ -88,6 +93,7 @@ def main():
 
     print("Dungeon Render:")
     render_dungeon(d, actor_map)
+
 
 if __name__ == "__main__":
     main()

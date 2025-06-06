@@ -7,6 +7,7 @@ from collections import deque
 
 # This file is to handle all functions that deal with the dungeon itself.
 
+# These are some arbitrary constants used in the dungeon class.
 min_room_h = 3
 min_room_w = 4
 max_rock_hardness = 255
@@ -249,7 +250,9 @@ class dungeon:
                 (random.randint(min_room_h, self.height // 2)),
                 (random.randint(min_room_w, self.width // 2)),
             )
-            if self.roomc <= min_roomc or exp_chancetime(self.roomc - min_roomc + 1):
+            if self.roomc <= min_roomc or exp_chancetime(
+                self.roomc - min_roomc + 1, 0.9
+            ):
                 if self._place_room(new_room):
                     self.roomc += 1
                     self.room_list.append(new_room)
@@ -283,7 +286,7 @@ class dungeon:
             if self.stairc <= min_stairc:
                 if self._place_stair(stair):
                     self.stairc += 1
-            elif exp_chancetime(self.stairc - min_stairc + 1):
+            elif exp_chancetime(self.stairc - min_stairc + 1, 0.9):
                 if self._place_stair(stair):
                     self.stairc += 1
             # self.stairc += 1 # Remove line when staircase placement is actually implemented
