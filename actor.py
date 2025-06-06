@@ -1,4 +1,6 @@
+import random
 import abc
+from enum import Enum
 import dungeon
 
 # This file contains the class information for the Actor class and its children, the player and monster classes.
@@ -6,10 +8,28 @@ import dungeon
 
 # This is the generic actor class to be used in the general turn loop.
 class actor(abc.ABC):
+    
+    # Enum to define moves, whose values correspond to the move's idx in the coordinate deltas
+    class _move(Enum):
+        up_left = 0
+        up = 1
+        up_right = 2
+        left = 3
+        right = 4
+        down_left = 5
+        down = 6
+        down_right = 7
+        none = 8
+        
     # This method is to initialize the position of the actor within the dungeon, verifying the location as valid.
     # Returns True on successful placement, False otherwise.
     @abc.abstractmethod
     def init_pos(self, dungeon, actor_map, r, c):
+        pass
+    
+    # Returns the row, column coordinate of the actor, in that order.
+    @abc.abstractmethod
+    def get_pos(self):
         pass
 
     # Handles the turn for the actor.
@@ -26,6 +46,14 @@ class actor(abc.ABC):
     @abc.abstractmethod
     def kill(self):
         pass
+    
+    # Returns the row, column coordinate of where the actor is attempting to move to.  
+    def target_pos(actor, move):
+        # Coordinate deltas for 8 surrounding points 
+        delta_r = [-1, -1, -1, 0, 0, 1, 1, 1]
+        delta_c = [-1, 0, 1, -1, 1, -1, 0, 1]
+        origin_r, origin_c = actor.get_pos()
+        return origin_r + delta_r[move], origin_c + delta_c[move]
 
 
 # This is the class for the player character and its turn/movement methods.
@@ -55,10 +83,18 @@ class player(actor):
             return True
         else:
             return False
+    
+    # Returns the row, column coordinate of the player, in that order.
+    def get_pos(self):
+        return self.r, self.c
 
     # Turn handler for the player.
     def handle_turn(self, dungeon, actor_map):
-        # TODO
+        # For now, the player just moves randomly.
+        print(self.get_pos())
+        print(self._move(random.randint(0, 7)))
+        print(self)
+        # print(self.target_pos(self, self._move(random.randint(0, 7))))
         return
 
     # Returns True if the player is alive, False otherwise.
@@ -97,6 +133,10 @@ class monster(actor):
             return True
         else:
             return False
+        
+    # Returns the row, column coordinate of the player, in that order.
+    def get_pos(self):
+        return self.r, self.c
 
     # Turn handler for this monster.
     def handle_turn(self, dungeon, actor_map):

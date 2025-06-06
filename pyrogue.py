@@ -93,6 +93,8 @@ def main():
 
     print("Dungeon Render:")
     render_dungeon(d, actor_map)
+    
+    pc.handle_turn(d, actor_map)
 
 
 if __name__ == "__main__":
