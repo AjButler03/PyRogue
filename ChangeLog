@@ -4,6 +4,8 @@ v03 ============================================================================
     - Monster Class + monster generation method
 06/05/2025
     - Laid some groundwork for actors to have turn methods, as well as death detection
+06/09/2025
+    - PC random movement
 v02 ===========================================================================================================================
 05/31/2025
     - Start v02; update ChangeLog + README

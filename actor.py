@@ -8,7 +8,7 @@ import dungeon
 
 # This is the generic actor class to be used in the general turn loop.
 class actor(abc.ABC):
-    
+
     # Enum to define moves, whose values correspond to the move's idx in the coordinate deltas
     class _move(Enum):
         up_left = 0
@@ -20,13 +20,13 @@ class actor(abc.ABC):
         down = 6
         down_right = 7
         none = 8
-        
+
     # This method is to initialize the position of the actor within the dungeon, verifying the location as valid.
     # Returns True on successful placement, False otherwise.
     @abc.abstractmethod
     def init_pos(self, dungeon, actor_map, r, c):
         pass
-    
+
     # Returns the row, column coordinate of the actor, in that order.
     @abc.abstractmethod
     def get_pos(self):
@@ -46,14 +46,14 @@ class actor(abc.ABC):
     @abc.abstractmethod
     def kill(self):
         pass
-    
-    # Returns the row, column coordinate of where the actor is attempting to move to.  
-    def target_pos(actor, move):
-        # Coordinate deltas for 8 surrounding points 
+
+    # Returns the row, column coordinate of where the actor is attempting to move to.
+    def target_pos(self, move):
+        # Coordinate deltas for 8 surrounding points
+        # up_left, up, up_right, left, right, down_left, down, down_right
         delta_r = [-1, -1, -1, 0, 0, 1, 1, 1]
         delta_c = [-1, 0, 1, -1, 1, -1, 0, 1]
-        origin_r, origin_c = actor.get_pos()
-        return origin_r + delta_r[move], origin_c + delta_c[move]
+        return self.r + delta_r[move.value], self.c + delta_c[move.value]
 
 
 # This is the class for the player character and its turn/movement methods.
@@ -68,13 +68,19 @@ class player(actor):
         self.memmap = []
         # Define the player as alive
         self.alive = True
+    
+    # Determines if the player can be at this position.
+    def _valid_pos(self, dungeon, r, c):
+        if dungeon.valid_point(r, c) and dungeon.rmap[r][c] == 0:
+            return True
+        else:
+            return False
 
     # Initializes the player's position within the dungeon.
     # Returns True on successful placement, False otherwise.
     def init_pos(self, dungeon, actor_map, r, c):
         if (
-            dungeon.valid_point(r, c)
-            and dungeon.rmap[r][c] == 0
+            self._valid_pos(dungeon, r, c)
             and actor_map[r][c] == None
         ):
             self.r = r
@@ -83,7 +89,7 @@ class player(actor):
             return True
         else:
             return False
-    
+
     # Returns the row, column coordinate of the player, in that order.
     def get_pos(self):
         return self.r, self.c
@@ -91,10 +97,18 @@ class player(actor):
     # Turn handler for the player.
     def handle_turn(self, dungeon, actor_map):
         # For now, the player just moves randomly.
-        print(self.get_pos())
-        print(self._move(random.randint(0, 7)))
-        print(self)
-        # print(self.target_pos(self, self._move(random.randint(0, 7))))
+        move = self._move(random.randint(0, 7))
+        new_r, new_c = self.target_pos(move)
+        # Check that new position is valid for the PC to be at
+        # Repeat until this is the case
+        while not self._valid_pos(dungeon, new_r, new_c):
+            move = self._move(random.randint(0, 7))
+            new_r, new_c = self.target_pos(move)
+        # Move the PC, removing whatever monster may be there
+        actor_map[self.r][self.c] = None
+        actor_map[new_r][new_c] = self
+        self.r = new_r
+        self.c = new_c
         return
 
     # Returns True if the player is alive, False otherwise.
@@ -133,7 +147,7 @@ class monster(actor):
             return True
         else:
             return False
-        
+
     # Returns the row, column coordinate of the player, in that order.
     def get_pos(self):
         return self.r, self.c
