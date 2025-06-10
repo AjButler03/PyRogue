@@ -68,7 +68,7 @@ class player(actor):
         self.memmap = []
         # Define the player as alive
         self.alive = True
-    
+
     # Determines if the player can be at this position.
     def _valid_pos(self, dungeon, r, c):
         if dungeon.valid_point(r, c) and dungeon.rmap[r][c] == 0:
@@ -79,10 +79,7 @@ class player(actor):
     # Initializes the player's position within the dungeon.
     # Returns True on successful placement, False otherwise.
     def init_pos(self, dungeon, actor_map, r, c):
-        if (
-            self._valid_pos(dungeon, r, c)
-            and actor_map[r][c] == None
-        ):
+        if self._valid_pos(dungeon, r, c) and actor_map[r][c] == None:
             self.r = r
             self.c = c
             actor_map[r][c] = self
@@ -122,18 +119,38 @@ class player(actor):
 
 # This is the class for monsters and their turn/movement methods.
 class monster(actor):
+    # A monster can have any number of attributes. I will be indicating these using a bit field.
+    # For v03, only the first 4 will be implemented. The others will come later, if I decide to do them at all.
+    # INTELLIGENT   bit 1  (0000 0000 0000 0001)
+    # TELEPATHIC    bit 2  (0000 0000 0000 0010)
+    # TUNNEL        bit 3  (0000 0000 0000 0100)
+    # ERRATIC       bit 4  (0000 0000 0000 1000)
+    # PASS          bit 5  (0000 0000 0001 0000)
+    # PICKUP        bit 6  (0000 0000 0010 0000)
+    # DESTROY       bit 7  (0000 0000 0100 0000)
+    # UNIQ          bit 8  (0000 0000 1000 0000)
+    # BOSS          bit 9  (0000 0001 0000 0000)
 
     # Monster constructor
-    def __init__(self, attributes):
+    def __init__(self, attributes, speed):
         # Declare fields for location
         self.r = 0
         self.c = 0
         # Monster's 'path'; this is a distance map of the dungeon to determine where to move next
         self.path = []
+        # Speed modifier; lower is better
+        self.speed = speed
         # bitfield to indicate what sort of attributes that the monster has
         self.attributes = attributes
         # Declare the monster as initially alive
         self.alive = True
+    
+    # Determines if the monster can be at this position.    
+    def _valid_pos(self, dungeon, r, c):
+        if dungeon.valid_point(r, c) and dungeon.rmap[r][c] == 0:
+            return True
+        else:
+            return False
 
     def init_pos(self, dungeon, actor_map, r, c):
         if (
@@ -152,9 +169,25 @@ class monster(actor):
     def get_pos(self):
         return self.r, self.c
 
+    # Updates the monster's path, depending on the attributes that it has
+    def _update_path(self, dungeon):
+        pass
+
     # Turn handler for this monster.
     def handle_turn(self, dungeon, actor_map):
-        # TODO
+        # For now, the player just moves randomly.
+        move = self._move(random.randint(0, 7))
+        new_r, new_c = self.target_pos(move)
+        # Check that new position is valid for the PC to be at
+        # Repeat until this is the case
+        while not self._valid_pos(dungeon, new_r, new_c):
+            move = self._move(random.randint(0, 7))
+            new_r, new_c = self.target_pos(move)
+        # Move the PC, removing whatever monster may be there
+        actor_map[self.r][self.c] = None
+        actor_map[new_r][new_c] = self
+        self.r = new_r
+        self.c = new_c
         return
 
     # Returns True if this monster is alive, False otherwise.

@@ -6,6 +6,8 @@ v03 ============================================================================
     - Laid some groundwork for actors to have turn methods, as well as death detection
 06/09/2025
     - PC random movement
+06/10/2025
+    - Started on primary game loop, or the discrete-event simulation. All automated, random movement for now.
 v02 ===========================================================================================================================
 05/31/2025
     - Start v02; update ChangeLog + README

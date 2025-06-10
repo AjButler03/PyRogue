@@ -1,6 +1,7 @@
 import dungeon
 import actor
 import random
+import time
 from utility import exp_chancetime
 from utility import PriorityQueue
 
@@ -48,7 +49,7 @@ def generate_monsters(dungeon, actor_map, monster_list, difficulty):
     # Generate monsters; runs until minimum number and attempt limit are met
     while (monsterc < min_monsterc) or (attemptc < attempt_limit):
         # Create monster
-        monster = actor.monster(0)
+        monster = actor.monster(0, 10)
         if monsterc <= min_monsterc or exp_chancetime(
             monsterc - min_monsterc, decay_rate
         ):
@@ -63,6 +64,21 @@ def generate_monsters(dungeon, actor_map, monster_list, difficulty):
         attemptc += 1
     print("Monsters placed:", monsterc)
 
+# Handles the main turnloop for the game, discrete-event simulation style.
+def turnloop(dungeon, pc, monster_list, actor_map):
+    # Create priorityqueue, starting player with turn 0 and monsters with 10 (player goes first)
+    pq = PriorityQueue()
+    pq.push(pc, 0)
+    for monster in monster_list:
+        pq.push(monster, 10)
+        
+    while len(pq) > 1:
+        _, actor = pq.pop()
+        actor.handle_turn(dungeon, actor_map)
+        render_dungeon(dungeon, actor_map)
+        time.sleep(0.125)
+    
+    
 
 def main():
     h = 20
@@ -94,9 +110,7 @@ def main():
     print("Dungeon Render:")
     render_dungeon(d, actor_map)
     
-    for _ in range(5000):
-        pc.handle_turn(d, actor_map)
-        render_dungeon(d, actor_map)
+    turnloop(d, pc, monster_list, actor_map)
 
 
 if __name__ == "__main__":
