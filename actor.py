@@ -31,10 +31,15 @@ class actor(abc.ABC):
     @abc.abstractmethod
     def get_pos(self):
         pass
-
-    # Handles the turn for the actor.
+    
+    # Returns the current turn of the given actor.
     @abc.abstractmethod
-    def handle_turn(self, dungeon, actor_map):
+    def get_currturn(self):
+        pass
+    
+    # Sets the current turn of the given actor.
+    @abc.abstractmethod
+    def set_currturn(self, turn):
         pass
 
     # Returns True if the actor is alive, False otherwise.
@@ -45,6 +50,11 @@ class actor(abc.ABC):
     # Declare this actor as dead.
     @abc.abstractmethod
     def kill(self):
+        pass
+
+    # Handles the turn for the actor.
+    @abc.abstractmethod
+    def handle_turn(self, dungeon, actor_map):
         pass
 
     # Returns the row, column coordinate of where the actor is attempting to move to.
@@ -66,8 +76,11 @@ class player(actor):
         self.c = 0
         # Player character's memory of the dungeon, as it appeared on sight.
         self.memmap = []
+        # Init the player's turn to zero
+        self.turn = 0
         # Define the player as alive
         self.alive = True
+        
 
     # Determines if the player can be at this position.
     def _valid_pos(self, dungeon, r, c):
@@ -90,7 +103,23 @@ class player(actor):
     # Returns the row, column coordinate of the player, in that order.
     def get_pos(self):
         return self.r, self.c
+    
+    # Returns the current turn of the player.
+    def get_currturn(self):
+        return self.turn
+    
+    # Sets the current turn of the monster.
+    def set_currturn(self, turn):
+        self.turn = turn
 
+    # Returns True if the player is alive, False otherwise.
+    def is_alive(self):
+        return self.alive
+
+    # Declares the player as dead.
+    def kill(self):
+        self.alive = False
+        
     # Turn handler for the player.
     def handle_turn(self, dungeon, actor_map):
         # For now, the player just moves randomly.
@@ -107,14 +136,6 @@ class player(actor):
         self.r = new_r
         self.c = new_c
         return
-
-    # Returns True if the player is alive, False otherwise.
-    def is_alive(self):
-        return self.alive
-
-    # Declares the player as dead.
-    def kill(self):
-        self.alive = False
 
 
 # This is the class for monsters and their turn/movement methods.
@@ -142,6 +163,8 @@ class monster(actor):
         self.speed = speed
         # bitfield to indicate what sort of attributes that the monster has
         self.attributes = attributes
+        # Set the monsters current turn to zero
+        self.turn = 0
         # Declare the monster as initially alive
         self.alive = True
     
@@ -173,6 +196,22 @@ class monster(actor):
     def _update_path(self, dungeon):
         pass
 
+    # Returns the current turn of the monster.
+    def get_currturn(self):
+        return self.turn
+    
+    # Sets the current turn of the monster.
+    def set_currturn(self, turn):
+        self.turn = turn
+
+    # Returns True if this monster is alive, False otherwise.
+    def is_alive(self):
+        return self.alive
+
+    # Declares this monster as dead.
+    def kill(self):
+        self.alive = False
+        
     # Turn handler for this monster.
     def handle_turn(self, dungeon, actor_map):
         # For now, the player just moves randomly.
@@ -189,11 +228,3 @@ class monster(actor):
         self.r = new_r
         self.c = new_c
         return
-
-    # Returns True if this monster is alive, False otherwise.
-    def is_alive(self):
-        return self.alive
-
-    # Declares this monster as dead.
-    def kill(self):
-        self.alive = False

@@ -8,6 +8,7 @@ v03 ============================================================================
     - PC random movement
 06/10/2025
     - Started on primary game loop, or the discrete-event simulation. All automated, random movement for now.
+    - Both the PC and the monsters now move in turn based on priority queue
 v02 ===========================================================================================================================
 05/31/2025
     - Start v02; update ChangeLog + README

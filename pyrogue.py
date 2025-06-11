@@ -70,13 +70,18 @@ def turnloop(dungeon, pc, monster_list, actor_map):
     pq = PriorityQueue()
     pq.push(pc, 0)
     for monster in monster_list:
+        monster.set_currturn(10)
         pq.push(monster, 10)
         
     while len(pq) > 1:
-        _, actor = pq.pop()
-        actor.handle_turn(dungeon, actor_map)
-        render_dungeon(dungeon, actor_map)
-        time.sleep(0.125)
+        _, a = pq.pop()
+        a.handle_turn(dungeon, actor_map)
+        new_turn = a.get_currturn() + 10
+        a.set_currturn(new_turn)
+        pq.push(a, new_turn)
+        if isinstance(a, actor.player):
+            render_dungeon(dungeon, actor_map)
+            time.sleep(0.125)
     
     
 
