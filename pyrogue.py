@@ -64,6 +64,7 @@ def generate_monsters(dungeon, actor_map, monster_list, difficulty):
         attemptc += 1
     print("Monsters placed:", monsterc)
 
+
 # Handles the main turnloop for the game, discrete-event simulation style.
 def turnloop(dungeon, pc, monster_list, actor_map):
     # Create priorityqueue, starting player with turn 0 and monsters with 10 (player goes first)
@@ -72,18 +73,21 @@ def turnloop(dungeon, pc, monster_list, actor_map):
     for monster in monster_list:
         monster.set_currturn(10)
         pq.push(monster, 10)
-        
-    while len(pq) > 1:
+
+    while len(pq) > 1 and pc.is_alive():
         _, a = pq.pop()
-        a.handle_turn(dungeon, actor_map)
-        new_turn = a.get_currturn() + 10
-        a.set_currturn(new_turn)
-        pq.push(a, new_turn)
-        if isinstance(a, actor.player):
-            render_dungeon(dungeon, actor_map)
-            time.sleep(0.125)
+        # Double check that actor has not died; If it has, ignore and move on
+        if a.is_alive():    
+            a.handle_turn(dungeon, actor_map)
+            new_turn = a.get_currturn() + 10
+            a.set_currturn(new_turn)
+            pq.push(a, new_turn)
+            if isinstance(a, actor.player):
+                render_dungeon(dungeon, actor_map)
+                time.sleep(0.25)
+    render_dungeon(dungeon, actor_map)
     
-    
+
 
 def main():
     h = 20
@@ -104,17 +108,17 @@ def main():
     while not pc.init_pos(
         d, actor_map, random.randint(1, h - 2), random.randint(1, w - 2)
     ):
-        pass
+        continue
 
-    d.calc_dist_maps(pc.r, pc.c)
+    pc_r, pc_c = pc.get_pos()
+    d.calc_dist_maps(pc_r, pc_c)
 
     # Generate the monsters
     monster_list = []
-    generate_monsters(d, actor_map, monster_list, 0.75)
+    generate_monsters(d, actor_map, monster_list, difficulty)
 
-    print("Dungeon Render:")
     render_dungeon(d, actor_map)
-    
+
     turnloop(d, pc, monster_list, actor_map)
 
 

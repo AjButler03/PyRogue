@@ -131,6 +131,10 @@ class player(actor):
             move = self._move(random.randint(0, 7))
             new_r, new_c = self.target_pos(move)
         # Move the PC, removing whatever monster may be there
+        a = actor_map[new_r][new_c]
+        if not a == None:
+            # Mark actor as dead
+            a.kill() 
         actor_map[self.r][self.c] = None
         actor_map[new_r][new_c] = self
         self.r = new_r
@@ -223,6 +227,10 @@ class monster(actor):
             move = self._move(random.randint(0, 7))
             new_r, new_c = self.target_pos(move)
         # Move the PC, removing whatever monster may be there
+        a = actor_map[new_r][new_c]
+        if not a == None:
+            # Mark actor as dead
+            a.kill() 
         actor_map[self.r][self.c] = None
         actor_map[new_r][new_c] = self
         self.r = new_r
