@@ -11,6 +11,7 @@ v03 ============================================================================
     - Both the PC and the monsters now move in turn based on priority queue
     - PC and monsters can now 'kill' each other by moving into space that another occupies
 06/11/2025
+    - Cleaned up actor/player/monster classes a bit
     - Start on monster attributes implementation
 v02 ===========================================================================================================================
 05/31/2025

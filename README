@@ -18,3 +18,10 @@ pyrogue.py is the main file, and running it will do the following:
     - Display the dungeon terrain, rock hardness map, walking distance map, tunneling distance map, then standard dungeon render
 
 New features with v03 include monsters and a turnloop for movement, although it is completely automated for now.
+
+Descriptions of the attributes that the monsters can have (Those that are implemented as of v03):
+    - INTELLIGENT: This indicates that the monster understands the optimal route to the player character, or at least to where they think the player is.
+      Intelligent monsters also remember where the player is, assuming that they obtain the player's location in the first place.
+    - TELEPATHIC: A telepathic monster will always know where the player character is, regardless of distance or line of sight.
+    - TUNNEL: A tunneling monster has the ability to bore through rock, creating new paths between rooms. It does take extra time to bore through the rock, though.
+    - ERRATIC: On any given turn, an erratic monster will have a 50% chance to move randomly. Otherwise it moves normally.

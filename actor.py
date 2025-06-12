@@ -1,5 +1,6 @@
 import random
 import abc
+import copy
 from enum import Enum
 import dungeon
 
@@ -23,34 +24,40 @@ class actor(abc.ABC):
 
     # This method is to initialize the position of the actor within the dungeon, verifying the location as valid.
     # Returns True on successful placement, False otherwise.
-    @abc.abstractmethod
-    def init_pos(self, dungeon: dungeon.dungeon, actor_map: list, r: int, c: int):
-        pass
+    def init_pos(
+        self, dungeon: dungeon.dungeon, actor_map: list, r: int, c: int
+    ) -> bool:
+        if (
+            dungeon.valid_point(r, c)
+            and dungeon.rmap[r][c] == 0
+            and actor_map[r][c] == None
+        ):
+            self.r = r
+            self.c = c
+            actor_map[r][c] = self
+            return True
+        else:
+            return False
 
     # Returns the row, column coordinate of the actor, in that order.
-    @abc.abstractmethod
     def get_pos(self):
-        pass
+        return self.r, self.c
 
     # Returns the current turn of the given actor.
-    @abc.abstractmethod
     def get_currturn(self) -> int:
-        pass
+        return self.turn
 
     # Sets the current turn of the given actor.
-    @abc.abstractmethod
     def set_currturn(self, turn: int):
-        pass
+        self.turn = turn
 
     # Returns True if the actor is alive, False otherwise.
-    @abc.abstractmethod
     def is_alive(self):
-        pass
+        return self.alive
 
     # Declare this actor as dead.
-    @abc.abstractmethod
     def kill(self):
-        pass
+        self.alive = False
 
     # Handles the turn for the actor.
     @abc.abstractmethod
@@ -87,37 +94,6 @@ class player(actor):
             return True
         else:
             return False
-
-    # Initializes the player's position within the dungeon.
-    # Returns True on successful placement, False otherwise.
-    def init_pos(self, dungeon: dungeon.dungeon, actor_map: list, r: int, c: int):
-        if self._valid_pos(dungeon, r, c) and actor_map[r][c] == None:
-            self.r = r
-            self.c = c
-            actor_map[r][c] = self
-            return True
-        else:
-            return False
-
-    # Returns the row, column coordinate of the player, in that order.
-    def get_pos(self):
-        return self.r, self.c
-
-    # Returns the current turn of the player.
-    def get_currturn(self) -> int:
-        return self.turn
-
-    # Sets the current turn of the monster.
-    def set_currturn(self, turn: int):
-        self.turn = turn
-
-    # Returns True if the player is alive, False otherwise.
-    def is_alive(self) -> bool:
-        return self.alive
-
-    # Declares the player as dead.
-    def kill(self):
-        self.alive = False
 
     # Turn handler for the player.
     def handle_turn(self, dungeon: dungeon.dungeon, actor_map: list):
@@ -186,42 +162,38 @@ class monster(actor):
         else:
             return False
 
-    def init_pos(self, dungeon: dungeon.dungeon, actor_map: list, r: int, c: int) -> bool:
-        if (
-            dungeon.valid_point(r, c)
-            and dungeon.rmap[r][c] == 0
-            and actor_map[r][c] == None
-        ):
-            self.r = r
-            self.c = c
-            actor_map[r][c] = self
-            return True
-        else:
-            return False
-
-    # Returns the row, column coordinate of the player, in that order.
-    def get_pos(self):
-        return self.r, self.c
+    def _has_pc_los(self, dungeon, ):
+        # TODO
+        return
 
     # Updates the monster's path, depending on the attributes that it has
-    def _update_path(self, dungeon):
-        pass
-
-    # Returns the current turn of the monster.
-    def get_currturn(self) -> int:
-        return self.turn
-
-    # Sets the current turn of the monster.
-    def set_currturn(self, turn: int):
-        self.turn = turn
-
-    # Returns True if this monster is alive, False otherwise.
-    def is_alive(self):
-        return self.alive
-
-    # Declares this monster as dead.
-    def kill(self):
-        self.alive = False
+    def _update_path(self, dungeon: dungeon.dungeon):
+        # Check if monster is intelligent
+        if self.has_attribute(self._ATTR_INTELLIGENT):
+            # Check if monster is a telepath
+            if self.has_attribute(self._ATTR_TELEPATHIC_):
+                # Monster is intelligent and telepathic; thus, it should get a full distance map; not a copy.
+                # Check if monster is a tunneling monster to determine which it should get.
+                if self.has_attribute(self._ATTR_TUNNEL_____):
+                    # Tunneler, get tunneling distance map.
+                    self.path = dungeon.tunn_distmap
+                else:
+                    # Not a tunneler, get walking distance map.
+                    self.path = dungeon.walk_distmap
+            else:
+                # Monster is intelligent, but not telepathic. Need to check for line of sight.
+                # TODO
+                pass
+        else:
+            if self.has_attribute(self._ATTR_TELEPATHIC_):
+                # Monster is telepathic, but not intelligent. Will need to calculate a straightline path.
+                # TODO
+                pass
+            else:
+                # Monster is not telepathic, nor intelligent. Will need to check line of sight.
+                # TODO
+                pass
+        return
 
     # Turn handler for this monster.
     def handle_turn(self, dungeon: dungeon.dungeon, actor_map: list):
