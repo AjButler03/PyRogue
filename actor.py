@@ -162,9 +162,35 @@ class monster(actor):
         else:
             return False
 
-    def _has_pc_los(self, dungeon, ):
-        # TODO
-        return
+    def _has_pc_los(self, dungeon: dungeon.dungeon, player: player) -> bool:
+        pc_r, pc_c = player.get_pos()
+        curr_r, curr_c = self.get_pos()
+        diff_r = abs(pc_r - self.r)
+        diff_c = abs(pc_c - self.c)
+        step_dir_r = 1 if self.r < pc_r else -1
+        step_dir_c = 1 if self.c < pc_c else -1
+        error = diff_c - diff_r
+        
+        while True:
+            # Check if there is rock in the way
+            if (dungeon.tmap[curr_r][curr_c] == dungeon.terrain.immrock or dungeon.tmap[curr_r][curr_c] == dungeon.terrain.stdrock):
+                # Rock is in the way; no line of sight, so return False.
+                return False
+
+            # Check if scan has reached the player
+            if (curr_r == pc_r and curr_c == pc_c):
+                # Reached the player; so line of sight established and return True.
+                return True
+
+            # Iterate towards the PC
+            e2 = 2 * error
+            if (e2 > - diff_r):
+                error -= diff_r
+                curr_c += step_dir_c
+            
+            if (e2 < diff_c):
+                error += diff_c
+                curr_r += step_dir_r
 
     # Updates the monster's path, depending on the attributes that it has
     def _update_path(self, dungeon: dungeon.dungeon):

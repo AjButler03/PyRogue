@@ -118,8 +118,13 @@ def main():
     generate_monsters(d, actor_map, monster_list, difficulty)
 
     render_dungeon(d, actor_map)
+    
+    # Testing los alg; will remove
+    for monster in monster_list:
+        print(monster.get_pos())
+        print(monster._has_pc_los(d, pc))
 
-    turnloop(d, pc, monster_list, actor_map)
+    # turnloop(d, pc, monster_list, actor_map)
 
 
 if __name__ == "__main__":

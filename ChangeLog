@@ -13,6 +13,8 @@ v03 ============================================================================
 06/11/2025
     - Cleaned up actor/player/monster classes a bit
     - Start on monster attributes implementation
+06/14/2025
+    - Monsters now have a method to check if they have a line of sight on the pc
 v02 ===========================================================================================================================
 05/31/2025
     - Start v02; update ChangeLog + README
