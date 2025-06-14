@@ -162,6 +162,7 @@ class monster(actor):
         else:
             return False
 
+    # Determines if the monster has a line of sight to the player; returns True if so, False otherwise.
     def _has_pc_los(self, dungeon: dungeon.dungeon, player: player) -> bool:
         pc_r, pc_c = player.get_pos()
         curr_r, curr_c = self.get_pos()
@@ -171,6 +172,7 @@ class monster(actor):
         step_dir_c = 1 if self.c < pc_c else -1
         error = diff_c - diff_r
         
+        # Scan from the monster's position, moving towards the player's location.
         while True:
             # Check if there is rock in the way
             if (dungeon.tmap[curr_r][curr_c] == dungeon.terrain.immrock or dungeon.tmap[curr_r][curr_c] == dungeon.terrain.stdrock):
@@ -192,6 +194,39 @@ class monster(actor):
                 error += diff_c
                 curr_r += step_dir_r
 
+    # Calculates a straightline path to the player character.
+    def _calc_straight_path(self, dungeon: dungeon.dungeon, player: player):
+        # Note: this method ignores if the monster is a tunneler or not.
+        dest_r, dest_c = self.get_pos()
+        curr_r, curr_c = player.get_pos()
+        diff_r = abs(dest_r - self.r)
+        diff_c = abs(dest_c - self.c)
+        step_dir_r = 1 if self.r < dest_r else -1
+        step_dir_c = 1 if self.c < dest_c else -1
+        error = diff_c - diff_r
+        # dist is to give the path a useful weight to use when deciding where to go
+        dist = 1
+        # Init path to 'infinite' weight at every point; slow, but prevents multiple paths overlapping if lOS broken and regained
+        self.path = [[float("inf")] * self.width for _ in range(self.height)]
+        
+        # Scan from the player's position, moving towards the monster's location.
+        while True:
+            # Update the path for distance from player
+            self.path[curr_r][curr_c] = dist
+            
+            if (curr_r == dest_r and curr_c == dest_c):
+                # Reached the monster's position; stop here
+                break
+                
+            e2 = 2 * error
+            if (e2 > -diff_r):
+                error -= diff_r
+                curr_c += step_dir_c
+            
+            if (e2 > -diff_c):
+                error -= diff_c
+                curr_r += step_dir_r
+    
     # Updates the monster's path, depending on the attributes that it has
     def _update_path(self, dungeon: dungeon.dungeon):
         # Check if monster is intelligent
@@ -208,7 +243,12 @@ class monster(actor):
                     self.path = dungeon.walk_distmap
             else:
                 # Monster is intelligent, but not telepathic. Need to check for line of sight.
-                # TODO
+                if self._has_pc_los:
+                    # Has line of sight, so need to check which distance map monster should recieve a copy of.
+                    # Also: Copy instead of direct assignment to emmulate 'memory' of last PC sighting.
+                    if self.has_attribute(self._ATTR_TUNNEL_____):
+                        # self.path = copy
+                        pass
                 pass
         else:
             if self.has_attribute(self._ATTR_TELEPATHIC_):
