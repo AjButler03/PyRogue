@@ -16,6 +16,8 @@ v03 ============================================================================
 06/14/2025
     - Monsters now have a method to check if they have a line of sight on the pc
     - Monsters now have a method to calculate a straightline path to the player character
+06/15/2025
+    - Starting on monster path-based movement and setting up better combat management
 v02 ===========================================================================================================================
 05/31/2025
     - Start v02; update ChangeLog + README

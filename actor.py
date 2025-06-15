@@ -61,7 +61,7 @@ class actor(abc.ABC):
 
     # Handles the turn for the actor.
     @abc.abstractmethod
-    def handle_turn(self, dungeon: dungeon.dungeon, actor_map: list):
+    def handle_turn(self, dungeon: dungeon.dungeon, actor_map: list, player):
         pass
 
     # Returns the row, column coordinate of where the actor is attempting to move to.
@@ -95,8 +95,15 @@ class player(actor):
         else:
             return False
 
+    # Forces the player into this position. Does not check that position is 'valid'.
+    def _force_pos_update(self, dungeon: dungeon.dungeon, actor_map: list, r: int, c: int):
+        actor_map[self.r][self.c] = None
+        actor_map[r][c] = self
+        self.r = r
+        self.c = c
+        
     # Turn handler for the player.
-    def handle_turn(self, dungeon: dungeon.dungeon, actor_map: list):
+    def handle_turn(self, dungeon: dungeon.dungeon, actor_map: list, player):
         # For now, the player just moves randomly.
         move = self._move(random.randint(0, 7))
         new_r, new_c = self.target_pos(move)
@@ -114,7 +121,6 @@ class player(actor):
         actor_map[new_r][new_c] = self
         self.r = new_r
         self.c = new_c
-        return
 
 
 # This is the class for monsters and their turn/movement methods.
@@ -227,42 +233,13 @@ class monster(actor):
                 error -= diff_c
                 curr_r += step_dir_r
     
-    # Updates the monster's path, depending on the attributes that it has
-    def _update_path(self, dungeon: dungeon.dungeon):
-        # Check if monster is intelligent
-        if self.has_attribute(self._ATTR_INTELLIGENT):
-            # Check if monster is a telepath
-            if self.has_attribute(self._ATTR_TELEPATHIC_):
-                # Monster is intelligent and telepathic; thus, it should get a full distance map; not a copy.
-                # Check if monster is a tunneling monster to determine which it should get.
-                if self.has_attribute(self._ATTR_TUNNEL_____):
-                    # Tunneler, get tunneling distance map.
-                    self.path = dungeon.tunn_distmap
-                else:
-                    # Not a tunneler, get walking distance map.
-                    self.path = dungeon.walk_distmap
-            else:
-                # Monster is intelligent, but not telepathic. Need to check for line of sight.
-                if self._has_pc_los:
-                    # Has line of sight, so need to check which distance map monster should recieve a copy of.
-                    # Also: Copy instead of direct assignment to emmulate 'memory' of last PC sighting.
-                    if self.has_attribute(self._ATTR_TUNNEL_____):
-                        # self.path = copy
-                        pass
-                pass
-        else:
-            if self.has_attribute(self._ATTR_TELEPATHIC_):
-                # Monster is telepathic, but not intelligent. Will need to calculate a straightline path.
-                # TODO
-                pass
-            else:
-                # Monster is not telepathic, nor intelligent. Will need to check line of sight.
-                # TODO
-                pass
-        return
-
-    # Turn handler for this monster.
-    def handle_turn(self, dungeon: dungeon.dungeon, actor_map: list):
+    # Handles an actor at a target location.
+    def _handle_target_actor(self, dungeo: dungeon.dungeon, actor_map: list, dest_r: int, dest_c: int):
+        # TODO
+        pass
+    
+    # Monster moves in a random direction.
+    def _random_move(self, dungeon: dungeon.dungeon, actor_map: list):
         # For now, the player just moves randomly.
         move = self._move(random.randint(0, 7))
         new_r, new_c = self.target_pos(move)
@@ -273,14 +250,77 @@ class monster(actor):
             new_r, new_c = self.target_pos(move)
         # Move the PC, removing whatever monster may be there
         a = actor_map[new_r][new_c]
-        if not a == None and isinstance(a, player):
-            # Mark player as dead and remove from the actor map
-            a.kill()
-            actor_map[new_r][new_c] = None
-        elif a == None:
-            # Have monster move only if there isn't another monster there
-            # Eventually I want this to displace the monster that exists there, if thats the case
+        if not a == None:
+            # Call the handler for targeting another actor
+            a = self._handle_target_actor(dungeon, actor_map, new_r, new_c)
+        else:
+            # Update the actor map + position information
             actor_map[self.r][self.c] = None
             actor_map[new_r][new_c] = self
             self.r = new_r
             self.c = new_c
+        
+        # return a to allow combat messages
+        return a
+    
+    # Monster moves based on its path.
+    def _path_move(self, dungeon: dungeon.dungeon, actor_map: list):
+        # TODO
+        pass
+    
+    # Updates the monster's path, depending on the attributes that it has.
+    # Returns True on a successful path update, False otherwise.
+    def _update_path(self, dungeon: dungeon.dungeon, player: player) -> bool:
+        # Check if monster is intelligent
+        if self.has_attribute(self._ATTR_INTELLIGENT):
+            # Check if monster is a telepath
+            if self.has_attribute(self._ATTR_TELEPATHIC_):
+                # Monster is intelligent and telepathic; thus, it should get a full distance map; not a copy.
+                # Check if monster is a tunneling monster to determine which it should get.
+                if self.has_attribute(self._ATTR_TUNNEL_____):
+                    # Tunneler, get tunneling distance map.
+                    self.path = dungeon.tunn_distmap
+                    return True
+                else:
+                    # Not a tunneler, get walking distance map.
+                    self.path = dungeon.walk_distmap
+                    return True
+            else:
+                # Monster is intelligent, but not telepathic. Need to check for line of sight.
+                if self._has_pc_los:
+                    # Has line of sight, so need to check which distance map monster should recieve a copy of.
+                    # Also: Copy instead of direct assignment to emmulate 'memory' of last PC sighting.
+                    if self.has_attribute(self._ATTR_TUNNEL_____):
+                        self.path = copy.deepcopy(dungeon.tunn_distmap)
+                        return True
+                    else:
+                        self.path = copy.deepcopy(dungeon.walk_distmap)
+                        return True
+        else:
+            if self.has_attribute(self._ATTR_TELEPATHIC_):
+                # Monster is telepathic, but not intelligent. Will need to calculate a straightline path.
+                self._calc_straight_path(dungeon, player)
+                return True
+            else:
+                # Monster is not telepathic, nor intelligent. Will need to check line of sight.
+                if self._has_pc_los(dungeon, player):
+                    self._calc_straight_path(dungeon, player)
+                    return True
+                # If there is not any line of sight, then no changes.
+        return False
+
+    # Turn handler for this monster.
+    def handle_turn(self, dungeon: dungeon.dungeon, actor_map: list, player):
+        return
+        # Update the monster's path.
+        if self._update_path(dungeon, player):
+            if self.has_attribute(self._ATTR_ERRATIC____) and random.randint(0, 1) > 0:
+                # Erratic attribute triggered
+                self._random_move(dungeon, actor_map)
+            else:
+                # Move based on path
+                self._path_move(dungeon, actor_map)
+        else:
+            # Path update failure indicates that the monster should move randomly
+            self._random_move(dungeon)
+                

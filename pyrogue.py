@@ -78,7 +78,7 @@ def turnloop(dungeon, pc, monster_list, actor_map):
         _, a = pq.pop()
         # Double check that actor has not died; If it has, ignore and move on
         if a.is_alive():    
-            a.handle_turn(dungeon, actor_map)
+            a.handle_turn(dungeon, actor_map, pc)
             new_turn = a.get_currturn() + 10
             a.set_currturn(new_turn)
             pq.push(a, new_turn)
@@ -96,7 +96,7 @@ def main():
     d.generate_dungeon()
     # Difficulty modifies the monster spawn rate
     # 0.25 => easy, 0.75 => normal, 1.25 => hard, 1.75 => very hard
-    difficulty = 0.75
+    difficulty = 0.25
 
     # Init actor map, storing where actors are relative to the dungeon
     actor_map = [[None] * d.width for _ in range(d.height)]
