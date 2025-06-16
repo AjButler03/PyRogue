@@ -234,9 +234,48 @@ class monster(actor):
                 curr_r += step_dir_r
     
     # Handles an actor at a target location.
-    def _handle_target_actor(self, dungeo: dungeon.dungeon, actor_map: list, dest_r: int, dest_c: int):
-        # TODO
-        pass
+    def _handle_target_actor(self, dungeo: dungeon.dungeon, actor_map: list, dest_r: int, dest_c: int) -> int:
+        # First determine if the targeted actor is a monster or the player character.
+        a = actor_map[dest_r][dest_c]
+        if isinstance(a, player):
+            # Attack player
+            # For now, this is just an instant kill.
+            a.kill()
+            actor_map[dest_r][dest_c] = None
+            # This will eventually return the damage dealt to the player character. 
+            return 100
+        else:
+            # displace monster (push them to another spot, or minimally swap places)
+            delta_r = [-1, -1, -1, 0, 0, 1, 1, 1]
+            delta_c = [-1, 0, 1, -1, 1, -1, 0, 1]
+
+            # Attempt to randomly displace
+            for i in range(7):
+                idx = random.randint(0, 7)
+                new_r = dest_r + delta_r[idx]
+                new_c = dest_c + delta_c[idx]
+                if (dungeon.valid_point(new_r, new_c)) and (actor_map[new_r][new_c] != None) and (dungeon.tmap[new_r][new_c] == dungeon.terrain.floor or dungeon.tmap[new_r][new_c] == dungeon.terrain.stair):
+                    # New point works; move the monster to the new positions
+                    # Move the targeted monster
+                    actor_map[new_r][new_c] = a
+                    a.r = new_r
+                    a.c = new_c
+                    # Move the targeting monster
+                    actor_map[dest_r][dest_c] = self
+                    self.r = dest_r
+                    self.c = dest_c
+                    # Done; return no damage dealt.
+                    return 0
+                
+            # If make it to here, then random displacement failed; default to basic position swap.
+            actor_map[self.r][self.c] = a
+            a.r = self.r
+            a.c = self.c
+            actor_map[dest_r][dest_c] = self
+            self.r = dest_r
+            self.c = dest_c
+            # Done; return no damage dealt.
+            return 0
     
     # Monster moves in a random direction.
     def _random_move(self, dungeon: dungeon.dungeon, actor_map: list):
@@ -260,7 +299,8 @@ class monster(actor):
             self.r = new_r
             self.c = new_c
         
-        # return a to allow combat messages
+        # return targeted actor to allow combat messages
+        # For monster, this should always be the player character.
         return a
     
     # Monster moves based on its path.
@@ -311,7 +351,6 @@ class monster(actor):
 
     # Turn handler for this monster.
     def handle_turn(self, dungeon: dungeon.dungeon, actor_map: list, player):
-        return
         # Update the monster's path.
         if self._update_path(dungeon, player):
             if self.has_attribute(self._ATTR_ERRATIC____) and random.randint(0, 1) > 0:
