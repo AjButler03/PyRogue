@@ -21,35 +21,9 @@ def render_dungeon(dungeon, actor_map):
                 else:
                     # This is an ugly print statement which easily shows attribute combinations for monsters.
                     # Eventually, monsters will have more unique symbols.
-                    attr = actor_inst.attributes
-                    if 0 <= attr < 10:
-                        print("\033[31m", end="")
-                        print(attr, end="")
-                        print("\033[0m", end="")
-                    elif attr == 10:
-                        print("\033[31m", end="")
-                        print("A", end="")
-                        print("\033[0m", end="")
-                    elif attr == 11:
-                        print("\033[31m", end="")
-                        print("B", end="")
-                        print("\033[0m", end="")
-                    elif attr == 12:
-                        print("\033[31m", end="")
-                        print("C", end="")
-                        print("\033[0m", end="")
-                    elif attr == 13:
-                        print("\033[31m", end="")
-                        print("D", end="")
-                        print("\033[0m", end="")
-                    elif attr == 14:
-                        print("\033[31m", end="")
-                        print("E", end="")
-                        print("\033[0m", end="")
-                    elif attr == 15:
-                        print("\033[31m", end="")
-                        print("F", end="")
-                        print("\033[0m", end="")
+                    print("\033[31m", end="")
+                    print(actor_inst.char, end="")
+                    print("\033[0m", end="")
             elif t_type == dungeon.terrain.floor:
                 print(".", end="")
             elif t_type == dungeon.terrain.stair:
@@ -109,15 +83,19 @@ def turnloop(dungeon, pc, monster_list, actor_map):
         _, a = pq.pop()
         # Double check that actor has not died; If it has, ignore and move on
         if a.is_alive():
-            a.handle_turn(dungeon, actor_map, pc)
+            targ_a, dmg_dealt = a.handle_turn(dungeon, actor_map, pc)
             curr_turn = a.get_currturn()
-            new_turn = curr_turn + 10
+            new_turn = curr_turn + a.get_speed()
             a.set_currturn(new_turn)
             pq.push(a, new_turn)
             if isinstance(a, actor.player):
                 # print("Turn:", curr_turn)
+                if targ_a != None:
+                    print("You Killed a", targ_a.get_char())
                 render_dungeon(dungeon, actor_map)
                 time.sleep(0.25)
+            elif isinstance(targ_a, actor.player):
+                print("a", a.get_char(), "killed you")
 
 
 def main():

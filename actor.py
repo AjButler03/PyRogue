@@ -52,6 +52,14 @@ class actor(abc.ABC):
     def get_currturn(self) -> int:
         return self.turn
 
+    # Returns the speed (turn number increase per turn).
+    def get_speed(self) -> int:
+        return self.speed
+
+    # Returns the character representation of the actor.
+    def get_char(self) -> str:
+        return self.char
+    
     # Sets the current turn of the given actor.
     def set_currturn(self, turn: int):
         self.turn = turn
@@ -86,8 +94,11 @@ class player(actor):
         self.memmap = []
         # Init the player's turn to zero
         self.turn = 0
+        # Init the player's speed (turn number increase per turn) to 10
+        self.speed = 10
         # Define the player as alive
         self.alive = True
+        self.char = "@"
 
     # Determines if the player can be at this position.
     def _valid_pos(self, dungeon: dungeon.dungeon, r: int, c: int) -> bool:
@@ -120,11 +131,17 @@ class player(actor):
         if not a == None:
             # Mark actor as dead
             a.kill()
+            dmg = float("inf")
+        else:
+            dmg = 0
         actor_map[self.r][self.c] = None
         actor_map[new_r][new_c] = self
         self.r = new_r
         self.c = new_c
         dungeon.calc_dist_maps(new_r, new_c)
+
+        # For combat dialog
+        return a, dmg
 
 
 # This is the class for monsters and their turn/movement methods.
@@ -157,7 +174,23 @@ class monster(actor):
         # Declare the monster as initially alive
         self.alive = True
         # Declaring a character to represent this monster in the dungeon
-        self.char = "M"
+        # This is a temporary setup, as monsters will have custom definitions in the future
+        if 0 <= attributes < 10:
+            self.char = str(attributes)
+        elif attributes == 10:
+            self.char = "A"
+        elif attributes == 11:
+            self.char = "B"
+        elif attributes == 12:
+            self.char = "C"
+        elif attributes == 13:
+            self.char = "D"
+        elif attributes == 14:
+            self.char = "E"
+        elif attributes == 15:
+            self.char = "F"
+        else:
+            self.char = "!"
 
     # Returns True if the monster has the given attribute, False otherwise.
     def has_attribute(self, attr: int) -> bool:
@@ -304,8 +337,9 @@ class monster(actor):
         a = actor_map[new_r][new_c]
         if a != None:
             # Call the handler for targeting another actor
-            a = self._handle_target_actor(dungeon, actor_map, new_r, new_c)
+            dmg = self._handle_target_actor(dungeon, actor_map, new_r, new_c)
         else:
+            dmg = 0  # to have a return value
             # Check if there is rock in the way
             if dungeon.rmap[new_r][new_c] != 0:
                 hardness = dungeon.rmap[new_r][new_c]
@@ -328,6 +362,8 @@ class monster(actor):
                 actor_map[new_r][new_c] = self
                 self.r = new_r
                 self.c = new_c
+        # Return actor + damage dealt for combat messages
+        return a, dmg
 
     # Monster moves in a random direction.
     def _random_move(self, dungeon: dungeon.dungeon, actor_map: list):
@@ -338,7 +374,9 @@ class monster(actor):
         while not self._valid_pos(dungeon, new_r, new_c):
             move = self._move(random.randint(0, 7))
             new_r, new_c = self.target_pos(move)
-        self._move_handeler(dungeon, actor_map, new_r, new_c)
+        a, dmg = self._move_handeler(dungeon, actor_map, new_r, new_c)
+        # Return actor + damage dealt for combat messages
+        return a, dmg
 
     # Monster moves based on its path.
     def _path_move(self, dungeon: dungeon.dungeon, actor_map: list):
@@ -358,7 +396,9 @@ class monster(actor):
 
         # Now attempt to move to that minimum cost point
         new_r, new_c = self.target_pos(self._move(minc_pt_idx))
-        self._move_handeler(dungeon, actor_map, new_r, new_c)
+        a, dmg = self._move_handeler(dungeon, actor_map, new_r, new_c)
+        # Return actor + damage dealt for combat messages
+        return a, dmg
 
     # Updates the monster's path, depending on the attributes that it has.
     # Returns True on a successful path update, False otherwise.
@@ -407,10 +447,12 @@ class monster(actor):
         if self._update_path(dungeon, player):
             if self.has_attribute(self._ATTR_ERRATIC____) and random.randint(0, 1) > 0:
                 # Erratic attribute triggered
-                self._random_move(dungeon, actor_map)
+                a, dmg = self._random_move(dungeon, actor_map)
             else:
                 # Move based on path
-                self._path_move(dungeon, actor_map)
+                a, dmg = self._path_move(dungeon, actor_map)
         else:
             # Path update failure indicates that the monster should move randomly
-            self._random_move(dungeon, actor_map)
+            a, dmg = self._random_move(dungeon, actor_map)
+        # Return actor + damage dealt for combat messages
+        return a, dmg

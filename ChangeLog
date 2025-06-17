@@ -22,6 +22,7 @@ v03 ============================================================================
     - Finished writing 'correct' monster movement code; currently not working correctly
 06/17/2025
     - Fixed several bugs with monster path movement
+    - Implemented a basic combat dialogue; will be more useful later on
 v02 ===========================================================================================================================
 05/31/2025
     - Start v02; update ChangeLog + README
