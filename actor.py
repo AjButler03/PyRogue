@@ -124,6 +124,7 @@ class player(actor):
         actor_map[new_r][new_c] = self
         self.r = new_r
         self.c = new_c
+        dungeon.calc_dist_maps(new_r, new_c)
 
 
 # This is the class for monsters and their turn/movement methods.
@@ -156,7 +157,7 @@ class monster(actor):
         # Declare the monster as initially alive
         self.alive = True
         # Declaring a character to represent this monster in the dungeon
-        self.char = 'M'
+        self.char = "M"
 
     # Returns True if the monster has the given attribute, False otherwise.
     def has_attribute(self, attr: int) -> bool:
@@ -183,17 +184,14 @@ class monster(actor):
         curr_r, curr_c = self.get_pos()
         diff_r = abs(dest_r - curr_r)
         diff_c = abs(dest_c - curr_c)
-        step_dir_r = 1 if curr_r < dest_r else -1
-        step_dir_c = 1 if curr_c < dest_c else -1
+        step_dir_r = 0 if curr_r == dest_r else (1 if curr_r < dest_r else -1)
+        step_dir_c = 0 if curr_c == dest_c else (1 if curr_c < dest_c else -1)
         error = diff_c - diff_r
 
         # Scan from the monster's position, moving towards the player's location.
         while True:
             # Check if there is rock in the way
-            if (
-                dungeon.tmap[curr_r][curr_c] == dungeon.terrain.immrock
-                or dungeon.tmap[curr_r][curr_c] == dungeon.terrain.stdrock
-            ):
+            if dungeon.rmap[curr_r][curr_c] > 0:
                 # Rock is in the way; no line of sight, so return False.
                 return False
 
@@ -219,8 +217,8 @@ class monster(actor):
         curr_r, curr_c = player.get_pos()
         diff_r = abs(dest_r - curr_r)
         diff_c = abs(dest_c - curr_c)
-        step_dir_r = 1 if curr_r < dest_r else -1
-        step_dir_c = 1 if curr_c < dest_c else -1
+        step_dir_r = 0 if dest_r == curr_r else (1 if dest_r > curr_r else -1)
+        step_dir_c = 0 if dest_c == curr_c else (1 if dest_c > curr_c else -1)
         error = diff_c - diff_r
         # dist is to give the path a useful weight to use when deciding where to go
         dist = 0
@@ -234,7 +232,6 @@ class monster(actor):
 
             if curr_r == dest_r and curr_c == dest_c:
                 # Reached the monster's position; stop here
-                print("Straight path calculated")
                 break
 
             # Iterate towards the monster
@@ -246,7 +243,7 @@ class monster(actor):
             if e2 < diff_c:
                 error += diff_c
                 curr_r += step_dir_r
-            
+
             dist += 1
 
     # Handles an actor at a target location.
@@ -268,17 +265,14 @@ class monster(actor):
             delta_c = [-1, 0, 1, -1, 1, -1, 0, 1]
 
             # Attempt to randomly displace
-            for i in range(7):
+            for _ in range(8):
                 idx = random.randint(0, 7)
                 new_r = dest_r + delta_r[idx]
                 new_c = dest_c + delta_c[idx]
                 if (
                     (dungeon.valid_point(new_r, new_c))
                     and (actor_map[new_r][new_c] != None)
-                    and (
-                        dungeon.tmap[new_r][new_c] == dungeon.terrain.floor
-                        or dungeon.tmap[new_r][new_c] == dungeon.terrain.stair
-                    )
+                    and a._valid_pos(dungeon, new_r, new_c)
                 ):
                     # New point works; move the monster to the new positions
                     # Move the targeted monster
@@ -302,49 +296,10 @@ class monster(actor):
             # Done; return no damage dealt.
             return 0
 
-    # Monster moves in a random direction.
-    def _random_move(self, dungeon: dungeon.dungeon, actor_map: list):
-        # For now, the player just moves randomly.
-        move = self._move(random.randint(0, 7))
-        new_r, new_c = self.target_pos(move)
-        # Check that new position is valid for the monster to be at
-        # Repeat until this is the case
-        while not self._valid_pos(dungeon, new_r, new_c):
-            move = self._move(random.randint(0, 7))
-            new_r, new_c = self.target_pos(move)
-        # Move the monster, handeling whatever actor may be there
-        a = actor_map[new_r][new_c]
-        if a != None:
-            # Call the handler for targeting another actor
-            a = self._handle_target_actor(dungeon, actor_map, new_r, new_c)
-        else:
-            # Update the actor map + position information
-            actor_map[self.r][self.c] = None
-            actor_map[new_r][new_c] = self
-            self.r = new_r
-            self.c = new_c
-
-        # return targeted actor to allow combat messages
-        # For monster, this should always be the player character.
-        return a
-
-    # Monster moves based on its path.
-    def _path_move(self, dungeon: dungeon.dungeon, actor_map: list):
-        # Definine the min cost to be infinite to start
-        min_cost = float("inf")
-        minc_pt_idx = 0
-        # Find minimum cost point in surrounding 8
-        for pt_idx in range(7):
-            # Grabs the new point
-            new_r, new_c = self.target_pos(self._move(pt_idx))
-            if dungeon.valid_point(new_r, new_c):
-                if self.path[new_r][new_c] < min_cost:
-                    # Better, so overwrite minimum cost point
-                    min_cost = self.path[new_r][new_c]
-                    minc_pt_idx = pt_idx
-
-        # Now attempt to move to that minimum cost point
-        new_r, new_c = self.target_pos(self._move(minc_pt_idx))
+    # Handles moving monster, once target position found.
+    def _move_handeler(
+        self, dungeon: dungeon.dungeon, actor_map: list, new_r: int, new_c: int
+    ):
         # Move the monster, handling whatever actor may be there
         a = actor_map[new_r][new_c]
         if a != None:
@@ -374,6 +329,37 @@ class monster(actor):
                 self.r = new_r
                 self.c = new_c
 
+    # Monster moves in a random direction.
+    def _random_move(self, dungeon: dungeon.dungeon, actor_map: list):
+        move = self._move(random.randint(0, 7))
+        new_r, new_c = self.target_pos(move)
+        # Check that new position is valid for the monster to be at
+        # Repeat until this is the case
+        while not self._valid_pos(dungeon, new_r, new_c):
+            move = self._move(random.randint(0, 7))
+            new_r, new_c = self.target_pos(move)
+        self._move_handeler(dungeon, actor_map, new_r, new_c)
+
+    # Monster moves based on its path.
+    def _path_move(self, dungeon: dungeon.dungeon, actor_map: list):
+        # Definine the min cost to be infinite to start
+        min_cost = float("inf")
+        minc_pt_idx = None
+        # Find minimum cost point in surrounding 8
+        for pt_idx in range(8):
+            # Grabs the new point
+            new_r, new_c = self.target_pos(self._move(pt_idx))
+            if dungeon.valid_point(new_r, new_c):
+                cost = self.path[new_r][new_c]
+                if cost < min_cost:
+                    # Better, so overwrite minimum cost point
+                    min_cost = cost
+                    minc_pt_idx = pt_idx
+
+        # Now attempt to move to that minimum cost point
+        new_r, new_c = self.target_pos(self._move(minc_pt_idx))
+        self._move_handeler(dungeon, actor_map, new_r, new_c)
+
     # Updates the monster's path, depending on the attributes that it has.
     # Returns True on a successful path update, False otherwise.
     def _update_path(self, dungeon: dungeon.dungeon, player: player) -> bool:
@@ -393,7 +379,7 @@ class monster(actor):
                     return True
             else:
                 # Monster is intelligent, but not telepathic. Need to check for line of sight.
-                if self._has_pc_los:
+                if self._has_pc_los(dungeon, player):
                     # Has line of sight, so need to check which distance map monster should recieve a copy of.
                     # Also: Copy instead of direct assignment to emmulate 'memory' of last PC sighting.
                     if self.has_attribute(self._ATTR_TUNNEL_____):

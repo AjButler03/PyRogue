@@ -21,7 +21,7 @@ v03 ============================================================================
 06/16/2025
     - Finished writing 'correct' monster movement code; currently not working correctly
 06/17/2025
-    - Fixed straight line path monster movement; still bugs with attributes
+    - Fixed several bugs with monster path movement
 v02 ===========================================================================================================================
 05/31/2025
     - Start v02; update ChangeLog + README

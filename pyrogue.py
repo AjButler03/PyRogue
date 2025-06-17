@@ -80,6 +80,7 @@ def generate_monsters(dungeon, actor_map, monster_list, difficulty):
     while (monsterc < min_monsterc) or (attemptc < attempt_limit):
         # Create monster
         monster = actor.monster(random.randint(0, 15), 10)
+        # monster = actor.monster(1, 10)
         if monsterc <= min_monsterc or exp_chancetime(
             monsterc - min_monsterc, decay_rate
         ):
@@ -114,7 +115,7 @@ def turnloop(dungeon, pc, monster_list, actor_map):
             a.set_currturn(new_turn)
             pq.push(a, new_turn)
             if isinstance(a, actor.player):
-                print("Turn:", curr_turn)
+                # print("Turn:", curr_turn)
                 render_dungeon(dungeon, actor_map)
                 time.sleep(0.25)
 
@@ -126,7 +127,7 @@ def main():
     d.generate_dungeon()
     # Difficulty modifies the monster spawn rate
     # 0.25 => easy, 0.75 => normal, 1.25 => hard, 1.75 => very hard
-    difficulty = 0.25
+    difficulty = 0.75
 
     # Init actor map, storing where actors are relative to the dungeon
     actor_map = [[None] * d.width for _ in range(d.height)]
@@ -151,7 +152,7 @@ def main():
 
     turnloop(d, pc, monster_list, actor_map)
 
-    print("Player died; Game Over")
+    print("Game Over")
     render_dungeon(d, actor_map)
 
 
