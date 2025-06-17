@@ -18,6 +18,8 @@ v03 ============================================================================
     - Monsters now have a method to calculate a straightline path to the player character
 06/15/2025
     - Starting on monster path-based movement and setting up better combat management
+06/16/2025
+    - Finished writing 'correct' monster movement code; currently not working correctly
 v02 ===========================================================================================================================
 05/31/2025
     - Start v02; update ChangeLog + README
