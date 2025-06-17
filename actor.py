@@ -155,6 +155,8 @@ class monster(actor):
         self.turn = 0
         # Declare the monster as initially alive
         self.alive = True
+        # Declaring a character to represent this monster in the dungeon
+        self.char = 'M'
 
     # Returns True if the monster has the given attribute, False otherwise.
     def has_attribute(self, attr: int) -> bool:
@@ -177,12 +179,12 @@ class monster(actor):
 
     # Determines if the monster has a line of sight to the player; returns True if so, False otherwise.
     def _has_pc_los(self, dungeon: dungeon.dungeon, player: player) -> bool:
-        pc_r, pc_c = player.get_pos()
+        dest_r, dest_c = player.get_pos()
         curr_r, curr_c = self.get_pos()
-        diff_r = abs(pc_r - self.r)
-        diff_c = abs(pc_c - self.c)
-        step_dir_r = 1 if self.r < pc_r else -1
-        step_dir_c = 1 if self.c < pc_c else -1
+        diff_r = abs(dest_r - curr_r)
+        diff_c = abs(dest_c - curr_c)
+        step_dir_r = 1 if curr_r < dest_r else -1
+        step_dir_c = 1 if curr_c < dest_c else -1
         error = diff_c - diff_r
 
         # Scan from the monster's position, moving towards the player's location.
@@ -196,7 +198,7 @@ class monster(actor):
                 return False
 
             # Check if scan has reached the player
-            if curr_r == pc_r and curr_c == pc_c:
+            if curr_r == dest_r and curr_c == dest_c:
                 # Reached the player; so line of sight established and return True.
                 return True
 
@@ -215,14 +217,14 @@ class monster(actor):
         # Note: this method ignores if the monster is a tunneler or not.
         dest_r, dest_c = self.get_pos()
         curr_r, curr_c = player.get_pos()
-        diff_r = abs(dest_r - self.r)
-        diff_c = abs(dest_c - self.c)
-        step_dir_r = 1 if self.r < dest_r else -1
-        step_dir_c = 1 if self.c < dest_c else -1
+        diff_r = abs(dest_r - curr_r)
+        diff_c = abs(dest_c - curr_c)
+        step_dir_r = 1 if curr_r < dest_r else -1
+        step_dir_c = 1 if curr_c < dest_c else -1
         error = diff_c - diff_r
         # dist is to give the path a useful weight to use when deciding where to go
-        dist = 1
-        # Init path to 'infinite' weight at every point; slow, but prevents multiple paths overlapping if lOS broken and regained
+        dist = 0
+        # Init path to 'infinite' weight at every point; slow, but prevents multiple paths overlapping if LOS broken and regained
         self.path = [[float("inf")] * dungeon.width for _ in range(dungeon.height)]
 
         # Scan from the player's position, moving towards the monster's location.
@@ -232,16 +234,20 @@ class monster(actor):
 
             if curr_r == dest_r and curr_c == dest_c:
                 # Reached the monster's position; stop here
+                print("Straight path calculated")
                 break
 
+            # Iterate towards the monster
             e2 = 2 * error
             if e2 > -diff_r:
                 error -= diff_r
                 curr_c += step_dir_c
 
-            if e2 > -diff_c:
-                error -= diff_c
+            if e2 < diff_c:
+                error += diff_c
                 curr_r += step_dir_r
+            
+            dist += 1
 
     # Handles an actor at a target location.
     def _handle_target_actor(
@@ -330,7 +336,7 @@ class monster(actor):
         # Find minimum cost point in surrounding 8
         for pt_idx in range(7):
             # Grabs the new point
-            new_r, new_c = self.target_pos(pt_idx)
+            new_r, new_c = self.target_pos(self._move(pt_idx))
             if dungeon.valid_point(new_r, new_c):
                 if self.path[new_r][new_c] < min_cost:
                     # Better, so overwrite minimum cost point
@@ -338,7 +344,7 @@ class monster(actor):
                     minc_pt_idx = pt_idx
 
         # Now attempt to move to that minimum cost point
-        new_r, new_c = self.target_pos(minc_pt_idx)
+        new_r, new_c = self.target_pos(self._move(minc_pt_idx))
         # Move the monster, handling whatever actor may be there
         a = actor_map[new_r][new_c]
         if a != None:
@@ -347,11 +353,12 @@ class monster(actor):
         else:
             # Check if there is rock in the way
             if dungeon.rmap[new_r][new_c] != 0:
+                hardness = dungeon.rmap[new_r][new_c]
                 if self.has_attribute(self._ATTR_TUNNEL_____):
                     # Bore rock
-                    new_hardness = max(0, dungeon.rmap[new_r][new_c] - 86)
-                    dungeon.rmap[new_r][new_c] = new_hardness
-                if new_hardness < 1 or self.has_attribute(self._ATTR_PASS_______):
+                    hardness = max(0, hardness - 86)
+                    dungeon.rmap[new_r][new_c] = hardness
+                if hardness < 1 or self.has_attribute(self._ATTR_PASS_______):
                     # Rock has been cleared and/or monster can pass through
                     dungeon.tmap[new_r][new_c] = dungeon.terrain.floor
                     # Update the actor map + position information

@@ -19,7 +19,37 @@ def render_dungeon(dungeon, actor_map):
                 if isinstance(actor_inst, actor.player):
                     print("\033[34m@\033[0m", end="")
                 else:
-                    print("\033[31mM\033[0m", end="")
+                    # This is an ugly print statement which easily shows attribute combinations for monsters.
+                    # Eventually, monsters will have more unique symbols.
+                    attr = actor_inst.attributes
+                    if 0 <= attr < 10:
+                        print("\033[31m", end="")
+                        print(attr, end="")
+                        print("\033[0m", end="")
+                    elif attr == 10:
+                        print("\033[31m", end="")
+                        print("A", end="")
+                        print("\033[0m", end="")
+                    elif attr == 11:
+                        print("\033[31m", end="")
+                        print("B", end="")
+                        print("\033[0m", end="")
+                    elif attr == 12:
+                        print("\033[31m", end="")
+                        print("C", end="")
+                        print("\033[0m", end="")
+                    elif attr == 13:
+                        print("\033[31m", end="")
+                        print("D", end="")
+                        print("\033[0m", end="")
+                    elif attr == 14:
+                        print("\033[31m", end="")
+                        print("E", end="")
+                        print("\033[0m", end="")
+                    elif attr == 15:
+                        print("\033[31m", end="")
+                        print("F", end="")
+                        print("\033[0m", end="")
             elif t_type == dungeon.terrain.floor:
                 print(".", end="")
             elif t_type == dungeon.terrain.stair:
@@ -42,14 +72,14 @@ def generate_monsters(dungeon, actor_map, monster_list, difficulty):
     min_monsterc = max(1, attempt_limit // 10)
     # Adjust exp_chancetime's decay curve to increase additional monster probability with difficulty
     decay_rate = 0.95 / (difficulty + 0.5)
-    print("Min # Monsters:", min_monsterc)
-    print("Monster Placement Attempt Limit:", attempt_limit)
-    print("New Decay Rate:", decay_rate)
+    # print("Min # Monsters:", min_monsterc)
+    # print("Monster Placement Attempt Limit:", attempt_limit)
+    # print("New Decay Rate:", decay_rate)
 
     # Generate monsters; runs until minimum number and attempt limit are met
     while (monsterc < min_monsterc) or (attemptc < attempt_limit):
         # Create monster
-        monster = actor.monster(0, 10)
+        monster = actor.monster(random.randint(0, 15), 10)
         if monsterc <= min_monsterc or exp_chancetime(
             monsterc - min_monsterc, decay_rate
         ):
@@ -62,7 +92,7 @@ def generate_monsters(dungeon, actor_map, monster_list, difficulty):
                 monsterc += 1
                 monster_list.append(monster)
         attemptc += 1
-    print("Monsters placed:", monsterc)
+    # print("Monsters placed:", monsterc)
 
 
 # Handles the main turnloop for the game, discrete-event simulation style.
@@ -77,16 +107,16 @@ def turnloop(dungeon, pc, monster_list, actor_map):
     while len(pq) > 1 and pc.is_alive():
         _, a = pq.pop()
         # Double check that actor has not died; If it has, ignore and move on
-        if a.is_alive():    
+        if a.is_alive():
             a.handle_turn(dungeon, actor_map, pc)
-            new_turn = a.get_currturn() + 10
+            curr_turn = a.get_currturn()
+            new_turn = curr_turn + 10
             a.set_currturn(new_turn)
             pq.push(a, new_turn)
             if isinstance(a, actor.player):
+                print("Turn:", curr_turn)
                 render_dungeon(dungeon, actor_map)
                 time.sleep(0.25)
-    render_dungeon(dungeon, actor_map)
-    
 
 
 def main():
@@ -120,6 +150,9 @@ def main():
     render_dungeon(d, actor_map)
 
     turnloop(d, pc, monster_list, actor_map)
+
+    print("Player died; Game Over")
+    render_dungeon(d, actor_map)
 
 
 if __name__ == "__main__":
