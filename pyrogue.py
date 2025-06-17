@@ -17,7 +17,9 @@ def render_dungeon(dungeon, actor_map):
                 actor_inst = actor_map[r][c]
                 # Check object type
                 if isinstance(actor_inst, actor.player):
-                    print("\033[34m@\033[0m", end="")
+                    print("\033[34m", end="")
+                    print(actor_inst.get_char(), end="")
+                    print("\033[0m", end="")
                 else:
                     # This is an ugly print statement which easily shows attribute combinations for monsters.
                     # Eventually, monsters will have more unique symbols.
