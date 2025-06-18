@@ -11,9 +11,9 @@ import dungeon
 class actor(abc.ABC):
 
     # Coordinate deltas for 8 surrounding points of a given point.
-    # up_left, up, up_right, left, right, down_left, down, down_right
-    _delta_r = [-1, -1, -1, 0, 0, 1, 1, 1]
-    _delta_c = [-1, 0, 1, -1, 1, -1, 0, 1]
+    # up_left, up, up_right, left, right, down_left, down, down_right, none
+    _delta_r = [-1, -1, -1, 0, 0, 1, 1, 1, 0]
+    _delta_c = [-1, 0, 1, -1, 1, -1, 0, 1, 0]
 
     # Enum to define moves, whose values correspond to the move's idx in the coordinate deltas
     class _move(Enum):
@@ -393,6 +393,11 @@ class monster(actor):
                     # Better, so overwrite minimum cost point
                     min_cost = cost
                     minc_pt_idx = pt_idx
+        
+        # Error handeling; In theory, this shouldn't happen. My logic is broken somewhere such that this is an incredibly rare problem.
+        if minc_pt_idx == None:
+            # No min cost point was found; so don't move anywhere.
+            minc_pt_idx = 8
 
         # Now attempt to move to that minimum cost point
         new_r, new_c = self.target_pos(self._move(minc_pt_idx))

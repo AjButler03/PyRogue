@@ -2,8 +2,10 @@ import dungeon
 import actor
 import random
 import time
+import tkinter as tk
 from utility import exp_chancetime
 from utility import PriorityQueue
+from pyrogue_ui import dungeon_ui
 
 # This is the main game file. Run This one.
 
@@ -101,7 +103,7 @@ def turnloop(dungeon, pc, monster_list, actor_map):
 
 
 def main():
-    h = 20
+    h = 40
     w = 80
     d = dungeon.dungeon(h, w)
     d.generate_dungeon()
@@ -113,27 +115,32 @@ def main():
     actor_map = [[None] * d.width for _ in range(d.height)]
 
     # Create player character
-    pc = actor.player()
+    # pc = actor.player()
 
     # Place pc into the dungeon
-    while not pc.init_pos(
-        d, actor_map, random.randint(1, h - 2), random.randint(1, w - 2)
-    ):
-        continue
+    # while not pc.init_pos(
+    #     d, actor_map, random.randint(1, h - 2), random.randint(1, w - 2)
+    # ):
+    #     continue
 
-    pc_r, pc_c = pc.get_pos()
-    d.calc_dist_maps(pc_r, pc_c)
+    # pc_r, pc_c = pc.get_pos()
+    # d.calc_dist_maps(pc_r, pc_c)
 
     # Generate the monsters
-    monster_list = []
-    generate_monsters(d, actor_map, monster_list, difficulty)
+    # monster_list = []
+    # generate_monsters(d, actor_map, monster_list, difficulty)
 
-    render_dungeon(d, actor_map)
+    # render_dungeon(d, actor_map)
 
-    turnloop(d, pc, monster_list, actor_map)
+    # turnloop(d, pc, monster_list, actor_map)
 
-    print("Game Over")
-    render_dungeon(d, actor_map)
+    # print("Game Over")
+    # render_dungeon(d, actor_map)
+    
+    root = tk.Tk()
+    root.title("Dungeon render test")
+    ui = dungeon_ui(root, d)
+    root.mainloop()
 
 
 if __name__ == "__main__":
