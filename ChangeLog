@@ -1,6 +1,9 @@
 v04 ===========================================================================================================================
 06/17/2025
     - Added error checking where no optimal move based on path found; now results in no move instead of crash
+06/18/2025
+    - Created a dungeon render using tkinter library
+    - Implemented custom scaling of dungeon render, so user can quickly adjust window size
 v03 ===========================================================================================================================
 06/04/2025
     - Start v03; update ChangeLog + README
