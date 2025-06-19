@@ -6,6 +6,9 @@ v04 ============================================================================
     - Implemented custom scaling of dungeon render, so user can quickly adjust window size
     - Refactored code to create pyrogue_game class, which will handle game logic.
     - Updated pyrogue_game renderer to include actors + display automated turnloop
+06/19/2025
+    - Refactored turnloop to allow tkinter's mainloop to update in between turns; this fixed dynamic scaling while loop running
+    - Renamed classes to be capitalized
 v03 ===========================================================================================================================
 06/04/2025
     - Start v03; update ChangeLog + README

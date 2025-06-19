@@ -2,13 +2,13 @@ import random
 import abc
 import copy
 from enum import Enum
-import dungeon
+from dungeon import *
 
 # This file contains the class information for the Actor class and its children, the player and monster classes.
 
 
 # This is the generic actor class to be used in the general turn loop.
-class actor(abc.ABC):
+class Actor(abc.ABC):
 
     # Coordinate deltas for 8 surrounding points of a given point.
     # up_left, up, up_right, left, right, down_left, down, down_right, none
@@ -29,9 +29,7 @@ class actor(abc.ABC):
 
     # This method is to initialize the position of the actor within the dungeon, verifying the location as valid.
     # Returns True on successful placement, False otherwise.
-    def init_pos(
-        self, dungeon: dungeon.dungeon, actor_map: list, r: int, c: int
-    ) -> bool:
+    def init_pos(self, dungeon: Dungeon, actor_map: list, r: int, c: int) -> bool:
         if (
             dungeon.valid_point(r, c)
             and dungeon.rmap[r][c] == 0
@@ -74,7 +72,7 @@ class actor(abc.ABC):
 
     # Handles the turn for the actor.
     @abc.abstractmethod
-    def handle_turn(self, dungeon: dungeon.dungeon, actor_map: list, player):
+    def handle_turn(self, dungeon: Dungeon, actor_map: list, player):
         pass
 
     # Returns the row, column coordinate of where the actor is attempting to move to.
@@ -83,7 +81,7 @@ class actor(abc.ABC):
 
 
 # This is the class for the player character and its turn/movement methods.
-class player(actor):
+class Player(Actor):
 
     # Player constructor
     def __init__(self):
@@ -101,23 +99,21 @@ class player(actor):
         self.char = "@"
 
     # Determines if the player can be at this position.
-    def _valid_pos(self, dungeon: dungeon.dungeon, r: int, c: int) -> bool:
+    def _valid_pos(self, dungeon: Dungeon, r: int, c: int) -> bool:
         if dungeon.valid_point(r, c) and dungeon.rmap[r][c] == 0:
             return True
         else:
             return False
 
     # Forces the player into this position. Does not check that position is 'valid'.
-    def _force_pos_update(
-        self, dungeon: dungeon.dungeon, actor_map: list, r: int, c: int
-    ):
+    def _force_pos_update(self, dungeon: Dungeon, actor_map: list, r: int, c: int):
         actor_map[self.r][self.c] = None
         actor_map[r][c] = self
         self.r = r
         self.c = c
 
     # Turn handler for the player.
-    def handle_turn(self, dungeon: dungeon.dungeon, actor_map: list, player):
+    def handle_turn(self, dungeon: Dungeon, actor_map: list, player):
         # For now, the player just moves randomly.
         move = self._move(random.randint(0, 7))
         new_r, new_c = self.target_pos(move)
@@ -145,7 +141,7 @@ class player(actor):
 
 
 # This is the class for monsters and their turn/movement methods.
-class monster(actor):
+class Monster(Actor):
     # A monster can have any number of attributes. I will be indicating these using a bit field.
     # For v03, only the first 4 will be fully implemented. The others will come later, if I decide to do them at all.
     _ATTR_INTELLIGENT = 0b0000_0000_0000_0001  # Bit 1 (0000 0000 0000 0001)
@@ -201,7 +197,7 @@ class monster(actor):
         self.attributes |= attr
 
     # Determines if the monster can be at this position.
-    def _valid_pos(self, dungeon: dungeon.dungeon, r: int, c: int):
+    def _valid_pos(self, dungeon: Dungeon, r: int, c: int):
         if dungeon.valid_point(r, c):
             if (
                 dungeon.rmap[r][c] == 0
@@ -212,7 +208,7 @@ class monster(actor):
         return False
 
     # Determines if the monster has a line of sight to the player; returns True if so, False otherwise.
-    def _has_pc_los(self, dungeon: dungeon.dungeon, player: player) -> bool:
+    def _has_pc_los(self, dungeon: Dungeon, player: Player) -> bool:
         dest_r, dest_c = player.get_pos()
         curr_r, curr_c = self.get_pos()
         diff_r = abs(dest_r - curr_r)
@@ -244,7 +240,7 @@ class monster(actor):
                 curr_r += step_dir_r
 
     # Calculates a straightline path to the player character.
-    def _calc_straight_path(self, dungeon: dungeon.dungeon, player: player):
+    def _calc_straight_path(self, dungeon: Dungeon, player: Player):
         # Note: this method ignores if the monster is a tunneler or not.
         dest_r, dest_c = self.get_pos()
         curr_r, curr_c = player.get_pos()
@@ -281,11 +277,11 @@ class monster(actor):
 
     # Handles an actor at a target location.
     def _handle_target_actor(
-        self, dungeon: dungeon.dungeon, actor_map: list, dest_r: int, dest_c: int
+        self, dungeon: Dungeon, actor_map: list, dest_r: int, dest_c: int
     ) -> int:
         # First determine if the targeted actor is a monster or the player character.
         a = actor_map[dest_r][dest_c]
-        if isinstance(a, player):
+        if isinstance(a, Player):
             # Attack player
             # For now, this is just an instant kill.
             a.kill()
@@ -330,9 +326,7 @@ class monster(actor):
             return 0
 
     # Handles moving monster, once target position found.
-    def _move_handeler(
-        self, dungeon: dungeon.dungeon, actor_map: list, new_r: int, new_c: int
-    ):
+    def _move_handeler(self, dungeon: Dungeon, actor_map: list, new_r: int, new_c: int):
         # Move the monster, handling whatever actor may be there
         a = actor_map[new_r][new_c]
         if a != None:
@@ -349,7 +343,7 @@ class monster(actor):
                     dungeon.rmap[new_r][new_c] = hardness
                 if hardness < 1 or self.has_attribute(self._ATTR_PASS_______):
                     # Rock has been cleared and/or monster can pass through
-                    dungeon.tmap[new_r][new_c] = dungeon.terrain.floor
+                    dungeon.tmap[new_r][new_c] = dungeon.Terrain.floor
                     # Update the actor map + position information
                     actor_map[self.r][self.c] = None
                     actor_map[new_r][new_c] = self
@@ -366,7 +360,7 @@ class monster(actor):
         return a, dmg
 
     # Monster moves in a random direction.
-    def _random_move(self, dungeon: dungeon.dungeon, actor_map: list):
+    def _random_move(self, dungeon: Dungeon, actor_map: list):
         move = self._move(random.randint(0, 7))
         new_r, new_c = self.target_pos(move)
         # Check that new position is valid for the monster to be at
@@ -379,7 +373,7 @@ class monster(actor):
         return a, dmg
 
     # Monster moves based on its path.
-    def _path_move(self, dungeon: dungeon.dungeon, actor_map: list):
+    def _path_move(self, dungeon: Dungeon, actor_map: list):
         # Definine the min cost to be infinite to start
         min_cost = float("inf")
         minc_pt_idx = None
@@ -407,7 +401,7 @@ class monster(actor):
 
     # Updates the monster's path, depending on the attributes that it has.
     # Returns True on a successful path update, False otherwise.
-    def _update_path(self, dungeon: dungeon.dungeon, player: player) -> bool:
+    def _update_path(self, dungeon: Dungeon, player: Player) -> bool:
         # Check if monster is intelligent
         if self.has_attribute(self._ATTR_INTELLIGENT):
             # Check if monster is a telepath
@@ -447,7 +441,7 @@ class monster(actor):
         return False
 
     # Turn handler for this monster.
-    def handle_turn(self, dungeon: dungeon.dungeon, actor_map: list, player):
+    def handle_turn(self, dungeon: Dungeon, actor_map: list, player):
         # Update the monster's path.
         if self._update_path(dungeon, player):
             if self.has_attribute(self._ATTR_ERRATIC____) and random.randint(0, 1) > 0:

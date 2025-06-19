@@ -13,10 +13,10 @@ min_room_w = 4
 max_rock_hardness = 255
 
 
-class dungeon:
+class Dungeon:
 
     # Enum to dictate the terrain types of a dungeon
-    class terrain(Enum):
+    class Terrain(Enum):
         debug = 0
         floor = 1
         stair = 2
@@ -24,7 +24,7 @@ class dungeon:
         immrock = 4
 
     # Classes to store individual room information
-    class room:
+    class Room:
         # Room Constructor
         def __init__(self, origin_r, origin_c, rsize_h, rsize_w):
             self.origin_r = origin_r
@@ -33,7 +33,7 @@ class dungeon:
             self.rsize_w = rsize_w
 
     # Class to store individual staircase information
-    class staircase:
+    class Staircase:
         # Staircase Constructor
         def __init__(self, r, c):
             self.r = r
@@ -42,7 +42,7 @@ class dungeon:
             self.direction = True
 
     # Simple class to queue different points in Dijkstra's algorithm
-    class dpoint:
+    class Dpoint:
         def __init__(self, r, c, w):
             self.r = r
             self.c = c
@@ -72,7 +72,7 @@ class dungeon:
         # Declaring the rock hardness map (used in terrain generation, pathfinding calculations)
         self.rmap = [[0] * self.width for _ in range(self.height)]
         # Declaring the terrain map for the dungeon
-        self.tmap = [[self.terrain.debug] * self.width for _ in range(self.height)]
+        self.tmap = [[self.Terrain.debug] * self.width for _ in range(self.height)]
         # Declare walking and tunneling distance maps used in monster pathfinding
         self.walk_distmap = [[float("inf")] * self.width for _ in range(self.height)]
         self.tunn_distmap = [[float("inf")] * self.width for _ in range(self.height)]
@@ -91,7 +91,7 @@ class dungeon:
         last_r = r + room.rsize_h
         last_c = c + room.rsize_w
 
-        if self.tmap[r][c] == self.terrain.floor:
+        if self.tmap[r][c] == self.Terrain.floor:
             # Room origin conflicts with another room
             return False
 
@@ -106,16 +106,16 @@ class dungeon:
                     # Out of bounds
                     return False
                 elif (
-                    tmap_copy[r + 1][c] == self.terrain.floor
-                    or tmap_copy[r][c + 1] == self.terrain.floor
-                    or tmap_copy[room.origin_r - 1][c] == self.terrain.floor
-                    or tmap_copy[r][room.origin_c - 1] == self.terrain.floor
+                    tmap_copy[r + 1][c] == self.Terrain.floor
+                    or tmap_copy[r][c + 1] == self.Terrain.floor
+                    or tmap_copy[room.origin_r - 1][c] == self.Terrain.floor
+                    or tmap_copy[r][room.origin_c - 1] == self.Terrain.floor
                 ):
                     # Room is either going to be adjacent to another room, or run into another room
                     return False
                 else:
                     # Claim as room cell on dungeon maps
-                    tmap_copy[r][c] = self.terrain.floor
+                    tmap_copy[r][c] = self.Terrain.floor
                     rmap_copy[r][c] = 0
                 c += 1
             r += 1
@@ -129,9 +129,9 @@ class dungeon:
     def _place_stair(self, staircase):
         if (
             self.valid_point(staircase.r, staircase.c)
-            and self.tmap[staircase.r][staircase.c] == self.terrain.floor
+            and self.tmap[staircase.r][staircase.c] == self.Terrain.floor
         ):
-            self.tmap[staircase.r][staircase.c] = self.terrain.stair
+            self.tmap[staircase.r][staircase.c] = self.Terrain.stair
             return True
         else:
             return False
@@ -182,7 +182,7 @@ class dungeon:
         pmap = {}
 
         # Initialize starting point
-        start = self.dpoint(r1, c1, 0)
+        start = self.Dpoint(r1, c1, 0)
         pq.push(start, 0)
         pmap[(r1, c1)] = start
 
@@ -203,8 +203,8 @@ class dungeon:
                 # Reached destination; trace back path
                 p = curr
                 while p and (p.r != r1 or p.c != c1):
-                    if self.tmap[p.r][p.c] == self.terrain.debug:
-                        self.tmap[p.r][p.c] = self.terrain.floor
+                    if self.tmap[p.r][p.c] == self.Terrain.debug:
+                        self.tmap[p.r][p.c] = self.Terrain.floor
                         self.rmap[p.r][p.c] = 0
                     p = p.prev
                 return
@@ -223,7 +223,7 @@ class dungeon:
                 # Evaluate neighbor point
                 if neighbor is None:
                     # Ungenerated in pmap, so creating and pushing to queue
-                    neighbor = self.dpoint(nr, nc, new_dist)
+                    neighbor = self.Dpoint(nr, nc, new_dist)
                     neighbor.prev = curr
                     pmap[(nr, nc)] = neighbor
                     pq.push(neighbor, new_dist)
@@ -241,10 +241,9 @@ class dungeon:
         attempt_limit = max(self.width, self.height) * 10
         # print(attempt_limit, "attempt limit on room placement")
         min_roomc = max(1, attempt_limit // 100)  # arbitrary; at least a few
-        # print(min_roomc, "Minimum rooms")
         # Attempts either self.width or self.height times, whichever is smaller
         while (self.roomc < min_roomc) or (attemptc < attempt_limit):
-            new_room = self.room(
+            new_room = self.Room(
                 (random.randint(1, self.height - 1)),
                 (random.randint(1, self.width - 1)),
                 (random.randint(min_room_h, self.height // 2)),
@@ -257,8 +256,16 @@ class dungeon:
                     self.roomc += 1
                     self.room_list.append(new_room)
             attemptc += 1
-        # print(attemptc, "Room placement attempts made")
-        # print(len(self.room_list), "Rooms successfully placed")
+
+        print(
+            "ROOMS:",
+            min_roomc,
+            "Min rooms, ",
+            attemptc,
+            "Placement attempts,",
+            self.roomc,
+            "Placed",
+        )
 
         # Now create corridors between rooms
         for i in range(len(self.room_list)):
@@ -280,7 +287,7 @@ class dungeon:
         min_stairc = max(1, self.roomc // 2)
         attemptc = 0
         while (self.stairc < min_stairc) or (attemptc < attempt_limit):
-            stair = self.staircase(
+            stair = self.Staircase(
                 random.randint(1, self.height - 1), random.randint(1, self.width - 1)
             )
             if self.stairc <= min_stairc:
@@ -291,15 +298,24 @@ class dungeon:
                     self.stairc += 1
             # self.stairc += 1 # Remove line when staircase placement is actually implemented
             attemptc += 1
+        print(
+            "STAIRS:",
+            min_stairc,
+            "Min stairs,",
+            attemptc,
+            "Placement attempts,",
+            self.stairc,
+            "Placed",
+        )
 
         # Fill in remaining terrain as rock
         for r in range(self.height):
             for c in range(self.width):
                 if self.valid_point(r, c):
-                    if self.tmap[r][c] == self.terrain.debug:
-                        self.tmap[r][c] = self.terrain.stdrock
+                    if self.tmap[r][c] == self.Terrain.debug:
+                        self.tmap[r][c] = self.Terrain.stdrock
                 else:
-                    self.tmap[r][c] = self.terrain.immrock
+                    self.tmap[r][c] = self.Terrain.immrock
 
     # Calculates distance from point via walking using Dijkstra's algorithm.
     def _calc_walk_distmap(self, r, c):
@@ -308,7 +324,7 @@ class dungeon:
         pmap = {}
 
         # Initialize starting point
-        start = self.dpoint(r, c, 0)
+        start = self.Dpoint(r, c, 0)
         self.walk_distmap[r][c] = 0
         pq.push(start, 0)
         pmap[(r, c)] = start
@@ -343,7 +359,7 @@ class dungeon:
                 # Evaluate neighbor point
                 if neighbor is None:
                     # Ungenerated in pmap, so creating and pushing to queue
-                    neighbor = self.dpoint(nr, nc, new_dist)
+                    neighbor = self.Dpoint(nr, nc, new_dist)
                     neighbor.prev = curr
                     pmap[(nr, nc)] = neighbor
                     self.walk_distmap[nr][nc] = new_dist
@@ -362,7 +378,7 @@ class dungeon:
         pmap = {}
 
         # Initialize starting point
-        start = self.dpoint(r, c, 0)
+        start = self.Dpoint(r, c, 0)
         self.tunn_distmap[r][c] = 0
         pq.push(start, 0)
         pmap[(r, c)] = start
@@ -394,7 +410,7 @@ class dungeon:
                 # Evaluate neighbor point
                 if neighbor is None:
                     # Ungenerated in pmap, so creating and pushing to queue
-                    neighbor = self.dpoint(nr, nc, new_dist)
+                    neighbor = self.Dpoint(nr, nc, new_dist)
                     neighbor.prev = curr
                     pmap[(nr, nc)] = neighbor
                     self.tunn_distmap[nr][nc] = new_dist
@@ -411,13 +427,13 @@ class dungeon:
         for r in range(self.height):
             for c in range(self.width):
                 t_type = self.tmap[r][c]
-                if t_type == self.terrain.floor:
+                if t_type == self.Terrain.floor:
                     print(".", end="")
-                elif t_type == self.terrain.stair:
+                elif t_type == self.Terrain.stair:
                     print("<", end="")
-                elif t_type == self.terrain.stdrock:
+                elif t_type == self.Terrain.stdrock:
                     print(" ", end="")
-                elif t_type == self.terrain.immrock:
+                elif t_type == self.Terrain.immrock:
                     print("X", end="")  # will want to be a proper border later
                 else:
                     print("!", end="")  # issue flag
