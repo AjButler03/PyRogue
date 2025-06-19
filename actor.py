@@ -59,7 +59,7 @@ class actor(abc.ABC):
     # Returns the character representation of the actor.
     def get_char(self) -> str:
         return self.char
-    
+
     # Sets the current turn of the given actor.
     def set_currturn(self, turn: int):
         self.turn = turn
@@ -393,7 +393,7 @@ class monster(actor):
                     # Better, so overwrite minimum cost point
                     min_cost = cost
                     minc_pt_idx = pt_idx
-        
+
         # Error handeling; In theory, this shouldn't happen. My logic is broken somewhere such that this is an incredibly rare problem.
         if minc_pt_idx == None:
             # No min cost point was found; so don't move anywhere.

@@ -1,10 +1,11 @@
 import tkinter as tk
-from dungeon import *
-from actor import *
+from time import sleep
 from utility import *
+from actor import *
+from dungeon import *
 
 
-# This file handles the tkinker user interface for the the game. Consequently, it also handles much of the high-level game logic.
+# This file handles the main gameloop and the vast majority of the tkinter user interface for PyRogue.
 class pyrogue_game:
 
     # Populates the actor_map with a dungeon size proportionate number of monsters.
@@ -40,7 +41,7 @@ class pyrogue_game:
     # Dungeon is size_h * size_w, difficulty modifies monster spawn rates.
     def init_generated_game(self):
         # Init dungeon
-        self.dungeon = dungeon.dungeon(self.mapsize_h, self.mapsize_w)
+        self.dungeon = dungeon(self.mapsize_h, self.mapsize_w)
         self.dungeon.generate_dungeon()
 
         # Init actor map
@@ -86,6 +87,7 @@ class pyrogue_game:
         self.player = None
         self.actor_map = []
         self.root = root
+        self.fontsize = 12
         if generate:
             # Ideally I'll take input for game size beforehand.
             self.init_generated_game()
@@ -98,6 +100,11 @@ class pyrogue_game:
         self.resize_event = None
         self.root.bind("<Configure>", self.on_resize)
 
+        # For handeling keyboard input
+        self.root.bind("<Key>", self.on_key_press)
+        self.key_pressed = False
+
+    # Event handeler for screen resizing.
     def on_resize(self, event):
         # Save the event for redrawing
         self.resize_event = event
@@ -109,18 +116,29 @@ class pyrogue_game:
         # schedule a redraw for 50ms from now
         self.resize_id = self.root.after(100, self._rerender_dungeon)
 
+    # Event handeler for keyboard input
+    def on_key_press(self, event):
+        print(f"Key pressed: {event.keysym}")
+        if not self.key_pressed:
+            self.key_pressed = True
+            self.turnloop()
+            self.render_dungeon(self.scrsize_w, self.scrsize_h)
+
+    # Error handeling for screen resizing event handeler.
     def _rerender_dungeon(self):
         if self.resize_event == None:
             return
 
         event = self.resize_event
-        self.canvas.delete("all")
         self.render_dungeon(event.width, event.height)
 
+    # Renders the dungeon to the screen canvas.
     def render_dungeon(self, width, height):
+        self.canvas.delete("all")  # Clear canvas
         max_tile_width = width // self.dungeon.width
         max_tile_height = height // (self.dungeon.height + 3)
         tile_size = min(max_tile_width, max_tile_height)
+        self.fontsize = int(tile_size / 1.5)
 
         # For properly centering the dungeon
         x_offset = (width - tile_size * self.dungeon.width) // 2
@@ -130,17 +148,27 @@ class pyrogue_game:
             for col, char in enumerate(line):
                 x = col * tile_size + x_offset
                 y = row * tile_size + y_offset
-                terrain = self.dungeon.tmap[row][col]
-                if terrain == self.dungeon.terrain.floor:
-                    char = "."
-                elif terrain == self.dungeon.terrain.stair:
-                    char = ">"
-                elif terrain == self.dungeon.terrain.stdrock:
-                    char = " "
-                elif terrain == self.dungeon.terrain.immrock:
-                    char = "X"
+                if self.actor_map[row][col] != None:
+                    actor = self.actor_map[row][col]
+                    char = actor.get_char()
+                    # Check actor type for color; later this will be unique to monster types
+                    if isinstance(actor, player):
+                        color = "gold"
+                    else:
+                        color = "red"
                 else:
-                    char = "!"
+                    color = "white"
+                    terrain = self.dungeon.tmap[row][col]
+                    if terrain == self.dungeon.terrain.floor:
+                        char = "."
+                    elif terrain == self.dungeon.terrain.stair:
+                        char = ">"
+                    elif terrain == self.dungeon.terrain.stdrock:
+                        char = " "
+                    elif terrain == self.dungeon.terrain.immrock:
+                        char = "X"
+                    else:
+                        char = "!"
                 self.canvas.create_rectangle(
                     x, y, x + tile_size, y + tile_size, fill="black", outline=""
                 )
@@ -148,6 +176,37 @@ class pyrogue_game:
                     x + tile_size // 2,
                     y + tile_size // 2,
                     text=char,
-                    fill="white",
-                    font=("Consolas", int(tile_size / 1.5)),
+                    fill=color,
+                    font=("Consolas", self.fontsize),
                 )
+        # Force updates the canvas. Maybe suboptimal.
+        self.canvas.update()
+
+    # Handles the main turnloop for the game, discrete-event simulation style.
+    def turnloop(self):
+        # Create priorityqueue, starting player with turn 0 and monsters with 10 (player goes first)
+        pq = PriorityQueue()
+        pq.push(self.player, 0)
+        for monster in self.monster_list:
+            monster.set_currturn(10)
+            pq.push(monster, 10)
+
+        while len(pq) > 1 and self.player.is_alive():
+            _, a = pq.pop()
+            # Double check that actor has not died; If it has, ignore and move on
+            if a.is_alive():
+                targ_a, dmg_dealt = a.handle_turn(
+                    self.dungeon, self.actor_map, self.player
+                )
+                curr_turn = a.get_currturn()
+                new_turn = curr_turn + a.get_speed()
+                a.set_currturn(new_turn)
+                pq.push(a, new_turn)
+                if isinstance(a, player):
+                    # if targ_a != None:
+                    #     print("You Killed a", targ_a.get_char())
+                    self.render_dungeon(self.scrsize_w, self.scrsize_h)
+                    # Wait 5000ms to show updated render
+                    self.root.after(500000, lambda: None)
+                # elif isinstance(targ_a, actor.player):
+                #     print("a", a.get_char(), "killed you")
