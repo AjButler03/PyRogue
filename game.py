@@ -53,7 +53,11 @@ class Pyrogue_Game:
         self.canvas = tk.Canvas(root, width=scrsize_w, height=scrsize_h, bg="black")
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
-        # For handeling window resizes
+        # Init some fields related to rendering
+        self.need_full_rerender = True
+        self.render_cache = (
+            {}
+        )  # {(row, col): (char, color)}. Stores last updated render info.
         self.resize_id = None
         self.resize_event = None
         self.root.bind("<Configure>", self._on_win_resize)
@@ -158,16 +162,14 @@ class Pyrogue_Game:
             success = self._handle_player_input(key)
             if success:
                 self.awaiting_player_input = False
-                print("Player input valid")
+                print("Input Process Success")
                 # Requeue player
-                new_turn = (self.player.get_currturn() + self.player.get_speed())
-                self.turn_pq.push(
-                    self.player, new_turn
-                )
+                new_turn = self.player.get_currturn() + self.player.get_speed()
+                self.turn_pq.push(self.player, new_turn)
                 self.player.set_currturn(new_turn)
                 self.root.after(10, self._next_turn)
             else:
-                print("invalid input")
+                print("Input Invalid")
         else:
             return
 
@@ -203,57 +205,106 @@ class Pyrogue_Game:
         event = self.resize_event
         self.scrsize_h = event.height
         self.scrsize_w = event.width
+        self.need_full_rerender = True
         self.render_dungeon(self.scrsize_w, self.scrsize_h)
 
     # Renders the dungeon to the screen canvas.
     def render_dungeon(self, width, height):
-        self.canvas.delete("all")  # Clear canvas
         max_tile_width = width // self.dungeon.width
         max_tile_height = height // (self.dungeon.height + 3)
         tile_size = min(max_tile_width, max_tile_height)
         self.fontsize = int(tile_size / 1.5)
 
-        # For properly centering the dungeon
         x_offset = (width - tile_size * self.dungeon.width) // 2
-        y_offset = tile_size * 2
+        y_offset = 0  # No vertical offset
 
-        for row, line in enumerate(self.dungeon.tmap):
-            for col, char in enumerate(line):
-                x = col * tile_size + x_offset
-                y = row * tile_size + y_offset
-                if self.actor_map[row][col] != None:
+        if self.need_full_rerender:
+            self.render_cache.clear()
+
+            # Calculate dungeon bounds in pixels
+            dungeon_left = x_offset + (tile_size // 2)
+            dungeon_top = y_offset + (tile_size // 2)
+            dungeon_right = dungeon_left + (self.dungeon.width - 1) * tile_size
+            dungeon_bottom = dungeon_top + (self.dungeon.height - 1) * tile_size
+
+            # Optional: delete previous border if re-rendering
+            self.canvas.delete("dungeon_border")
+
+            # Draw thin gray border
+            self.canvas.create_rectangle(
+                dungeon_left,
+                dungeon_top,
+                dungeon_right,
+                dungeon_bottom,
+                outline="white",
+                width=tile_size // 4,
+                tag="dungeon_border",
+            )
+            self.need_full_rerender = False
+
+        for row in range(self.dungeon.height):
+            for col in range(self.dungeon.width):
+                is_border_tile = (
+                    row == 0
+                    or col == 0
+                    or row == self.dungeon.height - 1
+                    or col == self.dungeon.width - 1
+                )
+
+                if not is_border_tile:
+                    x = col * tile_size + x_offset
+                    y = row * tile_size + y_offset
+
                     actor = self.actor_map[row][col]
-                    char = actor.get_char()
-                    # Check actor type for color; later this will be unique to monster types
-                    if isinstance(actor, Player):
-                        color = "gold"
+                    if actor:
+                        char = actor.get_char()
+                        color = "gold" if isinstance(actor, Player) else "red"
                     else:
-                        color = "red"
-                else:
-                    color = "white"
-                    terrain = self.dungeon.tmap[row][col]
-                    if terrain == self.dungeon.Terrain.floor:
-                        char = "."
-                    elif terrain == self.dungeon.Terrain.stair:
-                        char = ">"
-                    elif terrain == self.dungeon.Terrain.stdrock:
-                        char = " "
-                    elif terrain == self.dungeon.Terrain.immrock:
-                        char = "X"
-                    else:
-                        char = "!"
-                self.canvas.create_rectangle(
-                    x, y, x + tile_size, y + tile_size, fill="black", outline=""
-                )
-                self.canvas.create_text(
-                    x + tile_size // 2,
-                    y + tile_size // 2,
-                    text=char,
-                    fill=color,
-                    font=("Consolas", self.fontsize),
-                )
-        # Force updates the canvas. Maybe suboptimal.
-        # self.canvas.update()
+                        terrain = self.dungeon.tmap[row][col]
+                        color = "white"
+                        if terrain == self.dungeon.Terrain.floor:
+                            char = "."
+                        elif terrain == self.dungeon.Terrain.stair:
+                            char = ">"
+                        elif terrain == self.dungeon.Terrain.stdrock:
+                            char = " "
+                        elif terrain == self.dungeon.Terrain.immrock:
+                            char = "X"
+                        else:
+                            char = "!"
+
+                    # Use a tuple to represent what should be rendered at this tile
+                    current_draw = (char, color)
+                    cached_draw = self.render_cache.get((row, col))
+
+                    # Only redraw if changed
+                    if current_draw != cached_draw:
+                        self.render_cache[(row, col)] = current_draw
+
+                        # First, remove anything previously drawn at this location
+                        self.canvas.delete(f"tile_{row}_{col}")
+
+                        # Draw black background (optional)
+                        self.canvas.create_rectangle(
+                            x,
+                            y,
+                            x + tile_size,
+                            y + tile_size,
+                            fill="black",
+                            outline="",
+                            tag=f"tile_{row}_{col}",
+                        )
+                        # Draw character
+                        self.canvas.create_text(
+                            x + tile_size // 2,
+                            y + tile_size // 2,
+                            text=char,
+                            fill=color,
+                            font=("Consolas", self.fontsize),
+                            tag=f"tile_{row}_{col}",
+                        )
+        # Note for later: when generating new dungeon, need to call this.
+        # self.render_cache.clear()
 
     # Starts the game's turnloop
     def start_turnloop(self):
@@ -272,21 +323,21 @@ class Pyrogue_Game:
         if self.awaiting_player_input:
             return
 
+        self.render_dungeon(self.scrsize_w, self.scrsize_h)
+
         # Game over check
         if len(self.turn_pq) < 2 or not self.player.is_alive():
             print("Game Over")
-            self.render_dungeon(self.scrsize_w, self.scrsize_h)
+            # self.render_dungeon(self.scrsize_w, self.scrsize_h)
             return
 
         # Pop actor; check if player turn
         _, actor = self.turn_pq.pop()
         player_turn = isinstance(actor, Player)
-        print(actor.get_char(), " Turn", actor.get_currturn())
+        print("GAME TURN", actor.get_currturn(), ":", actor.get_char())
 
         if actor.is_alive():
             if player_turn:
-                self.render_dungeon(self.scrsize_w, self.scrsize_h)
-                
                 # Await player input to call its turn handeler
                 # Essentially 'pauses' the turnloop until keyboard input results in end of player turn
                 if not self.awaiting_player_input:
@@ -306,5 +357,5 @@ class Pyrogue_Game:
             if isinstance(targ_actor, Player):
                 print("a", actor.get_char(), "killed you")
 
-        # Wait 1ms before running next turn
+        # Wait 5ms before running next turn
         self.root.after(1, self._next_turn)
