@@ -12,6 +12,8 @@ v04 ============================================================================
     - Implemented player movement controls
     - Optimized dungeon renderer + added solid border around dungeon
     - High-level changes to init standardized dungeon size and difficulty settings
+06/20/2025
+    - Generated monsters now recieve randomized speed, and their first turn is based on speed
 v03 ===========================================================================================================================
 06/04/2025
     - Start v03; update ChangeLog + README

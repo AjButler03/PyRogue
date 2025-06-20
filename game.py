@@ -82,7 +82,7 @@ class Pyrogue_Game:
         # Generate monsters; runs until minimum number and attempt limit are met
         while (monsterc < min_monsterc) or (attemptc < attempt_limit):
             # Create monster
-            new_monster = Monster(random.randint(0, 15), 10)
+            new_monster = Monster(random.randint(0, 15), random.randint(5, 20))
             if monsterc <= min_monsterc or exp_chancetime(
                 monsterc - min_monsterc, decay_rate
             ):
@@ -311,9 +311,9 @@ class Pyrogue_Game:
         self.turn_pq = PriorityQueue()
         self.turn_pq.push(self.player, 0)
         for monster in self.monster_list:
-            monster.set_currturn(10)
+            monster.set_currturn(monster.get_speed())
             # 9 to ensure that ALL monsters get a turn after player's first turn
-            self.turn_pq.push(monster, 9)
+            self.turn_pq.push(monster, monster.get_currturn())
         print("PyRogue Turnloop started")
         self._next_turn()
 
@@ -334,7 +334,7 @@ class Pyrogue_Game:
         # Pop actor; check if player turn
         _, actor = self.turn_pq.pop()
         player_turn = isinstance(actor, Player)
-        print("GAME TURN", actor.get_currturn(), ":", actor.get_char())
+        print("TURN", actor.get_currturn(), "for", actor.get_char())
 
         if actor.is_alive():
             if player_turn:
