@@ -7,6 +7,19 @@ from dungeon import *
 # This file contains the class information for the Actor class and its children, the player and monster classes.
 
 
+# Enum to define moves, whose values correspond to the move's idx in the coordinate deltas
+class Move(Enum):
+    up_left = 0
+    up = 1
+    up_right = 2
+    left = 3
+    right = 4
+    down_left = 5
+    down = 6
+    down_right = 7
+    none = 8
+
+
 # This is the generic actor class to be used in the general turn loop.
 class Actor(abc.ABC):
 
@@ -14,18 +27,6 @@ class Actor(abc.ABC):
     # up_left, up, up_right, left, right, down_left, down, down_right, none
     _delta_r = [-1, -1, -1, 0, 0, 1, 1, 1, 0]
     _delta_c = [-1, 0, 1, -1, 1, -1, 0, 1, 0]
-
-    # Enum to define moves, whose values correspond to the move's idx in the coordinate deltas
-    class _move(Enum):
-        up_left = 0
-        up = 1
-        up_right = 2
-        left = 3
-        right = 4
-        down_left = 5
-        down = 6
-        down_right = 7
-        none = 8
 
     # This method is to initialize the position of the actor within the dungeon, verifying the location as valid.
     # Returns True on successful placement, False otherwise.
@@ -72,7 +73,7 @@ class Actor(abc.ABC):
 
     # Handles the turn for the actor.
     @abc.abstractmethod
-    def handle_turn(self, dungeon: Dungeon, actor_map: list, player):
+    def handle_turn(self, dungeon: Dungeon, actor_map: list, player, move: Move):
         pass
 
     # Returns the row, column coordinate of where the actor is attempting to move to.
@@ -113,15 +114,17 @@ class Player(Actor):
         self.c = c
 
     # Turn handler for the player.
-    def handle_turn(self, dungeon: Dungeon, actor_map: list, player):
-        # For now, the player just moves randomly.
-        move = self._move(random.randint(0, 7))
+    def handle_turn(self, dungeon: Dungeon, actor_map: list, player, move: int):
+        if move == Move.none:
+            # No move? Then just return.
+            return True, None, 0
+
+        move = Move(move)
         new_r, new_c = self.target_pos(move)
         # Check that new position is valid for the PC to be at
-        # Repeat until this is the case
-        while not self._valid_pos(dungeon, new_r, new_c):
-            move = self._move(random.randint(0, 7))
-            new_r, new_c = self.target_pos(move)
+        if not self._valid_pos(dungeon, new_r, new_c):
+            return False, None, 0
+
         # Move the PC, removing whatever monster may be there
         a = actor_map[new_r][new_c]
         if not a == None:
@@ -137,7 +140,7 @@ class Player(Actor):
         dungeon.calc_dist_maps(new_r, new_c)
 
         # For combat dialog
-        return a, dmg
+        return True, a, dmg
 
 
 # This is the class for monsters and their turn/movement methods.
@@ -361,12 +364,12 @@ class Monster(Actor):
 
     # Monster moves in a random direction.
     def _random_move(self, dungeon: Dungeon, actor_map: list):
-        move = self._move(random.randint(0, 7))
+        move = Move(random.randint(0, 7))
         new_r, new_c = self.target_pos(move)
         # Check that new position is valid for the monster to be at
         # Repeat until this is the case
         while not self._valid_pos(dungeon, new_r, new_c):
-            move = self._move(random.randint(0, 7))
+            move = Move(random.randint(0, 7))
             new_r, new_c = self.target_pos(move)
         a, dmg = self._move_handeler(dungeon, actor_map, new_r, new_c)
         # Return actor + damage dealt for combat messages
@@ -380,7 +383,7 @@ class Monster(Actor):
         # Find minimum cost point in surrounding 8
         for pt_idx in range(8):
             # Grabs the new point
-            new_r, new_c = self.target_pos(self._move(pt_idx))
+            new_r, new_c = self.target_pos(Move(pt_idx))
             if dungeon.valid_point(new_r, new_c):
                 cost = self.path[new_r][new_c]
                 if cost < min_cost:
@@ -394,7 +397,7 @@ class Monster(Actor):
             minc_pt_idx = 8
 
         # Now attempt to move to that minimum cost point
-        new_r, new_c = self.target_pos(self._move(minc_pt_idx))
+        new_r, new_c = self.target_pos(Move(minc_pt_idx))
         a, dmg = self._move_handeler(dungeon, actor_map, new_r, new_c)
         # Return actor + damage dealt for combat messages
         return a, dmg
@@ -441,7 +444,9 @@ class Monster(Actor):
         return False
 
     # Turn handler for this monster.
-    def handle_turn(self, dungeon: Dungeon, actor_map: list, player):
+    def handle_turn(
+        self, dungeon: Dungeon, actor_map: list, player: Player, move: Move
+    ):
         # Update the monster's path.
         if self._update_path(dungeon, player):
             if self.has_attribute(self._ATTR_ERRATIC____) and random.randint(0, 1) > 0:
@@ -454,4 +459,4 @@ class Monster(Actor):
             # Path update failure indicates that the monster should move randomly
             a, dmg = self._random_move(dungeon, actor_map)
         # Return actor + damage dealt for combat messages
-        return a, dmg
+        return True, a, dmg

@@ -9,6 +9,7 @@ v04 ============================================================================
 06/19/2025
     - Refactored turnloop to allow tkinter's mainloop to update in between turns; this fixed dynamic scaling while loop running
     - Renamed classes to be capitalized
+    - Implemented player movement controls
 v03 ===========================================================================================================================
 06/04/2025
     - Start v03; update ChangeLog + README
