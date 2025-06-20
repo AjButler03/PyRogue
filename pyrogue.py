@@ -9,7 +9,7 @@ dungeon_size = {
     'small': (20, 40),
     'medium': (30, 60),
     'large': (40, 80),
-    'enormous': (50, 90)
+    'enormous': (50, 100)
 }
 
 # Pre-defined difficulty settings
@@ -24,13 +24,27 @@ difficulty_setting = {
 
 
 def main():
+    # Initial screen size; arbitrary
     screen_h = 720
     screen_w = 1280
-    map_h, map_w = dungeon_size['medium']
-    difficulty = difficulty_setting['normal']
+    
+    # dungeon size and difficulty settings
+    size = 'medium'
+    diff = 'normal'
+    print("SIZE:", size, "DIFFICULTY:", diff)
+    
+    # Init dungeon
+    map_h, map_w = dungeon_size[size]
+    difficulty = difficulty_setting[diff]
+    
+    # Init tkinter window
     root = tk.Tk()
     root.title("PyRogue")
+    
+    # Init game; includes tkinter event listeners
     Pyrogue_Game(root, screen_h, screen_w, map_h, map_w, difficulty)
+    
+    # Launch the tkinter loop, which activates game code through event listeners
     root.mainloop()
 
 
