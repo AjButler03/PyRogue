@@ -157,11 +157,19 @@ class Pyrogue_Game:
         if self.awaiting_player_input:
             success = self._handle_player_input(key)
             if success:
-                # self.awaiting_player_input = False
+                self.awaiting_player_input = False
                 print("Player input valid")
+                # Requeue player
+                new_turn = (self.player.get_currturn() + self.player.get_speed())
+                self.turn_pq.push(
+                    self.player, new_turn
+                )
+                self.player.set_currturn(new_turn)
                 self.root.after(10, self._next_turn)
             else:
                 print("invalid input")
+        else:
+            return
 
     # Handles input for player turn
     def _handle_player_input(self, key) -> int:
@@ -171,7 +179,7 @@ class Pyrogue_Game:
             "k": Move.up,
             "u": Move.up_right,
             "h": Move.left,
-            ".": Move.none,
+            "period": Move.none,
             "l": Move.right,
             "b": Move.down_left,
             "j": Move.down,
@@ -253,35 +261,36 @@ class Pyrogue_Game:
         self.turn_pq.push(self.player, 0)
         for monster in self.monster_list:
             monster.set_currturn(10)
-            self.turn_pq.push(monster, 10)
+            # 9 to ensure that ALL monsters get a turn after player's first turn
+            self.turn_pq.push(monster, 9)
         print("PyRogue Turnloop started")
         self._next_turn()
 
     # Handles a single turn in the turnloop.
     def _next_turn(self):
-        
         # If player's turn, do nothing and wait
         if self.awaiting_player_input:
             return
-        
+
         # Game over check
         if len(self.turn_pq) < 2 or not self.player.is_alive():
             print("Game Over")
             self.render_dungeon(self.scrsize_w, self.scrsize_h)
             return
 
+        # Pop actor; check if player turn
         _, actor = self.turn_pq.pop()
         player_turn = isinstance(actor, Player)
-        self.render_dungeon(self.scrsize_w, self.scrsize_h)
+        print(actor.get_char(), " Turn", actor.get_currturn())
 
         if actor.is_alive():
-            
             if player_turn:
-                # Await player input to call its turn handeler; wait until then
+                self.render_dungeon(self.scrsize_w, self.scrsize_h)
+                
+                # Await player input to call its turn handeler
+                # Essentially 'pauses' the turnloop until keyboard input results in end of player turn
                 if not self.awaiting_player_input:
                     self.awaiting_player_input = True
-                    self.root.after(100, self._next_turn)
-                    self.turn_pq.push(actor, actor.get_currturn() + actor.get_speed())
                     return
             else:
                 # Call the monster's turn handler directly
@@ -289,16 +298,13 @@ class Pyrogue_Game:
                     self.dungeon, self.actor_map, self.player, 8
                 )
 
-            # Re-queue actor
+            # Re-queue monster
             new_turn = actor.get_currturn() + actor.get_speed()
             actor.set_currturn(new_turn)
             self.turn_pq.push(actor, new_turn)
 
-            if player_turn:
-                if targ_actor != None:
-                    print("You Killed a", targ_actor.get_char())
-            elif isinstance(targ_actor, Player):
+            if isinstance(targ_actor, Player):
                 print("a", actor.get_char(), "killed you")
 
-        # Wait 100ms before running next turn
-        self.root.after(100, self._next_turn)
+        # Wait 1ms before running next turn
+        self.root.after(1, self._next_turn)
