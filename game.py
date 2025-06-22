@@ -149,7 +149,7 @@ class Pyrogue_Game:
     # Event handeler for keyboard input
     def _on_key_press(self, event):
         key = event.keysym
-        print(f"Key pressed: {key}")
+        print(f"KEY INPUT: {key}")
         if not self.turnloop_started:
             # Until I create a main menu, any key input force starts the game.
             self.turnloop_started = True
@@ -162,14 +162,14 @@ class Pyrogue_Game:
             success = self._handle_player_input(key)
             if success:
                 self.awaiting_player_input = False
-                print("Input Process Success")
+                print("PLAYER INPUT SUCCESS")
                 # Requeue player
                 new_turn = self.player.get_currturn() + self.player.get_speed()
                 self.turn_pq.push(self.player, new_turn)
                 self.player.set_currturn(new_turn)
                 self.root.after(10, self._next_turn)
             else:
-                print("Input Invalid")
+                print("PLAYER INPUT FAIL")
         else:
             return
 
@@ -177,14 +177,24 @@ class Pyrogue_Game:
     def _handle_player_input(self, key) -> int:
         # Compact way of checking for movement keys and grabbing the respective move
         move_delta = {
+            "7": Move.up_left,
             "y": Move.up_left,
+            "8": Move.up,
             "k": Move.up,
+            "9": Move.up_right,
             "u": Move.up_right,
+            "4": Move.left,
             "h": Move.left,
+            "5": Move.none,
+            "space": Move.none,
             "period": Move.none,
+            "6": Move.right,
             "l": Move.right,
+            "1": Move.down_left,
             "b": Move.down_left,
+            "2": Move.down,
             "j": Move.down,
+            "3": Move.down_right,
             "n": Move.down_right,
         }
 
@@ -195,7 +205,10 @@ class Pyrogue_Game:
         success, targ_actor, dmg = self.player.handle_turn(
             self.dungeon, self.actor_map, self.player, move
         )
-        return success
+        if success:
+            if targ_actor != None:
+                print("COMBAT: You killed a", targ_actor.get_char())
+            return success
 
     # Error handeling for screen resizing event handeler.
     def _rerender_dungeon(self):
@@ -214,6 +227,14 @@ class Pyrogue_Game:
         max_tile_height = height // (self.dungeon.height + 3)
         tile_size = min(max_tile_width, max_tile_height)
         self.fontsize = int(tile_size / 1.5)
+        
+        terrain_char = {
+            Dungeon.Terrain.floor: ".",
+            Dungeon.Terrain.stair: ">",
+            Dungeon.Terrain.stdrock: " ",
+            Dungeon.Terrain.immrock: "X",
+            Dungeon.Terrain.debug: "!"
+        }
 
         x_offset = (width - tile_size * self.dungeon.width) // 2
         y_offset = 0  # No vertical offset
@@ -261,17 +282,8 @@ class Pyrogue_Game:
                         color = "gold" if isinstance(actor, Player) else "red"
                     else:
                         terrain = self.dungeon.tmap[row][col]
+                        char = terrain_char[terrain]
                         color = "white"
-                        if terrain == self.dungeon.Terrain.floor:
-                            char = "."
-                        elif terrain == self.dungeon.Terrain.stair:
-                            char = ">"
-                        elif terrain == self.dungeon.Terrain.stdrock:
-                            char = " "
-                        elif terrain == self.dungeon.Terrain.immrock:
-                            char = "X"
-                        else:
-                            char = "!"
 
                     # Use a tuple to represent what should be rendered at this tile
                     current_draw = (char, color)
@@ -314,7 +326,7 @@ class Pyrogue_Game:
             monster.set_currturn(monster.get_speed())
             # 9 to ensure that ALL monsters get a turn after player's first turn
             self.turn_pq.push(monster, monster.get_currturn())
-        print("PyRogue Turnloop started")
+        print("=== GAME START ===")
         self._next_turn()
 
     # Handles a single turn in the turnloop.
@@ -327,16 +339,21 @@ class Pyrogue_Game:
 
         # Game over check
         if len(self.turn_pq) < 2 or not self.player.is_alive():
-            print("Game Over")
-            # self.render_dungeon(self.scrsize_w, self.scrsize_h)
+            # Game has ended; if player is alive, then player won. Otherwise, the monsters won.
+            if self.player.is_alive():
+                print("You have defeated all monsters; you stand victorious")
+            else:
+                print("You have been defeated; your bones now decorate the floor of this dungeon")
+            print("=== GAME OVER ===")
             return
 
         # Pop actor; check if player turn
         _, actor = self.turn_pq.pop()
         player_turn = isinstance(actor, Player)
-        print("TURN", actor.get_currturn(), "for", actor.get_char())
 
         if actor.is_alive():
+            print("TURN", actor.get_currturn(), "for", actor.get_char())
+            
             if player_turn:
                 # Await player input to call its turn handeler
                 # Essentially 'pauses' the turnloop until keyboard input results in end of player turn
@@ -355,7 +372,7 @@ class Pyrogue_Game:
             self.turn_pq.push(actor, new_turn)
 
             if isinstance(targ_actor, Player):
-                print("a", actor.get_char(), "killed you")
+                print("COMBAT: a", actor.get_char(), "killed you")
 
         # Wait 5ms before running next turn
         self.root.after(1, self._next_turn)

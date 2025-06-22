@@ -14,6 +14,8 @@ v04 ============================================================================
     - High-level changes to init standardized dungeon size and difficulty settings
 06/20/2025
     - Generated monsters now recieve randomized speed, and their first turn is based on speed
+06/21/2025
+    - Slightly improved game event logging, including win/loss check
 v03 ===========================================================================================================================
 06/04/2025
     - Start v03; update ChangeLog + README
