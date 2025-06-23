@@ -16,6 +16,8 @@ v04 ============================================================================
     - Generated monsters now recieve randomized speed, and their first turn is based on speed
 06/21/2025
     - Slightly improved game event logging, including win/loss check
+06/23/2025
+    - Working labels into UI to show combat log and eventually player information
 v03 ===========================================================================================================================
 06/04/2025
     - Start v03; update ChangeLog + README

@@ -1,5 +1,4 @@
 import tkinter as tk
-from time import sleep
 from utility import *
 from actor import *
 from dungeon import *
@@ -22,12 +21,15 @@ class Pyrogue_Game:
         # Tkinter root
         self.root = root
 
-        # Init internal idea of screen size
+        # Init internal idea of screen size in pixels
         self.scrsize_h = scrsize_h
         self.scrsize_w = scrsize_w
 
-        # Internal idea of fontsize for UI elements; scales with screensize on render.
-        self.fontsize = 12  # Default 12 until renderer called
+        # Internal idea of size for UI elements; scales with screensize on render.
+        # number of char 'rows' in screen; one for each row in dungeon + 3 for messages / player info
+        self.scrn_rows = mapsize_h + 3
+        self.tile_size = 16  # Default 16 until renderer called
+        self.font_size = 12  # Default 12 until renderer called
 
         # Init internal idea of dungeon size
         self.mapsize_h = mapsize_h
@@ -44,20 +46,27 @@ class Pyrogue_Game:
         self.monster_list = []
         self.actor_map = []
         self.turn_pq = None
+        
+        # Init frame that will form the top message, dungeon, then player information, in that order
+        self.frame = tk.Frame(root)
+        self.frame.pack(expand=True)
+        
+        # Init top label for combat / movement messages
+        self.top_label = tk.Label(self.frame, text = "placeholder text", font=('Courier', self.font_size), bg='black', fg='white')
+        self.top_label.pack(fill='x', ipady = 0)
 
         # here in case I implement game save/load; until then, always randomly generate
         if generate:
             self._init_generated_game()
 
         # Init the canvas to display dungeon / actors
-        self.canvas = tk.Canvas(root, width=scrsize_w, height=scrsize_h, bg="black")
+        self.canvas = tk.Canvas(self.frame, width=scrsize_w, height=scrsize_h - (3 * self.tile_size), bg="black", bd=0, highlightthickness=0)
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
         # Init some fields related to rendering
         self.need_full_rerender = True
-        self.render_cache = (
-            {}
-        )  # {(row, col): (char, color)}. Stores last updated render info.
+         # {(row, col): (char, color)}. Stores last updated render info.
+        self.render_cache = {} 
         self.resize_id = None
         self.resize_event = None
         self.root.bind("<Configure>", self._on_win_resize)
@@ -144,7 +153,7 @@ class Pyrogue_Game:
             self.root.after_cancel(self.resize_id)
 
         # schedule a redraw for 50ms from now
-        self.resize_id = self.root.after(100, self._rerender_dungeon)
+        self.resize_id = self.root.after(100, self._resize_frame)
 
     # Event handeler for keyboard input
     def _on_key_press(self, event):
@@ -154,7 +163,7 @@ class Pyrogue_Game:
             # Until I create a main menu, any key input force starts the game.
             self.turnloop_started = True
             self.start_turnloop()
-            self.render_dungeon(self.scrsize_w, self.scrsize_h)
+            self.render_frame(self.scrsize_w, self.scrsize_h)
             # Game start done
             return
 
@@ -211,7 +220,7 @@ class Pyrogue_Game:
             return success
 
     # Error handeling for screen resizing event handeler.
-    def _rerender_dungeon(self):
+    def _resize_frame(self):
         if self.resize_event == None:
             return
 
@@ -219,25 +228,27 @@ class Pyrogue_Game:
         self.scrsize_h = event.height
         self.scrsize_w = event.width
         self.need_full_rerender = True
-        self.render_dungeon(self.scrsize_w, self.scrsize_h)
+        self.render_frame(self.scrsize_w, self.scrsize_h)
 
     # Renders the dungeon to the screen canvas.
-    def render_dungeon(self, width, height):
+    def render_frame(self, width, height):
         max_tile_width = width // self.dungeon.width
-        max_tile_height = height // (self.dungeon.height + 3)
+        max_tile_height = (
+            height // self.scrn_rows
+        )  # Note that there are 3 extra rows for messages / player information
         tile_size = min(max_tile_width, max_tile_height)
-        self.fontsize = int(tile_size / 1.5)
-        
+        self.font_size = int(tile_size / 1.5)
+
         terrain_char = {
             Dungeon.Terrain.floor: ".",
             Dungeon.Terrain.stair: ">",
             Dungeon.Terrain.stdrock: " ",
             Dungeon.Terrain.immrock: "X",
-            Dungeon.Terrain.debug: "!"
+            Dungeon.Terrain.debug: "!",
         }
 
         x_offset = (width - tile_size * self.dungeon.width) // 2
-        y_offset = 0  # No vertical offset
+        y_offset = 0
 
         if self.need_full_rerender:
             self.render_cache.clear()
@@ -248,10 +259,10 @@ class Pyrogue_Game:
             dungeon_right = dungeon_left + (self.dungeon.width - 1) * tile_size
             dungeon_bottom = dungeon_top + (self.dungeon.height - 1) * tile_size
 
-            # Optional: delete previous border if re-rendering
+            # Deleting existing border
             self.canvas.delete("dungeon_border")
 
-            # Draw thin gray border
+            # Drawing new white border around dungeon
             self.canvas.create_rectangle(
                 dungeon_left,
                 dungeon_top,
@@ -312,7 +323,7 @@ class Pyrogue_Game:
                             y + tile_size // 2,
                             text=char,
                             fill=color,
-                            font=("Consolas", self.fontsize),
+                            font=("Consolas", self.font_size),
                             tag=f"tile_{row}_{col}",
                         )
         # Note for later: when generating new dungeon, need to call this.
@@ -335,7 +346,7 @@ class Pyrogue_Game:
         if self.awaiting_player_input:
             return
 
-        self.render_dungeon(self.scrsize_w, self.scrsize_h)
+        self.render_frame(self.scrsize_w, self.scrsize_h)
 
         # Game over check
         if len(self.turn_pq) < 2 or not self.player.is_alive():
@@ -343,7 +354,9 @@ class Pyrogue_Game:
             if self.player.is_alive():
                 print("You have defeated all monsters; you stand victorious")
             else:
-                print("You have been defeated; your bones now decorate the floor of this dungeon")
+                print(
+                    "You have been defeated; your bones now decorate the floor of this dungeon"
+                )
             print("=== GAME OVER ===")
             return
 
@@ -353,7 +366,7 @@ class Pyrogue_Game:
 
         if actor.is_alive():
             print("TURN", actor.get_currturn(), "for", actor.get_char())
-            
+
             if player_turn:
                 # Await player input to call its turn handeler
                 # Essentially 'pauses' the turnloop until keyboard input results in end of player turn
