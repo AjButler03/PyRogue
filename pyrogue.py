@@ -40,6 +40,7 @@ def main():
     # Init tkinter window
     root = tk.Tk()
     root.title("PyRogue")
+    root.configure(bg='black')
 
     # Init game; includes tkinter event listeners
     Pyrogue_Game(root, screen_h, screen_w, map_h, map_w, difficulty)

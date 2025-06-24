@@ -30,6 +30,7 @@ class Pyrogue_Game:
         self.scrn_rows = mapsize_h + 3
         self.tile_size = 16  # Default 16 until renderer called
         self.font_size = 12  # Default 12 until renderer called
+        self.padx = 50  # The amount that the dungeon render is moved away from the left edge of the screen.
 
         # Init internal idea of dungeon size
         self.mapsize_h = mapsize_h
@@ -48,19 +49,19 @@ class Pyrogue_Game:
         self.turn_pq = None
 
         # Init frame that will form the top message, dungeon, then player information, in that order
-        self.frame = tk.Frame(root)
-        self.frame.pack(fill=tk.BOTH, expand=True)
+        self.frame = tk.Frame(root, bd=0, bg="black")
+        self.frame.pack(fill=tk.BOTH, expand=True, padx=0, pady=0)
 
         # Init top label for combat / movement messages
         self.top_label = tk.Label(
             self.frame,
-            text="placeholder text",
+            text="Press any key to start",
             font=("Consolas", self.font_size),
             bg="black",
-            fg="white",
+            fg="gold",
             anchor="w",
         )
-        self.top_label.pack(fill="x", ipady=0)
+        self.top_label.pack(fill="x", ipady=0, side="top")
 
         # here in case I implement game save/load; until then, always randomly generate
         if generate:
@@ -72,10 +73,10 @@ class Pyrogue_Game:
             width=scrsize_w,
             height=scrsize_h - (3 * self.tile_size),
             bg="black",
-            bd=0,
+            bd=10,
             highlightthickness=0,
         )
-        self.canvas.pack(fill=tk.BOTH, expand=True)
+        self.canvas.pack(fill=tk.BOTH, expand=True, side="bottom")
 
         # Init some fields related to rendering
         self.need_full_rerender = True
@@ -230,9 +231,15 @@ class Pyrogue_Game:
         )
         if success:
             if targ_actor != None:
-                self.top_label.configure(text=("You killed a", targ_actor.get_char()))
-                print("COMBAT: You killed a", targ_actor.get_char())
+                message = "You killed a " + targ_actor.get_char()
+                self.top_label.configure(text=message)
+                print("COMBAT:", message)
+            else:
+                # Just a plain successful move; reset message
+                self.top_label.configure(text="", fg="cyan")
             return success
+        else:
+            self.top_label.configure(text="You can't move there")
 
     # Error handeling for screen resizing event handeler.
     def _resize_frame(self):
@@ -254,9 +261,6 @@ class Pyrogue_Game:
         tile_size = min(max_tile_width, max_tile_height)
         self.font_size = int(tile_size / 1.5)
 
-        # Update top/bottom label font size
-        self.top_label.configure(font=("Consolas", self.font_size))
-
         terrain_char = {
             Dungeon.Terrain.floor: ".",
             Dungeon.Terrain.stair: ">",
@@ -265,18 +269,26 @@ class Pyrogue_Game:
             Dungeon.Terrain.debug: "!",
         }
 
-        # x_offset = (width - tile_size * self.dungeon.width) // 2
-        x_offset = 0
+        x_offset = (width - tile_size * self.dungeon.width) // 2
         y_offset = 0
+
+        # Update top/bottom label font size and x padding
+        self.top_label.configure(
+            font=("Consolas", self.font_size), padx=x_offset + tile_size // 2
+        )
 
         if self.need_full_rerender:
             self.render_cache.clear()
 
             # Calculate dungeon bounds in pixels
-            dungeon_left = x_offset + (tile_size // 4)
-            dungeon_top = y_offset + (tile_size // 4)
-            dungeon_right = dungeon_left + (self.dungeon.width - 1) * tile_size
-            dungeon_bottom = dungeon_top + (self.dungeon.height - 1) * tile_size
+            dungeon_left = x_offset + tile_size
+            dungeon_top = y_offset + tile_size
+            dungeon_right = (
+                dungeon_left + ((self.dungeon.width - 1) * tile_size) - tile_size
+            )
+            dungeon_bottom = (
+                dungeon_top + ((self.dungeon.height - 1) * tile_size) - tile_size
+            )
 
             # Deleting existing border
             self.canvas.delete("dungeon_border")
@@ -288,7 +300,7 @@ class Pyrogue_Game:
                 dungeon_right,
                 dungeon_bottom,
                 outline="white",
-                width=tile_size // 6,
+                width=tile_size,
                 tag="dungeon_border",
             )
             self.need_full_rerender = False
@@ -356,6 +368,7 @@ class Pyrogue_Game:
             monster.set_currturn(monster.get_speed())
             # 9 to ensure that ALL monsters get a turn after player's first turn
             self.turn_pq.push(monster, monster.get_currturn())
+        self.top_label.configure(text="", fg="cyan")
         print("=== GAME START ===")
         self._next_turn()
 
@@ -372,11 +385,13 @@ class Pyrogue_Game:
             # Game has ended; if player is alive, then player won. Otherwise, the monsters won.
             if self.player.is_alive():
                 self.top_label.configure(
-                    text="You have defeated all monsters; Game Over"
+                    text="You have defeated all monsters; Game Over", fg="gold"
                 )
                 print("You have defeated all monsters; Game Over")
             else:
-                self.top_label.configure(text="You have been defeated; Game Over")
+                self.top_label.configure(
+                    text="You have been defeated; Game Over", fg="red"
+                )
                 print("You have been defeated; Game Over")
             print("=== GAME OVER ===")
             return

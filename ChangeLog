@@ -18,6 +18,9 @@ v04 ============================================================================
     - Slightly improved game event logging, including win/loss check
 06/23/2025
     - Implemented basic messages above dungeon render; introduced resize flutter + broke render centering, fix in progress
+06/24/2025
+    - Fixed dungeon border to be correctly centered on the dungeon render
+    - Fixed top message to match dungeon offset
 v03 ===========================================================================================================================
 06/04/2025
     - Start v03; update ChangeLog + README
