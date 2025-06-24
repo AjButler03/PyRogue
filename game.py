@@ -46,27 +46,41 @@ class Pyrogue_Game:
         self.monster_list = []
         self.actor_map = []
         self.turn_pq = None
-        
+
         # Init frame that will form the top message, dungeon, then player information, in that order
         self.frame = tk.Frame(root)
-        self.frame.pack(expand=True)
-        
+        self.frame.pack(fill=tk.BOTH, expand=True)
+
         # Init top label for combat / movement messages
-        self.top_label = tk.Label(self.frame, text = "placeholder text", font=('Courier', self.font_size), bg='black', fg='white')
-        self.top_label.pack(fill='x', ipady = 0)
+        self.top_label = tk.Label(
+            self.frame,
+            text="placeholder text",
+            font=("Consolas", self.font_size),
+            bg="black",
+            fg="white",
+            anchor="w",
+        )
+        self.top_label.pack(fill="x", ipady=0)
 
         # here in case I implement game save/load; until then, always randomly generate
         if generate:
             self._init_generated_game()
 
         # Init the canvas to display dungeon / actors
-        self.canvas = tk.Canvas(self.frame, width=scrsize_w, height=scrsize_h - (3 * self.tile_size), bg="black", bd=0, highlightthickness=0)
+        self.canvas = tk.Canvas(
+            self.frame,
+            width=scrsize_w,
+            height=scrsize_h - (3 * self.tile_size),
+            bg="black",
+            bd=0,
+            highlightthickness=0,
+        )
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
         # Init some fields related to rendering
         self.need_full_rerender = True
-         # {(row, col): (char, color)}. Stores last updated render info.
-        self.render_cache = {} 
+        # {(row, col): (char, color)}. Stores last updated render info.
+        self.render_cache = {}
         self.resize_id = None
         self.resize_event = None
         self.root.bind("<Configure>", self._on_win_resize)
@@ -216,6 +230,7 @@ class Pyrogue_Game:
         )
         if success:
             if targ_actor != None:
+                self.top_label.configure(text=("You killed a", targ_actor.get_char()))
                 print("COMBAT: You killed a", targ_actor.get_char())
             return success
 
@@ -239,6 +254,9 @@ class Pyrogue_Game:
         tile_size = min(max_tile_width, max_tile_height)
         self.font_size = int(tile_size / 1.5)
 
+        # Update top/bottom label font size
+        self.top_label.configure(font=("Consolas", self.font_size))
+
         terrain_char = {
             Dungeon.Terrain.floor: ".",
             Dungeon.Terrain.stair: ">",
@@ -247,15 +265,16 @@ class Pyrogue_Game:
             Dungeon.Terrain.debug: "!",
         }
 
-        x_offset = (width - tile_size * self.dungeon.width) // 2
+        # x_offset = (width - tile_size * self.dungeon.width) // 2
+        x_offset = 0
         y_offset = 0
 
         if self.need_full_rerender:
             self.render_cache.clear()
 
             # Calculate dungeon bounds in pixels
-            dungeon_left = x_offset + (tile_size // 2)
-            dungeon_top = y_offset + (tile_size // 2)
+            dungeon_left = x_offset + (tile_size // 4)
+            dungeon_top = y_offset + (tile_size // 4)
             dungeon_right = dungeon_left + (self.dungeon.width - 1) * tile_size
             dungeon_bottom = dungeon_top + (self.dungeon.height - 1) * tile_size
 
@@ -269,7 +288,7 @@ class Pyrogue_Game:
                 dungeon_right,
                 dungeon_bottom,
                 outline="white",
-                width=tile_size // 4,
+                width=tile_size // 6,
                 tag="dungeon_border",
             )
             self.need_full_rerender = False
@@ -352,11 +371,13 @@ class Pyrogue_Game:
         if len(self.turn_pq) < 2 or not self.player.is_alive():
             # Game has ended; if player is alive, then player won. Otherwise, the monsters won.
             if self.player.is_alive():
-                print("You have defeated all monsters; you stand victorious")
-            else:
-                print(
-                    "You have been defeated; your bones now decorate the floor of this dungeon"
+                self.top_label.configure(
+                    text="You have defeated all monsters; Game Over"
                 )
+                print("You have defeated all monsters; Game Over")
+            else:
+                self.top_label.configure(text="You have been defeated; Game Over")
+                print("You have been defeated; Game Over")
             print("=== GAME OVER ===")
             return
 
@@ -385,6 +406,7 @@ class Pyrogue_Game:
             self.turn_pq.push(actor, new_turn)
 
             if isinstance(targ_actor, Player):
+                self.top_label.configure(text=("a", actor.get_char(), "killed you"))
                 print("COMBAT: a", actor.get_char(), "killed you")
 
         # Wait 5ms before running next turn
