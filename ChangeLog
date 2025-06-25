@@ -21,6 +21,9 @@ v04 ============================================================================
 06/24/2025
     - Fixed dungeon border to be correctly centered on the dungeon render
     - Fixed top message to match dungeon offset
+06/25/2025
+    - Implemented a basic scoring system
+    - Added bottom labels to display score and player information (just location for now)
 v03 ===========================================================================================================================
 06/04/2025
     - Start v03; update ChangeLog + README

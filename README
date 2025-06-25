@@ -11,7 +11,10 @@ My reasons for doing this:
 On point a in particular, I want this code to only rely on Python itself to be runable. In doing so, it is easily shared and ran by whoever would want to play the game or see how it works.
 
 pyrogue.py is the main file, and running it will do the following:
-    - New UI Stuff; PLEASE UPDATE THIS, FUTURE ME
+    - A new window for PyRogue will open, with a simple message at the top, followed by the dungeon display, then a couple more information labels
+    - The PyRogue window can be scaled to whatever size you would like, and the contents will grow / shrink to fill the space as best it can
+    - Pressing any key will start the game; your goal is to 'kill' all monsters by moving into the space they occupy. The monsters are attempting to do the same to you.
+    - The PyRogue Game ends when either you are defeated, or all the monsters are defeated.
 
 New features with v04:
     - User interface created via tkinker library, with options to display walking/ tunneling distance maps

@@ -29,7 +29,7 @@ def main():
     screen_w = 1280
 
     # dungeon size and difficulty settings
-    size = "small"
+    size = "medium"
     diff = "normal"
     print("SIZE:", size, "DIFFICULTY:", diff)
 
@@ -39,6 +39,7 @@ def main():
 
     # Init tkinter window
     root = tk.Tk()
+    root.configure(height=screen_h, width=1280)
     root.title("PyRogue")
     root.configure(bg='black')
 
