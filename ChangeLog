@@ -23,7 +23,8 @@ v04 ============================================================================
     - Fixed top message to match dungeon offset
 06/25/2025
     - Implemented a basic scoring system
-    - Added bottom labels to display score and player information (just location for now)
+    - Added bottom labels to display score and player information (just player location for now)
+    - Made staircases functional; player can now escape to new levels
 v03 ===========================================================================================================================
 06/04/2025
     - Start v03; update ChangeLog + README

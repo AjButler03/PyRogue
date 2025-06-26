@@ -80,6 +80,8 @@ class Pyrogue_Game:
         self.canvas = tk.Canvas(
             self.frame,
             bg="black",
+            height = scrsize_h,
+            width = scrsize_w,
             bd=0,
             highlightthickness=0,
         )
@@ -202,6 +204,35 @@ class Pyrogue_Game:
             "Placed",
         )
 
+    # Initializes a new dungeon for the game to use; this also re-generates the monsters and restarts the turnloop.
+    def _replace_dungeon(self):
+        print("STAIRCASE; NEW DUNGEON")
+        # Init the dungeon itself
+        self.dungeon = Dungeon(self.mapsize_h, self.mapsize_w)
+        self.dungeon.generate_dungeon()
+
+        # Clear actor map, monster list, and priority queue
+        self.actor_map = [
+            [None] * self.dungeon.width for _ in range(self.dungeon.height)
+        ]
+        self.monster_list = []
+        self.turn_pq = PriorityQueue()
+
+        # Set the player's position in the dungeon
+        while not self.player.init_pos(
+            self.dungeon,
+            self.actor_map,
+            random.randint(1, self.mapsize_h - 2),
+            random.randint(1, self.mapsize_w - 2),
+        ):
+            continue
+
+        # Generate new monsters
+        self._generate_monsters()
+
+        # Restart the turn loop
+        self._start_turnloop()
+
     # Initializes the game with randomly generated dungeon and monsters
     # Dungeon is size_h * size_w, difficulty modifies monster spawn rates.
     def _init_generated_game(self):
@@ -257,25 +288,44 @@ class Pyrogue_Game:
         }
 
         if key not in move_delta:
+            # Other input; Either navigating to a submenu or passing staircase
+            if key == "greater" or key == "0":
+                pc_r, pc_c = self.player.get_pos()
+                # Wanting to navigate staircase; check that staircase is present where player is standing
+                if self.dungeon.tmap[pc_r][pc_c] == Dungeon.Terrain.stair:
+                    # replace the dungeon, re-generating monsters and restarting the turn loop
+                    self._replace_dungeon()
+                    self._render_frame
+                    pc_r, pc_c = self.player.get_pos()
+                    pinfo_msg = "Player Location: Row " + str(pc_r) + ", Column: " + str(pc_c)
+                    self._update_pinfo_label(pinfo_msg)
+                    message = "You escaped to a new level of the dungeon"
+                    self._update_top_label(message, "gold")
+                    return True
+                else :
+                    message = "You can't escape from here; no staircase"
+                    self._update_top_label(message)
+            # Misinput; return false
             return False
-
-        move = move_delta[key]
-        success, targ_actor, dmg = self.player.handle_turn(
-            self.dungeon, self.actor_map, self.player, move
-        )
-        if success:
-            if targ_actor != None:
-                message = "You killed a " + targ_actor.get_char()
-                self.player_score += 10
-                self._update_top_label(message)
-                print("COMBAT:", message)
-            else:
-                # Just a plain successful move; reset message
-                self._update_top_label("")
-                self.player_score += 1
-            return success
         else:
-            self._update_top_label("You can't move there")
+            # Regular valid move
+            move = move_delta[key]
+            success, targ_actor, dmg = self.player.handle_turn(
+                self.dungeon, self.actor_map, self.player, move
+            )
+            if success:
+                if targ_actor != None:
+                    message = "You killed a " + targ_actor.get_char()
+                    self.player_score += 10
+                    self._update_top_label(message)
+                    print("COMBAT:", message)
+                else:
+                    # Just a plain successful move; reset message
+                    self._update_top_label("")
+                    self.player_score += 1
+                return success
+            else:
+                self._update_top_label("You can't move there")
 
     # Wrapper to update top message label. Cyan is the default message color.
     def _update_top_label(self, message: str, font_color: str = "cyan"):
@@ -420,6 +470,7 @@ class Pyrogue_Game:
     # Starts the game's turnloop
     def _start_turnloop(self):
         self.turn_pq = PriorityQueue()
+        self.player.set_currturn(0)
         self.turn_pq.push(self.player, 0)
         for monster in self.monster_list:
             monster.set_currturn(monster.get_speed())
@@ -440,8 +491,8 @@ class Pyrogue_Game:
         # Game over check
         if len(self.turn_pq) < 2 or not self.player.is_alive():
             score_msg = "Score: " + str(self.player_score)
-            self._update_score_label(score_msg, 'gold')
-            
+            self._update_score_label(score_msg, "gold")
+
             # Game has ended; if player is alive, then player won. Otherwise, the monsters won.
             if self.player.is_alive():
                 self._update_top_label(
