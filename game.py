@@ -79,13 +79,13 @@ class Pyrogue_Game:
 
         # Store what messages and font color should be displayed
         # Cache is to prevent unnecessary updates in render
-        self.top_msg_cache = ("","")
+        self.top_msg_cache = ("", "")
         self.top_msg = "Press any key to start"
         self.top_msg_color = "gold"
-        self.score_msg_cache = ("","")
+        self.score_msg_cache = ("", "")
         self.score_msg = "Score: 0"
         self.score_msg_color = "white"
-        self.pinfo_msg_cache = ("","")
+        self.pinfo_msg_cache = ("", "")
         pc_r, pc_c = self.player.get_pos()
         self.pinfo_msg = "Player Location: Row " + str(pc_r) + ", Column: " + str(pc_c)
         self.pinfo_msg_color = "white"
@@ -119,6 +119,7 @@ class Pyrogue_Game:
             self.turnloop_started = True
             self._start_turnloop()
             self._render_frame(self.scrsize_w, self.scrsize_h)
+            print("=== GAME START ===")
             # Game start done
             return
 
@@ -347,17 +348,6 @@ class Pyrogue_Game:
         x_offset = (width - tile_size * self.dungeon.width) // 2  # To center
         y_offset = tile_size  # To leave room for top message
 
-        # Update text labels, if needed
-        if (self.top_msg, self.top_msg_color) != self.top_msg_cache:
-            self.canvas.itemconfig("top_msg", text=self.top_msg, fill=self.top_msg_color)
-            self.top_msg_cache = (self.top_msg, self.top_msg_color)
-        # self.bottom_label_score.configure(
-        #     font=("Consolas", self.font_size), padx=x_offset + tile_size // 2
-        # )
-        # self.bottom_label_pinfo.configure(
-        #     font=("Consolas", self.font_size), padx=x_offset + tile_size // 2
-        # )
-
         if self.need_full_rerender:
             self.render_cache.clear()
 
@@ -374,11 +364,12 @@ class Pyrogue_Game:
             # Deleting existing messages and border
             self.canvas.delete("dungeon_border")
             self.canvas.delete("top_msg")
+            self.canvas.delete("score_msg")
+            self.canvas.delete("pinfo_msg")
 
-            # Create top message
+            # Draw top message label
             x = x_offset
             y = 0
-            # Draw top message label
             self.canvas.create_text(
                 x + tile_size // 2,
                 y + tile_size // 1.25,
@@ -386,6 +377,30 @@ class Pyrogue_Game:
                 fill=self.top_msg_color,
                 font=(self.def_font, self.font_size),
                 tag="top_msg",
+                anchor="w",
+            )
+
+            # Draw score message label
+            y = (self.dungeon.height + 1) * tile_size
+            self.canvas.create_text(
+                x + tile_size // 2,
+                y + tile_size // 2.5,
+                text=self.score_msg,
+                fill=self.score_msg_color,
+                font=(self.def_font, self.font_size),
+                tag="score_msg",
+                anchor="w",
+            )
+
+            # Draw pinfo message label
+            y = (self.dungeon.height + 2) * tile_size
+            self.canvas.create_text(
+                x + tile_size // 2,
+                y + tile_size // 2.5,
+                text=self.pinfo_msg,
+                fill=self.pinfo_msg_color,
+                font=(self.def_font, self.font_size),
+                tag="pinfo_msg",
                 anchor="w",
             )
 
@@ -400,6 +415,29 @@ class Pyrogue_Game:
                 tag="dungeon_border",
             )
             self.need_full_rerender = False
+
+
+        # Update text labels, if needed
+        # First checktop message
+        if (self.top_msg, self.top_msg_color) != self.top_msg_cache:
+            self.canvas.itemconfig(
+                "top_msg", text=self.top_msg, fill=self.top_msg_color
+            )
+            self.top_msg_cache = (self.top_msg, self.top_msg_color)
+            
+        # Check score message
+        if (self.score_msg, self.score_msg_color) != self.score_msg_cache:
+            self.canvas.itemconfig(
+                "score_msg", text=self.score_msg, fill=self.score_msg_color
+            )
+            self.score_msg_cache = (self.score_msg, self.score_msg_color)
+           
+        # Finally check pinfo message 
+        if (self.pinfo_msg, self.pinfo_msg_color) != self.pinfo_msg_cache:
+            self.canvas.itemconfig(
+                "pinfo_msg", text=self.pinfo_msg, fill=self.pinfo_msg_color
+            )
+            self.pinfo_msg_cache = (self.pinfo_msg, self.pinfo_msg_color)
 
         for row in range(self.dungeon.height):
             for col in range(self.dungeon.width):
@@ -465,8 +503,8 @@ class Pyrogue_Game:
             monster.set_currturn(monster.get_speed())
             # 9 to ensure that ALL monsters get a turn after player's first turn
             self.turn_pq.push(monster, monster.get_currturn())
-        # self._update_top_label("")
-        print("=== GAME START ===")
+        self._update_top_label("")
+        print("GAME: Turnloop started")
         self._next_turn()
 
     # Handles a single turn in the turnloop.
@@ -474,7 +512,7 @@ class Pyrogue_Game:
         # If player's turn, do nothing and wait
         if self.awaiting_player_input:
             return
-        
+
         # Game over check
         if len(self.turn_pq) < 2 or not self.player.is_alive():
             score_msg = "Score: " + str(self.player_score)
@@ -493,9 +531,8 @@ class Pyrogue_Game:
             print("=== GAME OVER ===")
             self._render_frame(self.scrsize_w, self.scrsize_h)
             return
-        
+
         self._render_frame(self.scrsize_w, self.scrsize_h)
-        
 
         # Pop actor; check if player turn
         _, actor = self.turn_pq.pop()
