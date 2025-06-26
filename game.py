@@ -6,9 +6,50 @@ from dungeon import *
 
 # This file handles the main gameloop and the vast majority of the tkinter user interface for PyRogue.
 # I'll admit that this code is a little messier than I think is ideal.
+
+
+# The Menu_Main class handles the main menu, it's sub-menus, and the main menu's control.
+# Consequently, it launches game itself (Pyrogue_Game class)
+class Menu_Main:
+    
+    # Pre-defined dungeon sizes
+    dungeon_size = {
+        "tiny": (10, 20),
+        "small": (20, 40),
+        "medium": (30, 60),
+        "large": (40, 80),
+        "enormous": (50, 100),
+    }
+
+    # Pre-defined difficulty settings
+    difficulty_setting = {
+        "trivial": 0.10,
+        "easy": 0.25,
+        "normal": 0.75,
+        "hard": 1.25,
+        "very_hard": 1.75,
+        "legendary": 2.5,
+    }
+    
+    # Menu_Main constructor.
+    def __init__(self, root):
+        
+        # Tkinter root
+        self.root = root
+        
+        # Init internal idea of screen size in pixels
+        self.scrsize_h = 720
+        self.scrsize_w = 1280
+        
+        # build whatever core UI Text element that the main menu will be build with
+        # I need to look at tkinter documentation to figure out which will be best; It may just end up being a canvas again.
+
+
+# The Pyrogue_Game class handles all the high-level game logic and control.
 class Pyrogue_Game:
 
-    # Pyrogue_game constructor.
+
+    # Pyrogue_Game constructor.
     def __init__(
         self,
         root,
@@ -80,8 +121,8 @@ class Pyrogue_Game:
         self.canvas = tk.Canvas(
             self.frame,
             bg="black",
-            height = scrsize_h,
-            width = scrsize_w,
+            height=scrsize_h,
+            width=scrsize_w,
             bd=0,
             highlightthickness=0,
         )
@@ -297,12 +338,14 @@ class Pyrogue_Game:
                     self._replace_dungeon()
                     self._render_frame
                     pc_r, pc_c = self.player.get_pos()
-                    pinfo_msg = "Player Location: Row " + str(pc_r) + ", Column: " + str(pc_c)
+                    pinfo_msg = (
+                        "Player Location: Row " + str(pc_r) + ", Column: " + str(pc_c)
+                    )
                     self._update_pinfo_label(pinfo_msg)
                     message = "You escaped to a new level of the dungeon"
                     self._update_top_label(message, "gold")
                     return True
-                else :
+                else:
                     message = "You can't escape from here; no staircase"
                     self._update_top_label(message)
             # Misinput; return false
