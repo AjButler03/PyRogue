@@ -29,7 +29,7 @@ def main():
     screen_w = 1280
 
     # dungeon size and difficulty settings
-    size = "medium"
+    size = "small"
     diff = "normal"
     print("SIZE:", size, "DIFFICULTY:", diff)
 
