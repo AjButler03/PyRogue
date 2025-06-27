@@ -11,9 +11,11 @@ from dungeon import *
 # The Menu_Main class handles the main menu, it's sub-menus, and the main menu's control.
 # Consequently, it launches game itself (Pyrogue_Game class)
 class Menu_Main:
-    
+    # This class has some duplicate code from Pyrogue_game.
+    # this is un-ideal, but I want main menu rendering / control to be separate from the game itself to keep things 'simpler'.
+
     # Pre-defined dungeon sizes
-    dungeon_size = {
+    dungeon_size_setting = {
         "tiny": (10, 20),
         "small": (20, 40),
         "medium": (30, 60),
@@ -30,24 +32,73 @@ class Menu_Main:
         "very_hard": 1.75,
         "legendary": 2.5,
     }
-    
+
     # Menu_Main constructor.
-    def __init__(self, root):
-        
+    def __init__(self, root, scrsize_h: int, scrsize_w: int):
+
         # Tkinter root
         self.root = root
-        
-        # Init internal idea of screen size in pixels
-        self.scrsize_h = 720
-        self.scrsize_w = 1280
-        
-        # build whatever core UI Text element that the main menu will be build with
-        # I need to look at tkinter documentation to figure out which will be best; It may just end up being a canvas again.
 
+        # Default font
+        self.def_font = "Consolas"
+
+        # Init internal idea of screen size in pixels
+        self.scrsize_h = scrsize_h
+        self.scrsize_w = scrsize_w
+
+        # Init default dungeon size and difficulty
+        self.difficulty = self.difficulty_setting["normal"]
+        self.dungeon_size = self.dungeon_size["small"]
+
+        # Now init the canvas that will hold everything
+        self.canvas = tk.Canvas(
+            self.root,
+            bg="black",
+            height=self.scrsize_h,
+            width=self.scrsize_w,
+            bd=0,
+            highlightthickness=5,
+        )
+        self.canvas.pack(fill=tk.BOTH, expand=True, side="top")
+
+        # Misc rendering related things
+        self.menu_modes = {"main": 0, "controls": 1, "manual": 2, "settings": 4}
+        self.curr_mode = 0
+        self.need_full_rerender = True
+
+        # Some things that help handle dynamic screen resizing
+        self.resize_id = None
+        self.resize_event = None
+        self.canvas.bind("<Configure>", self._on_win_resize)
+
+    # Event handeler for screen resizing.
+    def _on_win_resize(self, event):
+        # Save the event for redrawing
+        self.resize_event = event
+
+        # Cancel any pending redraw
+        if self.resize_id:
+            self.root.after_cancel(self.resize_id)
+
+        # schedule a redraw for 50ms from now
+        self.resize_id = self.root.after(100, self._resize_frame)
+        
+    # Handles resizing the window.
+    def _resize_frame(self):
+        if self.resize_event == None:
+            return
+
+        event = self.resize_event
+        self.scrsize_h = event.height
+        self.scrsize_w = event.width
+        self.need_full_rerender = True
+        # Call appropriate renderer; depends on current menu to be shown
+        if self.curr_mode == self.menu_modes['main']:
+            self._render_main(self.scrsize_h, self.scrsize_w)
+        self._render_frame(self.scrsize_h, self.scrsize_w)
 
 # The Pyrogue_Game class handles all the high-level game logic and control.
 class Pyrogue_Game:
-
 
     # Pyrogue_Game constructor.
     def __init__(
@@ -159,7 +210,7 @@ class Pyrogue_Game:
             # Until I create a main menu, any key input force starts the game.
             self.turnloop_started = True
             self._start_turnloop()
-            self._render_frame(self.scrsize_w, self.scrsize_h)
+            self._render_frame(self.scrsize_h, self.scrsize_w)
             print("=== GAME START ===")
             # Game start done
             return
@@ -308,7 +359,6 @@ class Pyrogue_Game:
                 if self.dungeon.tmap[pc_r][pc_c] == Dungeon.Terrain.stair:
                     # replace the dungeon, re-generating monsters and restarting the turn loop
                     self._replace_dungeon()
-                    self._render_frame
                     pc_r, pc_c = self.player.get_pos()
                     pinfo_msg = (
                         "Player Location: Row " + str(pc_r) + ", Column: " + str(pc_c)
@@ -367,10 +417,10 @@ class Pyrogue_Game:
         self.scrsize_h = event.height
         self.scrsize_w = event.width
         self.need_full_rerender = True
-        self._render_frame(self.scrsize_w, self.scrsize_h)
+        self._render_frame(self.scrsize_h, self.scrsize_w)
 
     # Renders the dungeon to the screen canvas.
-    def _render_frame(self, width, height):
+    def _render_frame(self, height, width):
         max_tile_width = width // self.dungeon.width
         max_tile_height = (
             height // self.scrn_rows
@@ -457,7 +507,6 @@ class Pyrogue_Game:
             )
             self.need_full_rerender = False
 
-
         # Update text labels, if needed
         # First checktop message
         if (self.top_msg, self.top_msg_color) != self.top_msg_cache:
@@ -465,15 +514,15 @@ class Pyrogue_Game:
                 "top_msg", text=self.top_msg, fill=self.top_msg_color
             )
             self.top_msg_cache = (self.top_msg, self.top_msg_color)
-            
+
         # Check score message
         if (self.score_msg, self.score_msg_color) != self.score_msg_cache:
             self.canvas.itemconfig(
                 "score_msg", text=self.score_msg, fill=self.score_msg_color
             )
             self.score_msg_cache = (self.score_msg, self.score_msg_color)
-           
-        # Finally check pinfo message 
+
+        # Finally check pinfo message
         if (self.pinfo_msg, self.pinfo_msg_color) != self.pinfo_msg_cache:
             self.canvas.itemconfig(
                 "pinfo_msg", text=self.pinfo_msg, fill=self.pinfo_msg_color
@@ -570,10 +619,10 @@ class Pyrogue_Game:
                 self._update_top_label("You have been defeated; Game Over", "red")
                 print("You have been defeated; Game Over")
             print("=== GAME OVER ===")
-            self._render_frame(self.scrsize_w, self.scrsize_h)
+            self._render_frame(self.scrsize_h, self.scrsize_w)
             return
 
-        self._render_frame(self.scrsize_w, self.scrsize_h)
+        self._render_frame(self.scrsize_h, self.scrsize_w)
 
         # Pop actor; check if player turn
         _, actor = self.turn_pq.pop()

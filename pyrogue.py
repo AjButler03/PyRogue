@@ -1,5 +1,5 @@
 import tkinter as tk
-from game import Pyrogue_Game
+from game import Menu_Main
 
 # This is the main executable for PyRogue. Running this file launches the game.
 
@@ -9,25 +9,15 @@ def main():
     screen_h = 720
     screen_w = 1280
 
-    # dungeon size and difficulty settings
-    size = "small"
-    diff = "normal"
-    print("SIZE:", size, "DIFFICULTY:", diff)
-
-    # Init dungeon
-    map_h, map_w = dungeon_size[size]
-    difficulty = difficulty_setting[diff]
-
     # Init tkinter window
     root = tk.Tk()
-    root.configure(height=screen_h, width=1280)
     root.title("PyRogue")
-    root.configure(bg='black')
+    root.configure(bg="black")
 
-    # Init game; includes tkinter event listeners
-    Pyrogue_Game(root, screen_h, screen_w, map_h, map_w, difficulty)
+    # Init the main menu; this will handle settings changes as well as launching / ending individual games
+    menu = Menu_Main(root, screen_h, screen_w)
 
-    # Launch the tkinter loop, which activates game code through event listeners
+    # Launch the tkinter loop, which will start the main menu's code
     root.mainloop()
 
 
