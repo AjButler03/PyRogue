@@ -1,25 +1,18 @@
 PyRogue v04 By Andrew Butler, Summer 2025
 Built to run using Python 3.12
 
--- About --
-In the spring semester of 2025 I built a rogue-like game as a series of assignments for a programming course at Iowa State University. 
-The original was built in C/C++, and had many unoptimized / poorly written aspects to it. Regardless, I was proud of having built it from scratch myself. The goal of this project is to build (roughly) the same game, but written in Python.
-My reasons for doing this:
-    a) I think it is easier to showcase and run python code to people, making it a better showpiece.
-    b) I want to gain more experience programming full projects in python, given that it is decently widely used.
-    c) Re-building the game allows me to implement optimizations and choice changes that I believe are 'better'.
-On point a in particular, I want this code to only rely on Python itself to be runable. In doing so, it is easily shared and ran by whoever would want to play the game or see how it works.
-
 pyrogue.py is the main file, and running it will do the following:
     - A new window for PyRogue will open, with a simple message at the top, followed by the dungeon display, then a couple more information labels
     - The PyRogue window can be scaled to whatever size you would like, and the contents will grow / shrink to fill the space as best it can
     - Pressing any key will start the game; your goal is to 'kill' all monsters by moving into the space they occupy. The monsters are attempting to do the same to you.
     - The PyRogue Game ends when either you are defeated, or all the monsters are defeated.
 
-New features with v04:
-    - User interface created via tkinker library
-    - Player character movement, as controlled by the player (keyboard input)
-    - Player can now escape to a new dungeon level via staircases (>)
+New features with v05:
+    - Main menu with instructions page
+    - Ability to replay without restarting pyrogue
+    - Settings options?
+    - Monster list sub-menu in game?
+    - Walk/tunnel distance map display?
 
 The game has the following key binds:
 ================================   MOVEMENT   ================================

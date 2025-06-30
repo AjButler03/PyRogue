@@ -1,0 +1,21 @@
+Main Menu Idea:
+    ____        ____                       
+   / __ \__  __/ __ \____  ____ ___  _____ 
+  / /_/ / / / / /_/ / __ \/ __ `/ / / / _ \
+ / ____/ /_/ / _, _/ /_/ / /_/ / /_/ /  __/
+/_/    \__, /_/ |_|\____/\__, /\__,_/\___/ 
+      /____/            /____/    
+
+    Start Game
+    Settings
+    Instructions
+    Monster Encyclopedia
+    Item Encyclopedia
+
+PyRogue in red, the menus in gold (roll clones)
+Source engine style indentation, because why not
+
+start game starts the game, rather intuitively.
+settings controls dungeon size and game difficulty; If I'm adventurous, I could even make controls settings; but that would be much, much later.
+instructions will have a page for 'lore' (short blurb) with game mechanic explanations, then another page for controls
+the encyclopedias will have unigue pages for each monster / item, all in the same format to display what they are.
