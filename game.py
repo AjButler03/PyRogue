@@ -48,7 +48,7 @@ class Menu_Main:
 
         # Init default dungeon size and difficulty
         self.difficulty = self.difficulty_setting["normal"]
-        self.dungeon_size = self.dungeon_size["small"]
+        self.dungeon_size = self.dungeon_size_setting["small"]
 
         # Now init the canvas that will hold everything
         self.canvas = tk.Canvas(
@@ -64,6 +64,7 @@ class Menu_Main:
         # Misc rendering related things
         self.menu_modes = {"main": 0, "controls": 1, "manual": 2, "settings": 4}
         self.curr_mode = 0
+        self.scrn_rows = 20 # Arbitrary; allows for enough room for text w/o making it too small / large
         self.need_full_rerender = True
 
         # Some things that help handle dynamic screen resizing
@@ -94,9 +95,123 @@ class Menu_Main:
         self.need_full_rerender = True
         # Call appropriate renderer; depends on current menu to be shown
         if self.curr_mode == self.menu_modes['main']:
-            self._render_main(self.scrsize_h, self.scrsize_w)
-        self._render_frame(self.scrsize_h, self.scrsize_w)
+            print("MENU: Re-rendered main screen")
+            self._render_home(self.scrsize_h, self.scrsize_w)
+    
+    # Renderer for the main menu's home page.
+    def _render_home(self, height, width):
+        # This is a series of string lines that form the PyRogue ASCII art text.
+        # It's a little garbled here because of excape character \.
+        ascii_line1 = "    ____        ____                       "
+        ascii_line2 = "   / __ \\__  __/ __ \\____  ____ ___  _____ "
+        ascii_line3 = "  / /_/ / / / / /_/ / __ \\/ __ `/ / / / _ \\"
+        ascii_line4 = " / ____/ /_/ / _, _/ /_/ / /_/ / /_/ /  __/"
+        ascii_line5 = "/_/    \\__, /_/ |_|\\____/\\__, /\\__,_/\\___/ "
+        ascii_line6 = "      /____/            /____/             "
+        
+        # Arbitrarily deciding that the screen must be at least 80 'tiles' wide.
+        max_tile_width = width // 80
+        max_tile_height = (
+            height // self.scrn_rows
+        )  # Note that there are 3 extra rows for messages / player information
+        tile_size = min(max_tile_width, max_tile_height)
+        self.font_size = int(tile_size / 1.5)
 
+        x_offset = 20
+        y_offset = tile_size * 2
+        
+
+        if self.need_full_rerender:
+            
+            ascii_color = "red"
+            ascii_anchor = "w"
+            # Deleting existing tagged canvas objects
+            self.canvas.delete("ascii_ln1")
+            self.canvas.delete("ascii_ln2")
+            self.canvas.delete("ascii_ln3")
+            self.canvas.delete("ascii_ln4")
+            self.canvas.delete("ascii_ln5")
+            self.canvas.delete("ascii_ln6")
+
+            # Draw top message label
+            x = x_offset
+            y = y_offset
+            
+            # line 1
+            self.canvas.create_text(
+                x,
+                y,
+                text=ascii_line1,
+                fill=ascii_color,
+                font=(self.def_font, self.font_size),
+                tag="ascii_ln1",
+                anchor=ascii_anchor,
+            )
+            
+            # line 2
+            y += tile_size
+            self.canvas.create_text(
+                x,
+                y,
+                text=ascii_line2,
+                fill=ascii_color,
+                font=(self.def_font, self.font_size),
+                tag="ascii_ln2",
+                anchor=ascii_anchor,
+            )
+            
+            # line 3
+            y += tile_size
+            self.canvas.create_text(
+                x,
+                y,
+                text=ascii_line3,
+                fill=ascii_color,
+                font=(self.def_font, self.font_size),
+                tag="ascii_ln3",
+                anchor=ascii_anchor,
+            )
+            
+            # line 4
+            y += tile_size
+            self.canvas.create_text(
+                x,
+                y,
+                text=ascii_line4,
+                fill=ascii_color,
+                font=(self.def_font, self.font_size),
+                tag="ascii_ln4",
+                anchor=ascii_anchor,
+            )
+            
+            # line 5
+            y += tile_size
+            self.canvas.create_text(
+                x,
+                y,
+                text=ascii_line5,
+                fill=ascii_color,
+                font=(self.def_font, self.font_size),
+                tag="ascii_ln5",
+                anchor=ascii_anchor,
+            )
+            
+            # line 6
+            y += tile_size
+            self.canvas.create_text(
+                x,
+                y,
+                text=ascii_line6,
+                fill=ascii_color,
+                font=(self.def_font, self.font_size),
+                tag="ascii_ln6",
+                anchor=ascii_anchor,
+            )
+            
+            self.need_full_rerender = False
+        
+        
+        
 # The Pyrogue_Game class handles all the high-level game logic and control.
 class Pyrogue_Game:
 

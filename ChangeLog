@@ -1,6 +1,8 @@
 v05 ===========================================================================================================================
 06/26/2025
     - Init Menu_Main class to handle the main menu and its future sub-menus; Work in progress
+06/30/2025
+    - Started work on rendering ASCII art PyRogue for main menu
 v04 ===========================================================================================================================
 06/17/2025
     - Added error checking where no optimal move based on path found; now results in no move instead of crash
