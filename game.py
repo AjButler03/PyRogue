@@ -62,9 +62,11 @@ class Menu_Main:
         self.canvas.pack(fill=tk.BOTH, expand=True, side="top")
 
         # Misc rendering related things
-        self.menu_modes = {"main": 0, "controls": 1, "manual": 2, "settings": 4}
+        self.menu_modes = {"main": 0, "settings": 1, "manual": 2, "monstencyc": 3, "itemencyc": 4}
         self.curr_mode = 0
+        self.home_select_idx = 0
         self.need_full_rerender = True
+        self.in_game = False
 
         # Some things that help handle dynamic screen resizing
         self.resize_id = None
@@ -73,15 +75,18 @@ class Menu_Main:
 
     # Event handeler for screen resizing.
     def _on_win_resize(self, event):
-        # Save the event for redrawing
-        self.resize_event = event
+        
+        # First check if in game; if so, do nothing.
+        if not self.in_game:
+            # Save the event for redrawing
+            self.resize_event = event
 
-        # Cancel any pending redraw
-        if self.resize_id:
-            self.root.after_cancel(self.resize_id)
+            # Cancel any pending redraw
+            if self.resize_id:
+                self.root.after_cancel(self.resize_id)
 
-        # schedule a redraw for 50ms from now
-        self.resize_id = self.root.after(100, self._resize_frame)
+            # schedule a redraw for 50ms from now
+            self.resize_id = self.root.after(100, self._resize_frame)
         
     # Handles resizing the window.
     def _resize_frame(self):
@@ -99,15 +104,6 @@ class Menu_Main:
     
     # Renderer for the main menu's home page.
     def _render_home(self, height, width):
-        # This is a series of string lines that form the PyRogue ASCII art text.
-        # It's a little garbled here because of excape character \.
-        ascii_line1 = "    ____        ____                       "
-        ascii_line2 = "   / __ \\__  __/ __ \\____  ____ ___  _____ "
-        ascii_line3 = "  / /_/ / / / / /_/ / __ \\/ __ `/ / / / _ \\"
-        ascii_line4 = " / ____/ /_/ / _, _/ /_/ / /_/ / /_/ /  __/"
-        ascii_line5 = "/_/    \\__, /_/ |_|\\____/\\__, /\\__,_/\\___/ "
-        ascii_line6 = "      /____/            /____/             "
-        
         version_str = "v0.05 July 2025"
         
         # Arbitrary bounds to determine how big home screen text should be
@@ -128,97 +124,41 @@ class Menu_Main:
 
         if self.need_full_rerender:
             
+            # This is a series of string lines that form the PyRogue ASCII art text.
+            # It's a little garbled here because of excape character \.
+            ascii_line1 = "    ____        ____                       "
+            ascii_line2 = "   / __ \\__  __/ __ \\____  ____ ___  _____ "
+            ascii_line3 = "  / /_/ / / / / /_/ / __ \\/ __ `/ / / / _ \\"
+            ascii_line4 = " / ____/ /_/ / _, _/ /_/ / /_/ / /_/ /  __/"
+            ascii_line5 = "/_/    \\__, /_/ |_|\\____/\\__, /\\__,_/\\___/ "
+            ascii_line6 = "      /____/            /____/             "
+            
+            # making things easier so I can just write loops for rendering home screen elements
             ascii_color = "red"
             ascii_anchor = "w"
+            ascii_text = {0:ascii_line1, 1:ascii_line2, 2:ascii_line3, 3:ascii_line4, 4:ascii_line5, 5:ascii_line6}
+            ascii_tags = {0:"ascii_ln1", 1:"ascii_ln2", 2:"ascii_ln3", 3:"ascii_ln4", 4:"ascii_ln5", 5:"ascii_ln6"}
+            select_opts = {0:"Start Game", 1:"Settings", 2:"Manual", 3:"Monster Encyclopedia", 4:"Item Encyclopedia"}
+            select_opts_tags = {0:"opt_startgame", 1:"opt_settings", 2:"opt_manual", 3:"opt_monstencyc", 4:"opt_itemencyc"}
             
             # Deleting existing tagged canvas objects
-            self.canvas.delete("ascii_ln1")
-            self.canvas.delete("ascii_ln2")
-            self.canvas.delete("ascii_ln3")
-            self.canvas.delete("ascii_ln4")
-            self.canvas.delete("ascii_ln5")
-            self.canvas.delete("ascii_ln6")
-            self.canvas.delete("opt_startgame")
-            self.canvas.delete("opt_settings")
-            self.canvas.delete("opt_manual")
-            self.canvas.delete("opt_monstencyc")
-            self.canvas.delete("opt_itemencyc")
-            self.canvas.delete("version")
+            self.canvas.delete("all")
 
             # Now clunkily render the ASCII art text line by line
             x = x_offset
             y = y_offset
-            
-            # line 1
-            self.canvas.create_text(
-                x,
-                y,
-                text=ascii_line1,
-                fill=ascii_color,
-                font=(self.def_font, self.font_size),
-                tag="ascii_ln1",
-                anchor=ascii_anchor,
-            )
-            
-            # line 2
-            y += tile_size
-            self.canvas.create_text(
-                x,
-                y,
-                text=ascii_line2,
-                fill=ascii_color,
-                font=(self.def_font, self.font_size),
-                tag="ascii_ln2",
-                anchor=ascii_anchor,
-            )
-            
-            # line 3
-            y += tile_size
-            self.canvas.create_text(
-                x,
-                y,
-                text=ascii_line3,
-                fill=ascii_color,
-                font=(self.def_font, self.font_size),
-                tag="ascii_ln3",
-                anchor=ascii_anchor,
-            )
-            
-            # line 4
-            y += tile_size
-            self.canvas.create_text(
-                x,
-                y,
-                text=ascii_line4,
-                fill=ascii_color,
-                font=(self.def_font, self.font_size),
-                tag="ascii_ln4",
-                anchor=ascii_anchor,
-            )
-            
-            # line 5
-            y += tile_size
-            self.canvas.create_text(
-                x,
-                y,
-                text=ascii_line5,
-                fill=ascii_color,
-                font=(self.def_font, self.font_size),
-                tag="ascii_ln5",
-                anchor=ascii_anchor,
-            )
-            
-            # line 6
-            y += tile_size
-            self.canvas.create_text(
-                x,
-                y,
-                text=ascii_line6,
-                fill=ascii_color,
-                font=(self.def_font, self.font_size),
-                tag="ascii_ln6",
-                anchor=ascii_anchor,
-            )
+
+            for i in range(6):
+                self.canvas.create_text(
+                    x,
+                    y,
+                    text=ascii_text[i],
+                    fill=ascii_color,
+                    font=(self.def_font, self.font_size),
+                    tag=ascii_tags[i],
+                    anchor=ascii_anchor,
+                )
+                y += tile_size
             
             # Now draw the home page options
             opt_color = "gold"
@@ -226,65 +166,23 @@ class Menu_Main:
             x = x_offset * 2
             y += tile_size * 3
             
-            # Start Game option
-            self.canvas.create_text(
-                x,
-                y,
-                text="Start Game",
-                fill=opt_color,
-                font=(self.def_font, opt_fontsize),
-                tag="opt_startgame",
-                anchor=ascii_anchor,
-            )
+            for i in range(5):
+                self.canvas.create_text(
+                    x,
+                    y,
+                    text=select_opts[i],
+                    fill=opt_color,
+                    font=(self.def_font, opt_fontsize),
+                    tag=select_opts_tags[i],
+                    anchor=ascii_anchor,
+                )
+                y += tile_size
             
-            # Settings option
-            y += tile_size
-            self.canvas.create_text(
-                x,
-                y,
-                text="Settings",
-                fill=opt_color,
-                font=(self.def_font, opt_fontsize),
-                tag="opt_settings",
-                anchor=ascii_anchor,
-            )
+            # append arrow to whichever selection is currently being made
+            new_opt_text = select_opts[self.home_select_idx] + " <--"
+            self.canvas.itemconfigure(select_opts_tags[self.home_select_idx], text=new_opt_text)
             
-            # Manual option
-            y += tile_size
-            self.canvas.create_text(
-                x,
-                y,
-                text="Manual",
-                fill=opt_color,
-                font=(self.def_font, opt_fontsize),
-                tag="opt_manual",
-                anchor=ascii_anchor,
-            )
-            
-            # Monster Encyclopedia option
-            y += tile_size
-            self.canvas.create_text(
-                x,
-                y,
-                text="Monster Encyclopedia",
-                fill=opt_color,
-                font=(self.def_font, opt_fontsize),
-                tag="opt_monstencyc",
-                anchor=ascii_anchor,
-            )
-            
-            # Item Encyclopedia option
-            y += tile_size
-            self.canvas.create_text(
-                x,
-                y,
-                text="Item Encyclopedia",
-                fill=opt_color,
-                font=(self.def_font, opt_fontsize),
-                tag="opt_itemencyc",
-                anchor=ascii_anchor,
-            )
-            
+            # Little version number at the bottom of the screen
             x = int(width - tile_size * 3.25)
             y = height - tile_size // 2
             self.canvas.create_text(
@@ -296,8 +194,6 @@ class Menu_Main:
                 tag="version",
                 anchor=ascii_anchor,
             )
-            
-            
             
             self.need_full_rerender = False
         

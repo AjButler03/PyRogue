@@ -5,6 +5,8 @@ v0.05 ==========================================================================
     - Started work on rendering ASCII art PyRogue for main menu
 07/01/2025
     - Visually added selection options to main menu home, formalized version numbers + added version note in main menu home
+    - cleaned up home screen rendering code
+    - 
 v0.04 ===========================================================================================================================
 06/17/2025
     - Added error checking where no optimal move based on path found; now results in no move instead of crash
