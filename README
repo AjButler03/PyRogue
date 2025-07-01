@@ -1,4 +1,4 @@
-PyRogue v04 By Andrew Butler, Summer 2025
+PyRogue v0.05 By Andrew Butler, Summer 2025
 Built to run using Python 3.12
 
 pyrogue.py is the main file, and running it will do the following:
@@ -7,7 +7,7 @@ pyrogue.py is the main file, and running it will do the following:
     - Pressing any key will start the game; your goal is to 'kill' all monsters by moving into the space they occupy. The monsters are attempting to do the same to you.
     - The PyRogue Game ends when either you are defeated, or all the monsters are defeated.
 
-New features with v05:
+New features with v0.05:
     - Main menu with instructions page
     - Ability to replay without restarting pyrogue
     - Settings options?

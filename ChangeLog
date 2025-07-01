@@ -1,9 +1,11 @@
-v05 ===========================================================================================================================
+v0.05 ===========================================================================================================================
 06/26/2025
     - Init Menu_Main class to handle the main menu and its future sub-menus; Work in progress
 06/30/2025
     - Started work on rendering ASCII art PyRogue for main menu
-v04 ===========================================================================================================================
+07/01/2025
+    - Visually added selection options to main menu home, formalized version numbers + added version note in main menu home
+v0.04 ===========================================================================================================================
 06/17/2025
     - Added error checking where no optimal move based on path found; now results in no move instead of crash
 06/18/2025
@@ -32,7 +34,7 @@ v04 ============================================================================
     - Made staircases functional; player can now escape to new levels
 06/26/2025
     - Removed labels, instead integrating hud text into the same canvas as the dungeon. Somewhat slower, but prettier.
-v03 ===========================================================================================================================
+v0.03 ===========================================================================================================================
 06/04/2025
     - Start v03; update ChangeLog + README
     - Monster Class + monster generation method
@@ -57,7 +59,7 @@ v03 ============================================================================
 06/17/2025
     - Fixed several bugs with monster path movement
     - Implemented a basic combat dialogue; will be more useful later on
-v02 ===========================================================================================================================
+v0.02 ===========================================================================================================================
 05/31/2025
     - Start v02; update ChangeLog + README
     - Init pyrogue.py as the main file to run
@@ -71,7 +73,7 @@ v02 ============================================================================
     - Created actor class (abstract), which player class inherits from
     - Created proper actor map to store actor locations
     - pyrogue.py now has render method to show terrain and actor positions
-v01 ===========================================================================================================================
+v0.01 ===========================================================================================================================
 05/20/2025
     - Starting this Project
 05/21/2025

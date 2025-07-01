@@ -64,7 +64,6 @@ class Menu_Main:
         # Misc rendering related things
         self.menu_modes = {"main": 0, "controls": 1, "manual": 2, "settings": 4}
         self.curr_mode = 0
-        self.scrn_rows = 20 # Arbitrary; allows for enough room for text w/o making it too small / large
         self.need_full_rerender = True
 
         # Some things that help handle dynamic screen resizing
@@ -109,22 +108,29 @@ class Menu_Main:
         ascii_line5 = "/_/    \\__, /_/ |_|\\____/\\__, /\\__,_/\\___/ "
         ascii_line6 = "      /____/            /____/             "
         
-        # Arbitrarily deciding that the screen must be at least 80 'tiles' wide.
-        max_tile_width = width // 80
+        version_str = "v0.05 July 2025"
+        
+        # Arbitrary bounds to determine how big home screen text should be
+        home_scr_charcol = 26 # At least this many 'tiles' wide
+        home_scr_charrow = 16 # At least this many 'tiles' tall
+        
+        # Arbitrarily deciding that the screen must be at least 40 'tiles' wide.
+        max_tile_width = width // home_scr_charcol
         max_tile_height = (
-            height // self.scrn_rows
+            height // home_scr_charrow
         )  # Note that there are 3 extra rows for messages / player information
         tile_size = min(max_tile_width, max_tile_height)
         self.font_size = int(tile_size / 1.5)
 
-        x_offset = 20
-        y_offset = tile_size * 2
+        x_offset = tile_size
+        y_offset = tile_size
         
 
         if self.need_full_rerender:
             
             ascii_color = "red"
             ascii_anchor = "w"
+            
             # Deleting existing tagged canvas objects
             self.canvas.delete("ascii_ln1")
             self.canvas.delete("ascii_ln2")
@@ -132,8 +138,14 @@ class Menu_Main:
             self.canvas.delete("ascii_ln4")
             self.canvas.delete("ascii_ln5")
             self.canvas.delete("ascii_ln6")
+            self.canvas.delete("opt_startgame")
+            self.canvas.delete("opt_settings")
+            self.canvas.delete("opt_manual")
+            self.canvas.delete("opt_monstencyc")
+            self.canvas.delete("opt_itemencyc")
+            self.canvas.delete("version")
 
-            # Draw top message label
+            # Now clunkily render the ASCII art text line by line
             x = x_offset
             y = y_offset
             
@@ -207,6 +219,85 @@ class Menu_Main:
                 tag="ascii_ln6",
                 anchor=ascii_anchor,
             )
+            
+            # Now draw the home page options
+            opt_color = "gold"
+            opt_fontsize = int(self.font_size // 1.25)
+            x = x_offset * 2
+            y += tile_size * 3
+            
+            # Start Game option
+            self.canvas.create_text(
+                x,
+                y,
+                text="Start Game",
+                fill=opt_color,
+                font=(self.def_font, opt_fontsize),
+                tag="opt_startgame",
+                anchor=ascii_anchor,
+            )
+            
+            # Settings option
+            y += tile_size
+            self.canvas.create_text(
+                x,
+                y,
+                text="Settings",
+                fill=opt_color,
+                font=(self.def_font, opt_fontsize),
+                tag="opt_settings",
+                anchor=ascii_anchor,
+            )
+            
+            # Manual option
+            y += tile_size
+            self.canvas.create_text(
+                x,
+                y,
+                text="Manual",
+                fill=opt_color,
+                font=(self.def_font, opt_fontsize),
+                tag="opt_manual",
+                anchor=ascii_anchor,
+            )
+            
+            # Monster Encyclopedia option
+            y += tile_size
+            self.canvas.create_text(
+                x,
+                y,
+                text="Monster Encyclopedia",
+                fill=opt_color,
+                font=(self.def_font, opt_fontsize),
+                tag="opt_monstencyc",
+                anchor=ascii_anchor,
+            )
+            
+            # Item Encyclopedia option
+            y += tile_size
+            self.canvas.create_text(
+                x,
+                y,
+                text="Item Encyclopedia",
+                fill=opt_color,
+                font=(self.def_font, opt_fontsize),
+                tag="opt_itemencyc",
+                anchor=ascii_anchor,
+            )
+            
+            x = int(width - tile_size * 3.25)
+            y = height - tile_size // 2
+            self.canvas.create_text(
+                x,
+                y,
+                text=version_str,
+                fill='white',
+                font=(self.def_font, (opt_fontsize // 2)),
+                tag="version",
+                anchor=ascii_anchor,
+            )
+            
+            
             
             self.need_full_rerender = False
         
