@@ -16,7 +16,6 @@ class Menu_Main:
 
     # Pre-defined dungeon sizes
     dungeon_size_setting = {
-        "tiny": (10, 20),
         "small": (20, 40),
         "medium": (30, 60),
         "large": (40, 80),
@@ -330,9 +329,6 @@ class Pyrogue_Game:
         self.game_over = False
         self.awaiting_player_input = False
 
-        # Render an initial frame
-        self._render_frame(scrsize_h, scrsize_w)
-
     # Event handeler for screen resizing.
     def _on_win_resize(self, event):
         # Save the event for redrawing
@@ -540,8 +536,10 @@ class Pyrogue_Game:
                     self.player_score += 1
                 return success
             else:
-                self._update_top_label("You can't move there")
-                pass
+                message = "You can't move there"
+                print("INPUT:", message)
+                self._update_top_label(message)
+                return False
 
     # Wrapper to update top message label. Cyan is the default message color.
     def _update_top_label(self, message: str, font_color: str = "cyan"):
@@ -655,7 +653,7 @@ class Pyrogue_Game:
             self.need_full_rerender = False
 
         # Update text labels, if needed
-        # First checktop message
+        # First check top message
         if (self.top_msg, self.top_msg_color) != self.top_msg_cache:
             self.canvas.itemconfig(
                 "top_msg", text=self.top_msg, fill=self.top_msg_color
@@ -728,8 +726,6 @@ class Pyrogue_Game:
                             font=(self.def_font, self.font_size),
                             tag=f"tile_{row}_{col}",
                         )
-        # Note for later: when generating new dungeon, need to call this.
-        # self.render_cache.clear()
 
     # Starts the game's turnloop
     def _start_turnloop(self):

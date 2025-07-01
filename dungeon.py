@@ -138,41 +138,43 @@ class Dungeon:
 
     # Generates dungeon rock hardness map, necessary for Dijkstra path generation + NPC pathfinding
     def _generate_rockmap(self):
-        # Step 1: Initialize immutable outer border to 255
+        # Init immutable rock border to hardness 255 & randomize everything else in [1, 254] inclusive.
         for r in range(self.height):
             for c in range(self.width):
                 if r == 0 or c == 0 or r == self.height - 1 or c == self.width - 1:
                     self.rmap[r][c] = max_rock_hardness
                 else:
-                    self.rmap[r][c] = 0  # Explicitly clear previous runs if any
+                    self.rmap[r][c] = random.randint(1, 254)
 
-        # Step 2: Generate one random origin for each rock hardness level (1–254, 0 reserved for floor & 255 is immutable rock)
-        rock_origins = [
-            (random.randint(1, self.height - 2), random.randint(1, self.width - 2))
-            for _ in range(max_rock_hardness - 1)
-        ]
+        # There was originally more to this to allow it to be more 'smooth', but that resulted in boring corridors.
+        
+        # # Step 2: Generate one random origin for each rock hardness level (1–254, 0 reserved for floor & 255 is immutable rock)
+        # rock_origins = [
+        #     (random.randint(1, self.height - 2), random.randint(1, self.width - 2))
+        #     for _ in range(max_rock_hardness - 1)
+        # ]
 
-        # Step 3: BFS propagation from each origin with decaying hardness
-        for rlev in range(1, max_rock_hardness):
-            origin_r, origin_c = rock_origins[rlev - 1]
-            queue = deque()
-            queue.append((origin_r, origin_c, rlev))
+        # # Step 3: BFS propagation from each origin with decaying hardness
+        # for rlev in range(1, max_rock_hardness):
+        #     origin_r, origin_c = rock_origins[rlev - 1]
+        #     queue = deque()
+        #     queue.append((origin_r, origin_c, rlev))
 
-            while queue:
-                r, c, hardness = queue.popleft()
+        #     while queue:
+        #         r, c, hardness = queue.popleft()
 
-                # Skip out-of-bounds or immutable
-                if not (1 <= r < self.height - 1 and 1 <= c < self.width - 1):
-                    continue
+        #         # Skip out-of-bounds or immutable
+        #         if not (1 <= r < self.height - 1 and 1 <= c < self.width - 1):
+        #             continue
 
-                # If this cell is unset or the new hardness is higher (stronger rock), update
-                if self.rmap[r][c] == 0 or hardness > self.rmap[r][c]:
-                    self.rmap[r][c] = hardness
+        #         # If this cell is unset or the new hardness is higher (stronger rock), update
+        #         if self.rmap[r][c] == 0 or hardness > self.rmap[r][c]:
+        #             self.rmap[r][c] = hardness
 
-                    # Spread to neighbors with decayed hardness (min = 1)
-                    if hardness > 1:
-                        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                            queue.append((r + dr, c + dc, hardness - 1))
+        #             # Spread to neighbors with decayed hardness (min = 1)
+        #             if hardness > 1:
+        #                 for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+        #                     queue.append((r + dr, c + dc, hardness - 1))
 
     # Creates a corridor between point 1 and point 2
     # Utilizing dijkstra's algoritm over the rockmap
