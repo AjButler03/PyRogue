@@ -105,18 +105,65 @@ class Menu_Main:
 
             # schedule a redraw for 50ms from now
             self.resize_id = self.root.after(100, self._resize_frame)
-        
+    
+    # Input event handler for the home page
+    def _home_input_handler(self, key):
+            if key == "Return":
+                # User made selection for new page
+                if self.home_select_idx == 0:
+                    # Start a new game
+                    print("Starting game")
+                    self.toggle_ingame()
+                    mapsize_h, mapsize_w = self.dungeon_size_setting[self.dungeon_size]
+                    Pyrogue_Game(self, self.root, self.scrsize_h, self.scrsize_w, mapsize_h, mapsize_w, self.difficulty_setting[self.difficulty])
+                elif self.home_select_idx == 5:
+                    # Force exit; maybe not the way to do it, but it seems to work fine
+                    exit(0)
+            elif key == "j" or key == "Down" or key == "2":
+                # Move selection down
+                if self.home_select_idx < 5:
+                    self.home_select_idx += 1
+                    self.need_full_rerender = True
+                    self._render_home(self.scrsize_h, self.scrsize_w)
+                else:
+                    self.home_select_idx = 0
+                    self.need_full_rerender = True
+                    self._render_home(self.scrsize_h, self.scrsize_w)
+            elif key == "k" or key == "Up" or key == "8":
+                # Move selection up
+                if self.home_select_idx >= 1:
+                    self.home_select_idx -= 1
+                    self.need_full_rerender = True
+                    self._render_home(self.scrsize_h, self.scrsize_w)
+                else:
+                    self.home_select_idx = 5
+                    self.need_full_rerender = True
+                    self._render_home(self.scrsize_h, self.scrsize_w)
+    
+    # Input event handler for the settings page
+    def _settings_input_handler(self, key):
+        pass
+    
+    # Input event handler for the manual page
+    def _manual_input_handler(self, key):
+        pass
+    
+    # Input event handler for the monster encyclopedia page
+    def _monstencyc_input_handler(self, key):
+        pass
+    
+    # Input event handler for the item encyclopedia page
+    def _itemencyc_input_handler(self, key):
+        pass
+    
     # Event handler for keyboard input.
     def _on_key_press(self, event):
         if not self.in_game:
             key = event.keysym
-            print(f"KEY INPUT: {key}")
-            if key == "Return":
-                # For now just handling like it's on start game, which it is currently hard coded to be.
-                print("Entering Game")
-                self.toggle_ingame()
-                mapsize_h, mapsize_w = self.dungeon_size_setting[self.dungeon_size]
-                Pyrogue_Game(self, self.root, self.scrsize_h, self.scrsize_w, mapsize_h, mapsize_w, self.difficulty_setting[self.difficulty])
+            print(f"MENU KEY INPUT: {key}")
+            # Check which page that the user is on, go to the appropriate handler
+            if self.curr_mode == 0:
+                self._home_input_handler(key)
                         
     # Handles resizing the window.
     def _resize_frame(self):
@@ -171,6 +218,7 @@ class Menu_Main:
             ascii_tags = {0:"ascii_ln1", 1:"ascii_ln2", 2:"ascii_ln3", 3:"ascii_ln4", 4:"ascii_ln5", 5:"ascii_ln6"}
             select_opts = {0:"Start Game", 1:"Settings", 2:"Manual", 3:"Monster Encyclopedia", 4:"Item Encyclopedia", 5:"Quit"}
             select_opts_tags = {0:"opt_startgame", 1:"opt_settings", 2:"opt_manual", 3:"opt_monstencyc", 4:"opt_itemencyc", 5:"opt_quit"}
+            select_opts_colors = {0:"gold", 1:"gray", 2:"gray", 3:"gray", 4:"gray", 5:"gold"}
             
             # Deleting existing tagged canvas objects
             self.canvas.delete("all")
@@ -203,7 +251,7 @@ class Menu_Main:
                     x,
                     y,
                     text=select_opts[i],
-                    fill=opt_color,
+                    fill=select_opts_colors[i],
                     font=(self.def_font, opt_fontsize),
                     tag=select_opts_tags[i],
                     anchor=ascii_anchor,
@@ -228,6 +276,10 @@ class Menu_Main:
             )
             
             self.need_full_rerender = False
+            
+    def _render_settings(self, height, width):
+        
+        pass
         
         
 # The Pyrogue_Game class handles all the high-level game logic and control.
@@ -344,7 +396,7 @@ class Pyrogue_Game:
     # Event handeler for keyboard input
     def _on_key_press(self, event):
         key = event.keysym
-        print(f"KEY INPUT: {key}")
+        print(f"GAME KEY INPUT: {key}")
         if not self.turnloop_started:
             # Until I create a main menu, any key input force starts the game.
             self.turnloop_started = True

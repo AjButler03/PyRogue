@@ -8,6 +8,9 @@ v0.05 ==========================================================================
     - cleaned up home screen rendering code
     - Implemented 'start game' functionality from main menu; can now play multiple times on a single launch of PyRogue.py
     - Changed dungeon rockmap generation to be purely random, leading to some more interesting corridors / pathfinding
+07/02/2025
+    - Main menu selection can now move
+    - Quit in main menu now works
 v0.04 ===========================================================================================================================
 06/17/2025
     - Added error checking where no optimal move based on path found; now results in no move instead of crash

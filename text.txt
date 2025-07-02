@@ -1,3 +1,6 @@
+ASCII text generated at https://patorjk.com/software/taag/#p=display&f=Slant&t=PyRogue
+Main font is Slant, side pages are Small Slant
+
 Main Menu Idea:
     ____        ____                       
    / __ \__  __/ __ \____  ____ ___  _____ 
@@ -19,3 +22,12 @@ start game starts the game, rather intuitively.
 settings controls dungeon size and game difficulty; If I'm adventurous, I could even make controls settings; but that would be much, much later.
 instructions will have a page for 'lore' (short blurb) with game mechanic explanations, then another page for controls
 the encyclopedias will have unigue pages for each monster / item, all in the same format to display what they are.
+
+
+Settings page Idea:
+
+   ____    __  __  _             
+  / __/__ / /_/ /_(_)__  ___ ____
+ _\ \/ -_) __/ __/ / _ \/ _ `(_-<
+/___/\__/\__/\__/_/_//_/\_, /___/
+                       /___/     
