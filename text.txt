@@ -42,3 +42,67 @@ Enormous   (40 x 80)         Legendary
 
 Settings, Dungeon size, and difficulty in white
 unselected settings in white, currently selected settings in gold
+
+Manual Page Idea (4 pages):
+Manual Page 1:
+   ____     __         
+  /  _/__  / /________ 
+ _/ // _ \/ __/ __/ _ \
+/___/_//_/\__/_/  \___/
+                                
+Welcome, traveler.
+
+PyRogue is a game about resourcefulness and survival - the dungeon you find yourself in
+is not a forgiving place, and plenty of monsters hide in the shadows. In order to survive,
+you will need to scavange for helpful objects and be observent about the creatures you find.
+
+Knowledge of the items you yield and the creatures you encounter might make the difference
+between making it out alive and becoming part of the decor.
+
+This manual aims to help you gain that knowledge.
+
+Manual Page 2:
+   __  ___              __            
+  /  |/  /__  ___  ___ / /____ _______
+ / /|_/ / _ \/ _ \(_-</ __/ -_) __(_-<
+/_/  /_/\___/_//_/___/\__/\__/_/ /___/
+
+Not all of the monsters lurking in the dungeon are the same; they have
+different attributes, which modify how a specific monster behaves in the dungeon.
+By default, a monster must see the player, stay within rooms/corridors, and moves
+in a straight line. These are the possible attributes:
+
+  INTELLIGENT: Monster follows optimal path, and can remember the player's location.
+  TELEPATHIC: Monster always knows the player's location.
+  TUNNEL: Monster can bore through rock, creating new paths between rooms.
+  ERRATIC: On each turn, monster has a 50% chance to ignore its path and move randomly.
+  UNIQUE: There will only be 1 at a time, and if it dies, it will not spawn again.
+  BOSS: Killing a boss monster wins the game.
+
+See the monster encyclopedia for the specific types of monsters that you might see.
+
+Manual Page 3:
+   ______              
+  /  _/ /____ __ _  ___
+ _/ // __/ -_)  ' \(_-<
+/___/\__/\__/_/_/_/___/             
+
+Scattered throughout the dungeon you will find various items that will help you 
+survive; these include potions, melee weapons, ranged weapons, armor, amulet, 
+light, and rings.
+
+You have inventory space for up to ten items; with the exception of potions, you can
+equip slots to 'use' the items. You can equip one ring on each hand, and only one of
+every other type of equipable items. Potions have instantanious effects upon the player,
+and their usage per turn is only limited by the amount that you are carrying.
+
+See the item encyclopedia for the different items to keep an eye out for.
+
+Manual Page 4:
+  _________  _  ___________  ____  __   ____
+ / ___/ __ \/ |/ /_  __/ _ \/ __ \/ /  / __/
+/ /__/ /_/ /    / / / / , _/ /_/ / /___\ \  
+\___/\____/_/|_/ /_/ /_/|_|\____/____/___/  
+
+This one has to scroll, so that makes this one a bit more complicated. 
+I'm going to worry about the first three first.

@@ -1,5 +1,6 @@
 import tkinter as tk
-from game import Menu_Main
+from menu_main import Menu_Main
+
 
 # This is the main executable for PyRogue. Running this file launches the game.
 
