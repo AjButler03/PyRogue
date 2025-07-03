@@ -15,23 +15,42 @@ class Menu_Main:
     # this is un-ideal, but I want main menu rendering / control to be separate from the game itself to keep things 'simpler'.
 
     # Pre-defined dungeon sizes
-    dungeon_size_setting = {
-        "tiny": (15, 30),
-        "small": (20, 40),
-        "medium": (25, 50),
-        "large": (30, 60),
-        "very large": (35, 70),
-        "enormous": (40, 80),
+    dungeon_size_idx = {
+        "tiny": 0,
+        "small": 1,
+        "medium": 2,
+        "large": 3,
+        "very large": 4,
+        "enormous": 5
     }
+    
+    dungeon_size_setting = {
+        0: (15, 30),
+        1: (20, 40),
+        2: (25, 50),
+        3: (30, 60),
+        4: (35, 70),
+        5: (40, 80),
+    }
+    
 
     # Pre-defined difficulty settings
+    difficulty_idx = {
+        "trivial": 0,
+        "easy": 1,
+        "normal": 2,
+        "hard" : 3,
+        "very hard": 4,
+        "legendary": 5
+    }
+    
     difficulty_setting = {
-        "trivial": 0.10,
-        "easy": 0.5,
-        "normal": 1,
-        "hard": 1.5,
-        "very_hard": 2,
-        "legendary": 2.5,
+        0: 0.10,
+        1: 0.5,
+        2: 1,
+        3: 1.5,
+        4: 2,
+        5: 2.5,
     }
 
     # Menu_Main constructor.
@@ -48,8 +67,8 @@ class Menu_Main:
         self.scrsize_w = scrsize_w
 
         # Init default dungeon size and difficulty
-        self.difficulty = "normal"
-        self.dungeon_size = "medium"
+        self.difficulty = self.difficulty_idx["normal"]
+        self.dungeon_size = self.dungeon_size_idx["small"]
 
         # Now init the canvas that will hold everything
         self.canvas = tk.Canvas(
@@ -63,7 +82,13 @@ class Menu_Main:
         self.canvas.pack(fill=tk.BOTH, expand=True, side="top")
 
         # Misc rendering related things
-        self.menu_modes = {"main": 0, "settings": 1, "manual": 2, "monstencyc": 3, "itemencyc": 4}
+        self.menu_modes = {
+            "home": 0,
+            "settings": 1,
+            "manual": 2,
+            "monstencyc": 3,
+            "itemencyc": 4,
+        }
         self.curr_mode = 0
         self.home_select_idx = 0
         self.need_full_rerender = True
@@ -73,7 +98,7 @@ class Menu_Main:
         self.resize_id = None
         self.resize_event = None
         self.canvas.bind("<Configure>", self._on_win_resize)
-        
+
         # For handeling keyboard input
         self.root.bind("<Key>", self._on_key_press)
 
@@ -83,10 +108,10 @@ class Menu_Main:
             self.in_game = False
             self.canvas.delete("all")
             self.canvas.pack(fill=tk.BOTH, expand=True, side="top")
-            
+
             # Re-bind event listener for key input
             self.root.bind("<Key>", self._on_key_press)
-            
+
             self.need_full_rerender = True
             self._resize_frame()
         else:
@@ -95,7 +120,7 @@ class Menu_Main:
 
     # Event handeler for screen resizing.
     def _on_win_resize(self, event):
-        
+
         # First check if in game; if so, do nothing.
         if not self.in_game:
             # Save the event for redrawing
@@ -107,66 +132,94 @@ class Menu_Main:
 
             # schedule a redraw for 50ms from now
             self.resize_id = self.root.after(100, self._resize_frame)
-    
+
     # Input event handler for the home page
     def _home_input_handler(self, key):
-            if key == "Return":
-                # User made selection for new page
-                if self.home_select_idx == 0:
-                    # Start a new game
-                    print("Starting game")
-                    self.toggle_ingame()
-                    mapsize_h, mapsize_w = self.dungeon_size_setting[self.dungeon_size]
-                    Pyrogue_Game(self, self.root, self.scrsize_h, self.scrsize_w, mapsize_h, mapsize_w, self.difficulty_setting[self.difficulty])
-                elif self.home_select_idx == 5:
-                    # Force exit; maybe not the way to do it, but it seems to work fine
-                    exit(0)
-            elif key == "j" or key == "Down" or key == "2":
-                # Move selection down
-                if self.home_select_idx < 5:
-                    self.home_select_idx += 1
-                    self.need_full_rerender = True
-                    self._render_home(self.scrsize_h, self.scrsize_w)
-                else:
-                    self.home_select_idx = 0
-                    self.need_full_rerender = True
-                    self._render_home(self.scrsize_h, self.scrsize_w)
-            elif key == "k" or key == "Up" or key == "8":
-                # Move selection up
-                if self.home_select_idx >= 1:
-                    self.home_select_idx -= 1
-                    self.need_full_rerender = True
-                    self._render_home(self.scrsize_h, self.scrsize_w)
-                else:
-                    self.home_select_idx = 5
-                    self.need_full_rerender = True
-                    self._render_home(self.scrsize_h, self.scrsize_w)
-    
+        if key == "Return":
+            # User made selection for new page
+            if self.home_select_idx == 0:
+                # Start a new game
+                print("Starting game")
+                self.toggle_ingame()
+                mapsize_h, mapsize_w = self.dungeon_size_setting[self.dungeon_size]
+                Pyrogue_Game(
+                    self,
+                    self.root,
+                    self.scrsize_h,
+                    self.scrsize_w,
+                    mapsize_h,
+                    mapsize_w,
+                    self.difficulty_setting[self.difficulty],
+                )
+            elif self.home_select_idx == 1:
+                # Settings page
+                self.curr_mode = self.menu_modes["settings"]
+                self.need_full_rerender = True
+                self._render_settings(self.scrsize_h, self.scrsize_w)
+            elif self.home_select_idx == 5:
+                # Force exit; maybe not the way to do it, but it seems to work fine
+                exit(0)
+        elif key == "j" or key == "Down" or key == "2":
+            # Move selection down
+            if self.home_select_idx < 5:
+                self.home_select_idx += 1
+                self.need_full_rerender = True
+                self._render_home(self.scrsize_h, self.scrsize_w)
+            else:
+                self.home_select_idx = 0
+                self.need_full_rerender = True
+                self._render_home(self.scrsize_h, self.scrsize_w)
+        elif key == "k" or key == "Up" or key == "8":
+            # Move selection up
+            if self.home_select_idx >= 1:
+                self.home_select_idx -= 1
+                self.need_full_rerender = True
+                self._render_home(self.scrsize_h, self.scrsize_w)
+            else:
+                self.home_select_idx = 5
+                self.need_full_rerender = True
+                self._render_home(self.scrsize_h, self.scrsize_w)
+
     # Input event handler for the settings page
     def _settings_input_handler(self, key):
-        pass
-    
+        if key == "Escape":
+            self.curr_mode = self.menu_modes["home"]
+            self.need_full_rerender = True
+            self._render_home(self.scrsize_h, self.scrsize_w)
+
     # Input event handler for the manual page
     def _manual_input_handler(self, key):
         pass
-    
+
     # Input event handler for the monster encyclopedia page
     def _monstencyc_input_handler(self, key):
         pass
-    
+
     # Input event handler for the item encyclopedia page
     def _itemencyc_input_handler(self, key):
         pass
-    
+
     # Event handler for keyboard input.
     def _on_key_press(self, event):
         if not self.in_game:
             key = event.keysym
-            print(f"MENU KEY INPUT: {key}")
             # Check which page that the user is on, go to the appropriate handler
-            if self.curr_mode == 0:
+            if self.curr_mode == self.menu_modes["home"]:
+                print(f"MENU HOME INPUT: {key}")
                 self._home_input_handler(key)
-                        
+            elif self.curr_mode == self.menu_modes["settings"]:
+                print(f"MENU SETTINGS INPUT: {key}")
+                self._settings_input_handler(key)
+            elif self.curr_mode == self.menu_modes["manual"]:
+                print(f"MENU MANUAL INPUT: {key}")
+                self._manual_input_handler(key)
+            elif self.curr_mode == self.menu_modes["monstencyc"]:
+                print(f"MENU MONST INPUT: {key}")
+                self._monstencyc_input_handler(key)
+            elif self.curr_mode == self.menu_modes["itemencyc"]:
+                print(f"MENU ITEM INPUT: {key}")
+                self._itemencyc_input_handler(key)
+
     # Handles resizing the window.
     def _resize_frame(self):
         if not self.in_game:
@@ -178,16 +231,19 @@ class Menu_Main:
             self.scrsize_w = event.width
             self.need_full_rerender = True
             # Call appropriate renderer; depends on current menu to be shown
-            if self.curr_mode == self.menu_modes['main']:
-                print("MENU: Re-rendered main screen")
+            if self.curr_mode == self.menu_modes["home"]:
+                print("MENU: Rendered home")
                 self._render_home(self.scrsize_h, self.scrsize_w)
-    
+            elif self.curr_mode == self.menu_modes["settings"]:
+                print("MENU: Rendered settings")
+                self._render_settings(self.scrsize_h, self.scrsize_w)
+
     # Renderer for the main menu's home page.
-    def _render_home(self, height, width):        
+    def _render_home(self, height, width):
         # Arbitrary bounds to determine how big home screen text should be
-        home_scr_charcol = 26 # At least this many 'tiles' wide
-        home_scr_charrow = 16 # At least this many 'tiles' tall
-        
+        home_scr_charcol = 26  # At least this many 'tiles' wide
+        home_scr_charrow = 16  # At least this many 'tiles' tall
+
         # Decide how big in pixels elements should be based on screen size
         max_tile_width = width // home_scr_charcol
         max_tile_height = (
@@ -201,7 +257,7 @@ class Menu_Main:
 
         if self.need_full_rerender:
             version_str = "v0.05 July 2025"
-            
+
             # This is a series of string lines that form the PyRogue ASCII art text.
             # It's a little garbled here because of excape character \.
             ascii_line1 = "    ____        ____                       "
@@ -210,16 +266,51 @@ class Menu_Main:
             ascii_line4 = " / ____/ /_/ / _, _/ /_/ / /_/ / /_/ /  __/"
             ascii_line5 = "/_/    \\__, /_/ |_|\\____/\\__, /\\__,_/\\___/ "
             ascii_line6 = "      /____/            /____/             "
-            
+
             # making things easier so I can just write loops for rendering home screen elements
             ascii_color = "red"
             ascii_anchor = "w"
-            ascii_text = {0:ascii_line1, 1:ascii_line2, 2:ascii_line3, 3:ascii_line4, 4:ascii_line5, 5:ascii_line6}
-            ascii_tags = {0:"ascii_ln1", 1:"ascii_ln2", 2:"ascii_ln3", 3:"ascii_ln4", 4:"ascii_ln5", 5:"ascii_ln6"}
-            select_opts = {0:"Start Game", 1:"Settings", 2:"Manual", 3:"Monster Encyclopedia", 4:"Item Encyclopedia", 5:"Quit"}
-            select_opts_tags = {0:"opt_startgame", 1:"opt_settings", 2:"opt_manual", 3:"opt_monstencyc", 4:"opt_itemencyc", 5:"opt_quit"}
-            select_opts_colors = {0:"gold", 1:"gray", 2:"gray", 3:"gray", 4:"gray", 5:"gold"}
-            
+            ascii_text = {
+                0: ascii_line1,
+                1: ascii_line2,
+                2: ascii_line3,
+                3: ascii_line4,
+                4: ascii_line5,
+                5: ascii_line6,
+            }
+            ascii_tags = {
+                0: "ascii_ln1",
+                1: "ascii_ln2",
+                2: "ascii_ln3",
+                3: "ascii_ln4",
+                4: "ascii_ln5",
+                5: "ascii_ln6",
+            }
+            select_opts = {
+                0: "Start Game",
+                1: "Settings",
+                2: "Manual",
+                3: "Monster Encyclopedia",
+                4: "Item Encyclopedia",
+                5: "Quit",
+            }
+            select_opts_tags = {
+                0: "opt_startgame",
+                1: "opt_settings",
+                2: "opt_manual",
+                3: "opt_monstencyc",
+                4: "opt_itemencyc",
+                5: "opt_quit",
+            }
+            select_opts_colors = {
+                0: "gold",
+                1: "gold",
+                2: "gray",
+                3: "gray",
+                4: "gray",
+                5: "gold",
+            }
+
             # Deleting existing tagged canvas objects
             self.canvas.delete("all")
 
@@ -239,13 +330,12 @@ class Menu_Main:
                     anchor=ascii_anchor,
                 )
                 y += tile_size
-            
+
             # Now draw the home page options
-            opt_color = "gold"
             opt_fontsize = int(self.font_size // 1.25)
             x = x_offset * 2
             y += tile_size * 2
-            
+
             for i in range(6):
                 self.canvas.create_text(
                     x,
@@ -257,11 +347,13 @@ class Menu_Main:
                     anchor=ascii_anchor,
                 )
                 y += tile_size
-            
+
             # append arrow to whichever selection is currently being made
             new_opt_text = select_opts[self.home_select_idx] + " <--"
-            self.canvas.itemconfigure(select_opts_tags[self.home_select_idx], text=new_opt_text)
-            
+            self.canvas.itemconfigure(
+                select_opts_tags[self.home_select_idx], text=new_opt_text
+            )
+
             # Little version number at the bottom of the screen
             x = int(width - tile_size * 3.25)
             y = height - tile_size // 2
@@ -269,20 +361,20 @@ class Menu_Main:
                 x,
                 y,
                 text=version_str,
-                fill='white',
+                fill="white",
                 font=(self.def_font, (opt_fontsize // 2)),
                 tag="version",
                 anchor=ascii_anchor,
             )
-            
+
             self.need_full_rerender = False
-    
-    # Renderer for the main menu's settings page.      
+
+    # Renderer for the main menu's settings page.
     def _render_settings(self, height, width):
         # Arbitrary bounds to determine how big the screen text should be
-        settings_scr_charcol = 35 # width
-        settings_scr_charrow = 15 # height
-        
+        settings_scr_charcol = 20  # width
+        settings_scr_charrow = 15  # height
+
         # Decide how big in pixels elements should be based on screen size
         max_tile_width = width // settings_scr_charcol
         max_tile_height = (
@@ -291,7 +383,15 @@ class Menu_Main:
         tile_size = min(max_tile_width, max_tile_height)
         self.font_size = int(tile_size / 1.5)
         
+        x_offset = tile_size
+        y_offset = tile_size
+
         if self.need_full_rerender:
+            # Clear canvas
+            self.canvas.delete("all")
+
+            opt_fontsize = int(self.font_size // 1.25)
+            
             # This is a series of string lines that form the Settings ASCII art text.
             # It's a little garbled here because of excape character \.
             ascii_line1 = "   ____    __  __  _             "
@@ -299,15 +399,110 @@ class Menu_Main:
             ascii_line3 = " _\\ \\/ -_) __/ __/ / _ \\/ _ `(_-<"
             ascii_line4 = "/___/\\__/\\__/\\__/_/_//_/\\_, /___/"
             ascii_line5 = "                       /___/     "
+            
+            ascii_text = {
+                0: ascii_line1,
+                1: ascii_line2,
+                2: ascii_line3,
+                3: ascii_line4,
+                4: ascii_line5,
+            }
+            ascii_tags = {
+                0: "ascii_ln1",
+                1: "ascii_ln2",
+                2: "ascii_ln3",
+                3: "ascii_ln4",
+                4: "ascii_ln5"
+            }
+            ascii_color = "white"
+            size_opts = {
+                0: "Tiny       (15 x 30)",
+                1: "Small      (20 x 40)",
+                2: "Medium     (25 x 50)",
+                3: "Large      (30 x 60)",
+                4: "Very Large (35 x 70)",
+                5: "Enormous   (40 x 80)",
+            }
+            size_opts_tags = {
+                0: "size_opt_tiny",
+                1: "size_opt_small",
+                2: "size_opt_medium",
+                3: "size_opt_large",
+                4: "size_opt_vlarge",
+                5: "size_opt_enormous",
+            }
+            diff_opts = {
+                0: "Trivial",
+                1: "Easy",
+                2: "Normal",
+                3: "Hard",
+                4: "Very Hard",
+                5: "Legendary",
+            }
+            diff_opts_tags = {
+                0: "diff_opt_trivial",
+                1: "diff_opt_easy",
+                2: "diff_opt_normal",
+                3: "diff_opt_hard",
+                4: "diff_opt_vhard",
+                5: "dif_opt_legend",
+            }
+            
+            x = x_offset
+            y = y_offset
+            
+            for i in range(5):
+                self.canvas.create_text(
+                    x,
+                    y,
+                    text=ascii_text[i],
+                    fill=ascii_color,
+                    font=(self.def_font, self.font_size),
+                    tag=ascii_tags[i],
+                    anchor="w",
+                )
+                y += tile_size
+                
         
-        
+            x1 = x_offset
+            x2 = x_offset + (tile_size * 15)
+            y = y_offset + (tile_size * 6)
+            
+            for i in range(6):                
+                # Write size setting
+                color = "gold" if self.dungeon_size == i else "white"
+                self.canvas.create_text(
+                    x1,
+                    y,
+                    text=size_opts[i],
+                    fill=color,
+                    font=(self.def_font, opt_fontsize),
+                    tag=size_opts_tags[i],
+                    anchor="w",
+                )
+                
+                # Write difficulty size setting
+                color = "gold" if self.difficulty == i else "white"
+                self.canvas.create_text(
+                    x2,
+                    y,
+                    text=diff_opts[i],
+                    fill=color,
+                    font=(self.def_font, opt_fontsize),
+                    tag=diff_opts_tags[i],
+                    anchor="w",
+                )
+                y += tile_size
+                
+            
+
 # The Pyrogue_Game class handles all the high-level game logic and control.
 class Pyrogue_Game:
 
     # Pyrogue_Game constructor.
     def __init__(
         self,
-        menu_main : Menu_Main,
+        menu_main: Menu_Main,
         root,
         scrsize_h: int,
         scrsize_w: int,
@@ -318,7 +513,7 @@ class Pyrogue_Game:
     ):
         # Menu from which this game instance was launched from
         self.menu_main = menu_main
-        
+
         # Tkinter root
         self.root = root
 
@@ -332,7 +527,7 @@ class Pyrogue_Game:
         # Internal idea of size for UI elements; scales with screensize on render.
         # number of char 'rows' in screen; one for each row in dungeon + 3 for messages / player info
         self.scrn_rows = mapsize_h + 3
-        
+
         max_tile_width = scrsize_w // mapsize_w
         max_tile_height = (
             scrsize_h // self.scrn_rows
@@ -437,7 +632,7 @@ class Pyrogue_Game:
                 self.root.after(10, self._next_turn)
             else:
                 print("PLAYER INPUT FAIL")
-        
+
         # Any input after end of game returns control to main menu
         if self.game_over:
             # Destroy the canvas for this game, also unbinding event listeners
