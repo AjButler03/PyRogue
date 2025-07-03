@@ -9,7 +9,7 @@ Main Menu Idea:
 /_/    \__, /_/ |_|\____/\__, /\__,_/\___/ 
       /____/            /____/             
 
-    Start Game
+    Start Game <--
     Settings
     Manual
     Monster Encyclopedia
@@ -31,3 +31,14 @@ Settings page Idea:
  _\ \/ -_) __/ __/ / _ \/ _ `(_-<
 /___/\__/\__/\__/_/_//_/\_, /___/
                        /___/     
+
+   Dungeon Size             Difficulty
+Tiny       (15 x 30)         Trivial <--
+Small      (20 x 40)         Easy     
+Medium     (25 x 50) <--     Normal   
+Large      (30 x 60)         Hard     
+Very Large (35 x 70)         Very Hard
+Enormous   (40 x 80)         Legendary
+
+Settings, Dungeon size, and difficulty in white
+unselected settings in white, currently selected settings in gold

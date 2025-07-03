@@ -8,9 +8,11 @@ pyrogue.py is the main file, and running it will do the following:
     - The PyRogue Game ends when either you are defeated, or all the monsters are defeated.
 
 New features with v0.05:
-    - Main menu with instructions page
-    - Ability to replay without restarting pyrogue
-    - Settings options?
+    - Main menu with following features:
+        - Game launcher, allowing several games to be played without re-executing PyRogue.py.
+        - Settings page, allowing user to select from dungeon size and game difficulty options
+        - Manual page, displaying information about PyRogue gameplay and controls.
+        - Quit, which closes the PyRogue from the UI instead of force quitting the window
     - Monster list sub-menu in game?
     - Walk/tunnel distance map display?
 
@@ -32,3 +34,6 @@ Descriptions of the attributes that the monsters can have (Those that are implem
     - TELEPATHIC: A telepathic monster will always know where the player character is, regardless of distance or line of sight.
     - TUNNEL: A tunneling monster has the ability to bore through rock, creating new paths between rooms.
     - ERRATIC: On any given turn, an erratic monster will have a 50% chance to move randomly.
+
+Known Issues:
+    - Monsters attempting to move into other monsters around the player might result in the player being removed from the map temporarily, resulting in immortality.

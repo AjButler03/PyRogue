@@ -11,6 +11,7 @@ v0.05 ==========================================================================
 07/02/2025
     - Main menu selection can now move
     - Quit in main menu now works
+    - Started on settings page + modified dungeon size options
 v0.04 ===========================================================================================================================
 06/17/2025
     - Added error checking where no optimal move based on path found; now results in no move instead of crash

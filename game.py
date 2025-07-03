@@ -16,19 +16,21 @@ class Menu_Main:
 
     # Pre-defined dungeon sizes
     dungeon_size_setting = {
+        "tiny": (15, 30),
         "small": (20, 40),
-        "medium": (30, 60),
-        "large": (40, 80),
-        "enormous": (50, 100),
+        "medium": (25, 50),
+        "large": (30, 60),
+        "very large": (35, 70),
+        "enormous": (40, 80),
     }
 
     # Pre-defined difficulty settings
     difficulty_setting = {
         "trivial": 0.10,
-        "easy": 0.25,
-        "normal": 0.75,
-        "hard": 1.25,
-        "very_hard": 1.75,
+        "easy": 0.5,
+        "normal": 1,
+        "hard": 1.5,
+        "very_hard": 2,
         "legendary": 2.5,
     }
 
@@ -47,7 +49,7 @@ class Menu_Main:
 
         # Init default dungeon size and difficulty
         self.difficulty = "normal"
-        self.dungeon_size = "small"
+        self.dungeon_size = "medium"
 
         # Now init the canvas that will hold everything
         self.canvas = tk.Canvas(
@@ -181,14 +183,12 @@ class Menu_Main:
                 self._render_home(self.scrsize_h, self.scrsize_w)
     
     # Renderer for the main menu's home page.
-    def _render_home(self, height, width):
-        version_str = "v0.05 July 2025"
-        
+    def _render_home(self, height, width):        
         # Arbitrary bounds to determine how big home screen text should be
         home_scr_charcol = 26 # At least this many 'tiles' wide
         home_scr_charrow = 16 # At least this many 'tiles' tall
         
-        # Arbitrarily deciding that the screen must be at least 40 'tiles' wide.
+        # Decide how big in pixels elements should be based on screen size
         max_tile_width = width // home_scr_charcol
         max_tile_height = (
             height // home_scr_charrow
@@ -198,9 +198,9 @@ class Menu_Main:
 
         x_offset = tile_size
         y_offset = tile_size
-        
 
         if self.need_full_rerender:
+            version_str = "v0.05 July 2025"
             
             # This is a series of string lines that form the PyRogue ASCII art text.
             # It's a little garbled here because of excape character \.
@@ -276,10 +276,29 @@ class Menu_Main:
             )
             
             self.need_full_rerender = False
-            
+    
+    # Renderer for the main menu's settings page.      
     def _render_settings(self, height, width):
+        # Arbitrary bounds to determine how big the screen text should be
+        settings_scr_charcol = 35 # width
+        settings_scr_charrow = 15 # height
         
-        pass
+        # Decide how big in pixels elements should be based on screen size
+        max_tile_width = width // settings_scr_charcol
+        max_tile_height = (
+            height // settings_scr_charrow
+        )  # Note that there are 3 extra rows for messages / player information
+        tile_size = min(max_tile_width, max_tile_height)
+        self.font_size = int(tile_size / 1.5)
+        
+        if self.need_full_rerender:
+            # This is a series of string lines that form the Settings ASCII art text.
+            # It's a little garbled here because of excape character \.
+            ascii_line1 = "   ____    __  __  _             "
+            ascii_line2 = "  / __/__ / /_/ /_(_)__  ___ ____"
+            ascii_line3 = " _\\ \\/ -_) __/ __/ / _ \\/ _ `(_-<"
+            ascii_line4 = "/___/\\__/\\__/\\__/_/_//_/\\_, /___/"
+            ascii_line5 = "                       /___/     "
         
         
 # The Pyrogue_Game class handles all the high-level game logic and control.
