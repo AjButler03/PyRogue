@@ -12,6 +12,8 @@ v0.05 ==========================================================================
     - Main menu selection can now move
     - Quit in main menu now works
     - Implemented functional settings page
+07/03/2025
+    - Tweaked monster generation + difficulty settings to scale monster count more proportionately to dungeon size
 v0.04 ===========================================================================================================================
 06/17/2025
     - Added error checking where no optimal move based on path found; now results in no move instead of crash

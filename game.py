@@ -26,12 +26,12 @@ class Menu_Main:
 
     # Pre-defined difficulty settings
     difficulty_setting = {
-        0: 0.10,
-        1: 0.5,
-        2: 1,
-        3: 1.5,
-        4: 2,
-        5: 2.5,
+        0: 0.05,
+        1: 0.25,
+        2: 0.5,
+        3: 0.75,
+        4: 1.5,
+        5: 2.5
     }
 
     # Menu_Main constructor.
@@ -744,10 +744,11 @@ class Pyrogue_Game:
     def _generate_monsters(self):
         attemptc = 0
         monsterc = 0
+        size_modifier = self.dungeon.width * self.dungeon.height
         attempt_limit = int(
-            self.difficulty * max(self.dungeon.width, self.dungeon.height)
+            self.difficulty * size_modifier
         )
-        min_monsterc = max(1, attempt_limit // 10)
+        min_monsterc = max(1, int(size_modifier // 100 * self.difficulty))
         # Adjust exp_chancetime's decay curve to increase additional monster probability with difficulty
         decay_rate = 0.95 / (self.difficulty + 0.5)
 
