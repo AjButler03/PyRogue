@@ -15,6 +15,8 @@ v0.05 ==========================================================================
 07/03/2025
     - Tweaked monster generation + difficulty settings to scale monster count more proportionately to dungeon size
     - Re-factored code so that the Menu_Main class is in its own file
+07/04/2025
+    - Added render options for rendering current walkmap / distmap by pressing 'z'.
 v0.04 ===========================================================================================================================
 06/17/2025
     - Added error checking where no optimal move based on path found; now results in no move instead of crash

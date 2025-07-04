@@ -81,8 +81,14 @@ class Pyrogue_Game:
 
         # Init some fields related to rendering
         self.need_full_rerender = True
+        self.render_modes = {"standard": 0, "x-ray": 1, "walkmap": 2, "tunnmap": 3}
+        self.curr_render_mode = self.render_modes["standard"]
         # {(row, col): (char, color)}. Stores last updated render info.
         self.render_cache = {}
+        self.display_submenus = {"none": 0, "exit": 1, "monster_list": 2, "inventory": 3, "equipment": 4}
+        self.curr_submenu = self.display_submenus["none"]
+        
+        # To handle window resizes
         self.resize_id = None
         self.resize_event = None
         self.canvas.bind("<Configure>", self._on_win_resize)
@@ -292,8 +298,27 @@ class Pyrogue_Game:
                 else:
                     message = "You can't escape from here; no staircase"
                     self._update_top_label(message)
-            # Misinput; return false
-            return False
+            elif key == "Escape":
+                # Destroy the canvas for this game, also unbinding event listeners
+                self.canvas.unbind("<Configure>")
+                self.canvas.destroy()
+                self.root.unbind("<Key>")
+                # Relinquish control back to the main menu
+                self.menu_main.toggle_ingame()
+            elif key == "z":
+                # Rotate through distance map displays
+                if self.curr_render_mode == self.render_modes["standard"]:
+                    self.curr_render_mode = self.render_modes["walkmap"]
+                elif self.curr_render_mode == self.render_modes["walkmap"]:
+                    self.curr_render_mode = self.render_modes["tunnmap"]
+                elif self.curr_render_mode == self.render_modes["tunnmap"]:
+                    self.curr_render_mode = self.render_modes["standard"]
+                self.need_full_rerender = True
+                self._render_frame(self.scrsize_h, self.scrsize_w)
+                    
+            else:
+                # Misinput; return false
+                return False
         else:
             # Regular valid move
             move = move_delta[key]
@@ -463,14 +488,46 @@ class Pyrogue_Game:
                     x = col * tile_size + x_offset
                     y = row * tile_size + y_offset
 
-                    actor = self.actor_map[row][col]
-                    if actor:
-                        char = actor.get_char()
-                        color = "gold" if isinstance(actor, Player) else "red"
-                    else:
-                        terrain = self.dungeon.tmap[row][col]
-                        char = terrain_char[terrain]
-                        color = "white"
+                    # default
+                    char = "!"
+                    color = "gray"
+                    
+                    # determine the current render mode to grab char & color
+                    if self.curr_render_mode == self.render_modes["standard"]:
+                        actor = self.actor_map[row][col]
+                        if actor:
+                            char = actor.get_char()
+                            color = "gold" if isinstance(actor, Player) else "red"
+                        else:
+                            terrain = self.dungeon.tmap[row][col]
+                            char = terrain_char[terrain]
+                            color = "white"
+                    elif self.curr_render_mode == self.render_modes["x-ray"]:
+                        # Eventually, the player will have view distance, and 'x-ray' will disable this feature.
+                        # For now, I'm just leaving a placeholder.
+                        pass
+                    elif self.curr_render_mode == self.render_modes["walkmap"]:
+                        # Grab walkmap character
+                        val = self.dungeon.walk_distmap[row][col]
+                        if val == 0:
+                            char = "@"
+                            color = "gold"
+                        elif val == float('inf'):
+                            char = " "
+                        else:
+                            val = val % 10
+                            char = f"{val}"
+                    elif self.curr_render_mode == self.render_modes["tunnmap"]:
+                        # Grab walkmap character
+                        val = self.dungeon.tunn_distmap[row][col]
+                        if val == 0:
+                            char = "@"
+                            color = "gold"
+                        elif val == float('inf'):
+                            char = " "
+                        else:
+                            val = val % 10
+                            char = f"{val}"
 
                     # Use a tuple to represent what should be rendered at this tile
                     current_draw = (char, color)
