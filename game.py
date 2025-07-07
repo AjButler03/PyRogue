@@ -38,7 +38,6 @@ class Pyrogue_Game:
         # Internal idea of size for UI elements; scales with screensize on render.
         # number of char 'rows' in screen; one for each row in dungeon + 3 for messages / player info
         self.scrn_rows = mapsize_h + 3
-
         max_tile_width = scrsize_w // mapsize_w
         max_tile_height = (
             scrsize_h // self.scrn_rows
@@ -81,13 +80,22 @@ class Pyrogue_Game:
 
         # Init some fields related to rendering
         self.need_full_rerender = True
+        # Dungeon display modes; displays different aspects of the map.
         self.render_modes = {"standard": 0, "x-ray": 1, "walkmap": 2, "tunnmap": 3}
         self.curr_render_mode = self.render_modes["standard"]
         # {(row, col): (char, color)}. Stores last updated render info.
         self.render_cache = {}
-        self.display_submenus = {"none": 0, "exit": 1, "monster_list": 2, "inventory": 3, "equipment": 4}
-        self.curr_submenu = self.display_submenus["none"]
         
+        # Fields to handle submenus and their navigation
+        self.display_submenus = {
+            "none": 0,
+            "exit": 1,
+            "monster_list": 2,
+            "inventory": 3,
+            "equipment": 4,
+        }
+        self.curr_submenu = self.display_submenus["none"]
+
         # To handle window resizes
         self.resize_id = None
         self.resize_event = None
@@ -106,11 +114,16 @@ class Pyrogue_Game:
         self.pinfo_msg = "Player Location: Row " + str(pc_r) + ", Column: " + str(pc_c)
         self.pinfo_msg_color = "white"
 
-        # For handeling keyboard input
+        # Fields for handling keyboard input
         self.root.bind("<Key>", self._on_key_press)
+        self.input_modes = {"none": 0, "player_turn": 1, "menu_exit": 2}
+        self.curr_input_mode = self.input_modes["player_turn"]
         self.turnloop_started = False
         self.game_over = False
-        self.awaiting_player_input = False
+
+        # Start the turnloop for the game
+        self._start_turnloop()
+        print("=== GAME START ===")
 
     # Event handeler for screen resizing.
     def _on_win_resize(self, event):
@@ -128,27 +141,22 @@ class Pyrogue_Game:
     def _on_key_press(self, event):
         key = event.keysym
         print(f"GAME KEY INPUT: {key}")
-        if not self.turnloop_started:
-            # Until I create a main menu, any key input force starts the game.
-            self.turnloop_started = True
-            self._start_turnloop()
-            self._render_frame(self.scrsize_h, self.scrsize_w)
-            print("=== GAME START ===")
-            # Game start done
-            return
 
-        if self.awaiting_player_input:
+        # Check if handling player turn input, call handler
+        if self.curr_input_mode == self.input_modes["player_turn"]:
             success = self._handle_player_input(key)
             if success:
-                self.awaiting_player_input = False
-                print("PLAYER INPUT SUCCESS")
+                self.curr_input_mode = self.input_modes["none"]
+                print("GAME: Player turn completed")
+
                 # Requeue player
                 new_turn = self.player.get_currturn() + self.player.get_speed()
                 self.turn_pq.push(self.player, new_turn)
                 self.player.set_currturn(new_turn)
                 self.root.after(10, self._next_turn)
             else:
-                print("PLAYER INPUT FAIL")
+                # Player input was not correct
+                print("GAME: player turn continues")
 
         # Any input after end of game returns control to main menu
         if self.game_over:
@@ -315,7 +323,7 @@ class Pyrogue_Game:
                     self.curr_render_mode = self.render_modes["standard"]
                 self.need_full_rerender = True
                 self._render_frame(self.scrsize_h, self.scrsize_w)
-                    
+
             else:
                 # Misinput; return false
                 return False
@@ -330,7 +338,6 @@ class Pyrogue_Game:
                     message = "You killed a " + targ_actor.get_char()
                     self.player_score += 10
                     self._update_top_label(message)
-                    print("COMBAT:", message)
                 else:
                     # Just a plain successful move; reset message
                     self._update_top_label("")
@@ -338,24 +345,45 @@ class Pyrogue_Game:
                 return success
             else:
                 message = "You can't move there"
-                print("INPUT:", message)
                 self._update_top_label(message)
                 return False
 
     # Wrapper to update top message label. Cyan is the default message color.
     def _update_top_label(self, message: str, font_color: str = "cyan"):
+        print("GAME MSG:", message)
         self.top_msg = message
         self.top_msg_color = font_color
+
+        # Update canvas
+        if (self.top_msg, self.top_msg_color) != self.top_msg_cache:
+            self.canvas.itemconfig(
+                "top_msg", text=self.top_msg, fill=self.top_msg_color
+            )
+            self.top_msg_cache = (self.top_msg, self.top_msg_color)
 
     # Wrapper to update the bottom label for score. White is default message color.
     def _update_score_label(self, message: str, font_color: str = "white"):
         self.score_msg = message
         self.score_msg_color = font_color
 
+        # Update text on canvas
+        if (self.score_msg, self.score_msg_color) != self.score_msg_cache:
+            self.canvas.itemconfig(
+                "score_msg", text=self.score_msg, fill=self.score_msg_color
+            )
+            self.score_msg_cache = (self.score_msg, self.score_msg_color)
+
     # Wrapper to update bottom label for player info. White is default message color.
     def _update_pinfo_label(self, message: str, font_color: str = "white"):
         self.pinfo_msg = message
         self.pinfo_msg_color = font_color
+
+        # update text on canvas
+        if (self.pinfo_msg, self.pinfo_msg_color) != self.pinfo_msg_cache:
+            self.canvas.itemconfig(
+                "pinfo_msg", text=self.pinfo_msg, fill=self.pinfo_msg_color
+            )
+            self.pinfo_msg_cache = (self.pinfo_msg, self.pinfo_msg_color)
 
     # Error handeling for screen resizing event handeler.
     def _resize_frame(self):
@@ -453,28 +481,6 @@ class Pyrogue_Game:
             )
             self.need_full_rerender = False
 
-        # Update text labels, if needed
-        # First check top message
-        if (self.top_msg, self.top_msg_color) != self.top_msg_cache:
-            self.canvas.itemconfig(
-                "top_msg", text=self.top_msg, fill=self.top_msg_color
-            )
-            self.top_msg_cache = (self.top_msg, self.top_msg_color)
-
-        # Check score message
-        if (self.score_msg, self.score_msg_color) != self.score_msg_cache:
-            self.canvas.itemconfig(
-                "score_msg", text=self.score_msg, fill=self.score_msg_color
-            )
-            self.score_msg_cache = (self.score_msg, self.score_msg_color)
-
-        # Finally check pinfo message
-        if (self.pinfo_msg, self.pinfo_msg_color) != self.pinfo_msg_cache:
-            self.canvas.itemconfig(
-                "pinfo_msg", text=self.pinfo_msg, fill=self.pinfo_msg_color
-            )
-            self.pinfo_msg_cache = (self.pinfo_msg, self.pinfo_msg_color)
-
         for row in range(self.dungeon.height):
             for col in range(self.dungeon.width):
                 is_border_tile = (
@@ -491,7 +497,7 @@ class Pyrogue_Game:
                     # default
                     char = "!"
                     color = "gray"
-                    
+
                     # determine the current render mode to grab char & color
                     if self.curr_render_mode == self.render_modes["standard"]:
                         actor = self.actor_map[row][col]
@@ -512,7 +518,7 @@ class Pyrogue_Game:
                         if val == 0:
                             char = "@"
                             color = "gold"
-                        elif val == float('inf'):
+                        elif val == float("inf"):
                             char = " "
                         else:
                             val = val % 10
@@ -523,7 +529,7 @@ class Pyrogue_Game:
                         if val == 0:
                             char = "@"
                             color = "gold"
-                        elif val == float('inf'):
+                        elif val == float("inf"):
                             char = " "
                         else:
                             val = val % 10
@@ -569,14 +575,14 @@ class Pyrogue_Game:
             monster.set_currturn(monster.get_speed())
             # 9 to ensure that ALL monsters get a turn after player's first turn
             self.turn_pq.push(monster, monster.get_currturn())
-        self._update_top_label("")
         print("GAME: Turnloop started")
         self._next_turn()
 
     # Handles a single turn in the turnloop.
     def _next_turn(self):
         # If player's turn, do nothing and wait
-        if self.awaiting_player_input:
+        if self.curr_input_mode == self.input_modes["player_turn"]:
+            print("GAME: Player turn; no render")
             return
 
         # Game over check
@@ -611,7 +617,7 @@ class Pyrogue_Game:
             if player_turn:
                 # Await player input to call its turn handeler
                 # Essentially 'pauses' the turnloop until keyboard input results in end of player turn
-                if not self.awaiting_player_input:
+                if self.curr_input_mode != self.input_modes["player_turn"]:
                     # Update bottom messages for player location and score
                     pc_r, pc_c = self.player.get_pos()
                     pinfo_msg = (
@@ -620,7 +626,7 @@ class Pyrogue_Game:
                     score_msg = "Score: " + str(self.player_score)
                     self._update_pinfo_label(pinfo_msg)
                     self._update_score_label(score_msg)
-                    self.awaiting_player_input = True
+                    self.curr_input_mode = self.input_modes["player_turn"]
                     return
             else:
                 # Call the monster's turn handler directly
@@ -635,7 +641,7 @@ class Pyrogue_Game:
 
             if isinstance(targ_actor, Player):
                 message = "a " + actor.get_char() + " dealt damage to you"
-                self._update_top_label(message)
+                # self._update_top_label(message)
                 print("COMBAT:", message)
 
         # Wait 1ms before running next turn
