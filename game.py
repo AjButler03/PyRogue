@@ -233,6 +233,7 @@ class Pyrogue_Game:
                 self.curr_submenu = self.display_submenus["menu_exit"]
                 self.submenu_select_idx = 0
                 self._render_exit_menu()
+                self._update_top_label("PAUSED")
                 print("GAME: Exit sub-menu activated")
                 return False
             else:
@@ -268,6 +269,7 @@ class Pyrogue_Game:
                 self.curr_submenu = self.display_submenus["none"]
                 self.submenu_canvas.destroy()
                 print("GAME: Exit sub-menu closed")
+                self._update_top_label("")
             elif self.submenu_select_idx == 1:
                 self._end_game()
             elif self.submenu_select_idx == 2:
@@ -294,6 +296,7 @@ class Pyrogue_Game:
             self.curr_submenu = self.display_submenus["none"]
             self.submenu_canvas.destroy()
             print("GAME: Exit sub-menu closed")
+            self._update_top_label("")
 
     # Populates the actor_map with a dungeon size proportionate number of monsters.
     # Difficulty is a modifier for the spawn rate of monsters in the dungeon.
@@ -440,13 +443,13 @@ class Pyrogue_Game:
 
     # Handles creating/rendering the exit menu
     def _render_exit_menu(self):
-        menu_height = int(self.tile_size * 3.25)
+        menu_height = int(self.tile_size * 3.75)
         menu_width = (self.tile_size * 7)
         
         if self.need_full_rerender or self.need_submenu_rerender:
             self.submenu_canvas.destroy()
         
-        self.submenu_canvas = tk.Canvas(self.canvas, height=menu_height, width = menu_width, bg="black", highlightthickness=2)
+        self.submenu_canvas = tk.Canvas(self.canvas, height=menu_height, width = menu_width, bg="black", highlightthickness=self.tile_size // 6,)
         self.canvas.create_window(self.scrsize_w // 2, (self.tile_size * self.mapsize_h // 2), height=menu_height, width=menu_width, window=self.submenu_canvas, anchor="center")
         
         offset = self.tile_size // 2
@@ -456,7 +459,7 @@ class Pyrogue_Game:
             text = "Continue"
         self.submenu_canvas.create_text(
                 offset,
-                0,
+                offset // 2,
                 text=text,
                 fill="gold",
                 font=(self.def_font, self.font_size),
@@ -470,7 +473,7 @@ class Pyrogue_Game:
             text = "End game"
         self.submenu_canvas.create_text(
                 offset,
-                self.tile_size,
+                offset // 2  + self.tile_size,
                 text=text,
                 fill="gold",
                 font=(self.def_font, self.font_size),
@@ -484,7 +487,7 @@ class Pyrogue_Game:
             text = "Quit"
         self.submenu_canvas.create_text(
                 offset,
-                (self.tile_size * 2),
+                offset // 2 + (self.tile_size * 2),
                 text=text,
                 fill="gold",
                 font=(self.def_font, self.font_size),
@@ -529,8 +532,8 @@ class Pyrogue_Game:
             self.canvas.delete("all")
 
             # Draw top message label
-            x = x_offset
-            y = 0
+            x = x_offset + (self.tile_size // 4)
+            y = self.tile_size // 4
             self.canvas.create_text(
                 x + self.tile_size // 2,
                 y + self.tile_size // 1.25,
@@ -542,7 +545,7 @@ class Pyrogue_Game:
             )
 
             # Draw score message label
-            y = (self.dungeon.height + 1) * self.tile_size
+            y = int((self.dungeon.height + 0.5) * self.tile_size)
             self.canvas.create_text(
                 x + self.tile_size // 2,
                 y + self.tile_size // 2.5,
@@ -554,7 +557,7 @@ class Pyrogue_Game:
             )
 
             # Draw pinfo message label
-            y = (self.dungeon.height + 2) * self.tile_size
+            y += self.tile_size
             self.canvas.create_text(
                 x + self.tile_size // 2,
                 y + self.tile_size // 2.5,
