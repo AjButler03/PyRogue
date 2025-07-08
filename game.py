@@ -42,8 +42,8 @@ class Pyrogue_Game:
         max_tile_height = (
             scrsize_h // self.scrn_rows
         )  # Note that there are 3 extra rows for messages / player information
-        tile_size = min(max_tile_width, max_tile_height)
-        self.font_size = int(tile_size / 1.5)
+        self.tile_size = min(max_tile_width, max_tile_height)
+        self.font_size = int(self.tile_size / 1.5)
 
         # Init internal idea of dungeon size
         self.mapsize_h = mapsize_h
@@ -87,16 +87,19 @@ class Pyrogue_Game:
         self.render_cache = {}
         
         # Fields to handle submenus and their navigation
+        self.submenu_canvas = None
+        self.submenu_select_idx = 0
+        self.need_submenu_rerender = False
         self.display_submenus = {
             "none": 0,
-            "exit": 1,
-            "monster_list": 2,
-            "inventory": 3,
-            "equipment": 4,
+            "menu_exit": 1,
+            "menu_monster_list": 2,
+            "menu_inventory": 3,
+            "menu_equipment": 4,
         }
         self.curr_submenu = self.display_submenus["none"]
 
-        # To handle window resizes
+        # To handle screen resizes
         self.resize_id = None
         self.resize_event = None
         self.canvas.bind("<Configure>", self._on_win_resize)
@@ -104,20 +107,22 @@ class Pyrogue_Game:
         # Store what messages and font color should be displayed
         # Cache is to prevent unnecessary updates in render
         self.top_msg_cache = ("", "")
-        self.top_msg = "Press any key to start"
-        self.top_msg_color = "gold"
         self.score_msg_cache = ("", "")
-        self.score_msg = "Score: 0"
-        self.score_msg_color = "white"
         self.pinfo_msg_cache = ("", "")
+        self.top_msg = "Press any key to start"
+        self.score_msg = "Score: 0"
         pc_r, pc_c = self.player.get_pos()
         self.pinfo_msg = "Player Location: Row " + str(pc_r) + ", Column: " + str(pc_c)
+        self.top_msg_color = "gold"
+        self.score_msg_color = "white"
         self.pinfo_msg_color = "white"
 
         # Fields for handling keyboard input
         self.root.bind("<Key>", self._on_key_press)
         self.input_modes = {"none": 0, "player_turn": 1, "menu_exit": 2}
         self.curr_input_mode = self.input_modes["player_turn"]
+        
+        # Misc game control fields
         self.turnloop_started = False
         self.game_over = False
 
@@ -137,15 +142,19 @@ class Pyrogue_Game:
         # schedule a redraw for 50ms from now
         self.resize_id = self.root.after(100, self._resize_frame)
 
-    # Event handeler for keyboard input
+    # High-level event handler for keyboard input. Will call different handlers based on current input mode, enabling / disabling those modes as necessary.
     def _on_key_press(self, event):
         key = event.keysym
         print(f"GAME KEY INPUT: {key}")
 
-        # Check if handling player turn input, call handler
-        if self.curr_input_mode == self.input_modes["player_turn"]:
-            success = self._handle_player_input(key)
-            if success:
+        # Check the current input mode and call the appropriate input handler
+        if self.curr_input_mode == self.input_modes["menu_exit"]:
+            # Calling exit submenu input handler
+            self._handle_exit_input(key)
+        elif self.curr_input_mode == self.input_modes["player_turn"]:
+            # Calling player input handler
+            turn_completed = self._handle_player_input(key)
+            if turn_completed:
                 self.curr_input_mode = self.input_modes["none"]
                 print("GAME: Player turn completed")
 
@@ -156,16 +165,135 @@ class Pyrogue_Game:
                 self.root.after(10, self._next_turn)
             else:
                 # Player input was not correct
-                print("GAME: player turn continues")
+                print("GAME: Player turn continues")
 
         # Any input after end of game returns control to main menu
         if self.game_over:
-            # Destroy the canvas for this game, also unbinding event listeners
-            self.canvas.unbind("<Configure>")
-            self.canvas.destroy()
-            self.root.unbind("<Key>")
-            # Relinquish control back to the main menu
-            self.menu_main.toggle_ingame()
+            # For now, just end game. 
+            # Maybe I'll print a message to use the exit menu, but thats a design choice, not a technical limitation.
+            self._end_game()
+
+    # Handles input for player turn. Returns True on completion of turn, false if turn is still ongoing.
+    def _handle_player_input(self, key) -> int:
+        # Compact way of checking for movement keys and grabbing the respective move
+        move_delta = {
+            "7": Move.up_left,
+            "y": Move.up_left,
+            "8": Move.up,
+            "k": Move.up,
+            "9": Move.up_right,
+            "u": Move.up_right,
+            "4": Move.left,
+            "h": Move.left,
+            "5": Move.none,
+            "space": Move.none,
+            "period": Move.none,
+            "6": Move.right,
+            "l": Move.right,
+            "1": Move.down_left,
+            "b": Move.down_left,
+            "2": Move.down,
+            "j": Move.down,
+            "3": Move.down_right,
+            "n": Move.down_right,
+        }
+
+        if key not in move_delta:
+            # Other input; Either navigating to a submenu or passing staircase
+            if key == "greater" or key == "0":
+                pc_r, pc_c = self.player.get_pos()
+                # Wanting to navigate staircase; check that staircase is present where player is standing
+                if self.dungeon.tmap[pc_r][pc_c] == Dungeon.Terrain.stair:
+                    # replace the dungeon, re-generating monsters and restarting the turn loop
+                    self._replace_dungeon()
+                    pc_r, pc_c = self.player.get_pos()
+                    pinfo_msg = (
+                        "Player Location: Row " + str(pc_r) + ", Column: " + str(pc_c)
+                    )
+                    self._update_pinfo_label(pinfo_msg)
+                    message = "You escaped to a new level of the dungeon"
+                    self._update_top_label(message, "gold")
+                    return True
+                else:
+                    message = "You can't escape from here; no staircase"
+                    self._update_top_label(message)
+            elif key == "z":
+                # Rotate through distance map displays
+                if self.curr_render_mode == self.render_modes["standard"]:
+                    self.curr_render_mode = self.render_modes["walkmap"]
+                elif self.curr_render_mode == self.render_modes["walkmap"]:
+                    self.curr_render_mode = self.render_modes["tunnmap"]
+                elif self.curr_render_mode == self.render_modes["tunnmap"]:
+                    self.curr_render_mode = self.render_modes["standard"]
+                self.need_full_rerender = True
+                self._render_frame(self.scrsize_h, self.scrsize_w)
+            elif key == "Escape":
+                # Enter the "exit" menu for exit options
+                self.curr_input_mode = self.input_modes["menu_exit"]
+                self.curr_submenu = self.display_submenus["menu_exit"]
+                self.submenu_select_idx = 0
+                self._render_exit_menu()
+                print("GAME: Exit sub-menu activated")
+                return False
+            else:
+                # Misinput; return false
+                return False
+        else:
+            # Regular valid move
+            move = move_delta[key]
+            success, targ_actor, dmg = self.player.handle_turn(
+                self.dungeon, self.actor_map, self.player, move
+            )
+            if success:
+                if targ_actor != None:
+                    message = "You killed a " + targ_actor.get_char()
+                    self.player_score += 10
+                    self._update_top_label(message)
+                else:
+                    # Just a plain successful move; reset message
+                    self._update_top_label("")
+                    self.player_score += 1
+                return success
+            else:
+                message = "You can't move there"
+                self._update_top_label(message)
+                return False
+
+    # Handles input for exit submenu
+    def _handle_exit_input(self, key):
+        if key == "Return":
+            # User made selection
+            if self.submenu_select_idx == 0:
+                self.curr_input_mode = self.input_modes["player_turn"]
+                self.curr_submenu = self.display_submenus["none"]
+                self.submenu_canvas.destroy()
+                print("GAME: Exit sub-menu closed")
+            elif self.submenu_select_idx == 1:
+                self._end_game()
+            elif self.submenu_select_idx == 2:
+                # Force exit; maybe not the way to do it, but it seems to work fine
+                exit(0)
+        elif key == "j" or key == "Down" or key == "2":
+            # Move selection down
+            if self.submenu_select_idx < 2:
+                self.submenu_select_idx += 1
+            else:
+                self.submenu_select_idx = 0
+            self.need_submenu_rerender = True
+            self._render_exit_menu()
+        elif key == "k" or key == "Up" or key == "8":
+            # Move selection up
+            if self.submenu_select_idx >= 1:
+                self.submenu_select_idx -= 1
+            else:
+                self.submenu_select_idx = 2
+            self.need_submenu_rerender = True
+            self._render_exit_menu()
+        elif key == "Escape":
+            self.curr_input_mode = self.input_modes["player_turn"]
+            self.curr_submenu = self.display_submenus["none"]
+            self.submenu_canvas.destroy()
+            print("GAME: Exit sub-menu closed")
 
     # Populates the actor_map with a dungeon size proportionate number of monsters.
     # Difficulty is a modifier for the spawn rate of monsters in the dungeon.
@@ -262,92 +390,6 @@ class Pyrogue_Game:
         # Generate monsters to populate the dungeon
         self._generate_monsters()
 
-    # Handles input for player turn
-    def _handle_player_input(self, key) -> int:
-        # Compact way of checking for movement keys and grabbing the respective move
-        move_delta = {
-            "7": Move.up_left,
-            "y": Move.up_left,
-            "8": Move.up,
-            "k": Move.up,
-            "9": Move.up_right,
-            "u": Move.up_right,
-            "4": Move.left,
-            "h": Move.left,
-            "5": Move.none,
-            "space": Move.none,
-            "period": Move.none,
-            "6": Move.right,
-            "l": Move.right,
-            "1": Move.down_left,
-            "b": Move.down_left,
-            "2": Move.down,
-            "j": Move.down,
-            "3": Move.down_right,
-            "n": Move.down_right,
-        }
-
-        if key not in move_delta:
-            # Other input; Either navigating to a submenu or passing staircase
-            if key == "greater" or key == "0":
-                pc_r, pc_c = self.player.get_pos()
-                # Wanting to navigate staircase; check that staircase is present where player is standing
-                if self.dungeon.tmap[pc_r][pc_c] == Dungeon.Terrain.stair:
-                    # replace the dungeon, re-generating monsters and restarting the turn loop
-                    self._replace_dungeon()
-                    pc_r, pc_c = self.player.get_pos()
-                    pinfo_msg = (
-                        "Player Location: Row " + str(pc_r) + ", Column: " + str(pc_c)
-                    )
-                    self._update_pinfo_label(pinfo_msg)
-                    message = "You escaped to a new level of the dungeon"
-                    self._update_top_label(message, "gold")
-                    return True
-                else:
-                    message = "You can't escape from here; no staircase"
-                    self._update_top_label(message)
-            elif key == "Escape":
-                # Destroy the canvas for this game, also unbinding event listeners
-                self.canvas.unbind("<Configure>")
-                self.canvas.destroy()
-                self.root.unbind("<Key>")
-                # Relinquish control back to the main menu
-                self.menu_main.toggle_ingame()
-            elif key == "z":
-                # Rotate through distance map displays
-                if self.curr_render_mode == self.render_modes["standard"]:
-                    self.curr_render_mode = self.render_modes["walkmap"]
-                elif self.curr_render_mode == self.render_modes["walkmap"]:
-                    self.curr_render_mode = self.render_modes["tunnmap"]
-                elif self.curr_render_mode == self.render_modes["tunnmap"]:
-                    self.curr_render_mode = self.render_modes["standard"]
-                self.need_full_rerender = True
-                self._render_frame(self.scrsize_h, self.scrsize_w)
-
-            else:
-                # Misinput; return false
-                return False
-        else:
-            # Regular valid move
-            move = move_delta[key]
-            success, targ_actor, dmg = self.player.handle_turn(
-                self.dungeon, self.actor_map, self.player, move
-            )
-            if success:
-                if targ_actor != None:
-                    message = "You killed a " + targ_actor.get_char()
-                    self.player_score += 10
-                    self._update_top_label(message)
-                else:
-                    # Just a plain successful move; reset message
-                    self._update_top_label("")
-                    self.player_score += 1
-                return success
-            else:
-                message = "You can't move there"
-                self._update_top_label(message)
-                return False
-
     # Wrapper to update top message label. Cyan is the default message color.
     def _update_top_label(self, message: str, font_color: str = "cyan"):
         print("GAME MSG:", message)
@@ -396,14 +438,68 @@ class Pyrogue_Game:
         self.need_full_rerender = True
         self._render_frame(self.scrsize_h, self.scrsize_w)
 
+    # Handles creating/rendering the exit menu
+    def _render_exit_menu(self):
+        menu_height = int(self.tile_size * 3.25)
+        menu_width = (self.tile_size * 7)
+        
+        if self.need_full_rerender or self.need_submenu_rerender:
+            self.submenu_canvas.destroy()
+        
+        self.submenu_canvas = tk.Canvas(self.canvas, height=menu_height, width = menu_width, bg="black", highlightthickness=2)
+        self.canvas.create_window(self.scrsize_w // 2, (self.tile_size * self.mapsize_h // 2), height=menu_height, width=menu_width, window=self.submenu_canvas, anchor="center")
+        
+        offset = self.tile_size // 2
+        if self.submenu_select_idx == 0:
+            text = "Continue <--"
+        else:
+            text = "Continue"
+        self.submenu_canvas.create_text(
+                offset,
+                0,
+                text=text,
+                fill="gold",
+                font=(self.def_font, self.font_size),
+                tag="exit_opt_continue",
+                anchor="nw",
+            )
+        
+        if self.submenu_select_idx == 1:
+            text = "End game <--"
+        else:
+            text = "End game"
+        self.submenu_canvas.create_text(
+                offset,
+                self.tile_size,
+                text=text,
+                fill="gold",
+                font=(self.def_font, self.font_size),
+                tag="exit_opt_endgame",
+                anchor="nw",
+            )
+        
+        if self.submenu_select_idx == 2:
+            text = "Quit <--"
+        else:
+            text = "Quit"
+        self.submenu_canvas.create_text(
+                offset,
+                (self.tile_size * 2),
+                text=text,
+                fill="gold",
+                font=(self.def_font, self.font_size),
+                tag="exit_opt_quit",
+                anchor="nw",
+            )
+    
     # Renders the dungeon to the screen canvas.
     def _render_frame(self, height, width):
         max_tile_width = width // self.dungeon.width
         max_tile_height = (
             height // self.scrn_rows
         )  # Note that there are 3 extra rows for messages / player information
-        tile_size = min(max_tile_width, max_tile_height)
-        self.font_size = int(tile_size / 1.5)
+        self.tile_size = min(max_tile_width, max_tile_height)
+        self.font_size = int(self.tile_size / 1.5)
 
         terrain_char = {
             Dungeon.Terrain.floor: ".",
@@ -413,20 +509,20 @@ class Pyrogue_Game:
             Dungeon.Terrain.debug: "!",
         }
 
-        x_offset = (width - tile_size * self.dungeon.width) // 2  # To center
-        y_offset = tile_size  # To leave room for top message
+        x_offset = (width - self.tile_size * self.dungeon.width) // 2  # To center
+        y_offset = self.tile_size  # To leave room for top message
 
         if self.need_full_rerender:
             self.render_cache.clear()
 
             # Calculate dungeon bounds in pixels
-            dungeon_left = x_offset + tile_size
-            dungeon_top = y_offset + tile_size
+            dungeon_left = x_offset + self.tile_size
+            dungeon_top = y_offset + self.tile_size
             dungeon_right = (
-                dungeon_left + ((self.dungeon.width - 1) * tile_size) - tile_size
+                dungeon_left + ((self.dungeon.width - 1) * self.tile_size) - self.tile_size
             )
             dungeon_bottom = (
-                dungeon_top + ((self.dungeon.height - 1) * tile_size) - tile_size
+                dungeon_top + ((self.dungeon.height - 1) * self.tile_size) - self.tile_size
             )
 
             # Deleting existing messages and border
@@ -436,8 +532,8 @@ class Pyrogue_Game:
             x = x_offset
             y = 0
             self.canvas.create_text(
-                x + tile_size // 2,
-                y + tile_size // 1.25,
+                x + self.tile_size // 2,
+                y + self.tile_size // 1.25,
                 text=self.top_msg,
                 fill=self.top_msg_color,
                 font=(self.def_font, self.font_size),
@@ -446,10 +542,10 @@ class Pyrogue_Game:
             )
 
             # Draw score message label
-            y = (self.dungeon.height + 1) * tile_size
+            y = (self.dungeon.height + 1) * self.tile_size
             self.canvas.create_text(
-                x + tile_size // 2,
-                y + tile_size // 2.5,
+                x + self.tile_size // 2,
+                y + self.tile_size // 2.5,
                 text=self.score_msg,
                 fill=self.score_msg_color,
                 font=(self.def_font, self.font_size),
@@ -458,10 +554,10 @@ class Pyrogue_Game:
             )
 
             # Draw pinfo message label
-            y = (self.dungeon.height + 2) * tile_size
+            y = (self.dungeon.height + 2) * self.tile_size
             self.canvas.create_text(
-                x + tile_size // 2,
-                y + tile_size // 2.5,
+                x + self.tile_size // 2,
+                y + self.tile_size // 2.5,
                 text=self.pinfo_msg,
                 fill=self.pinfo_msg_color,
                 font=(self.def_font, self.font_size),
@@ -476,10 +572,14 @@ class Pyrogue_Game:
                 dungeon_right,
                 dungeon_bottom,
                 outline="white",
-                width=tile_size,
+                width=self.tile_size // 2,
                 tag="dungeon_border",
             )
-            self.need_full_rerender = False
+        
+        if self.curr_submenu == self.display_submenus["menu_exit"]:
+            self._render_exit_menu()
+        
+        self.need_full_rerender = False
 
         for row in range(self.dungeon.height):
             for col in range(self.dungeon.width):
@@ -491,8 +591,8 @@ class Pyrogue_Game:
                 )
 
                 if not is_border_tile:
-                    x = col * tile_size + x_offset
-                    y = row * tile_size + y_offset
+                    x = col * self.tile_size + x_offset
+                    y = row * self.tile_size + y_offset
 
                     # default
                     char = "!"
@@ -550,16 +650,16 @@ class Pyrogue_Game:
                         self.canvas.create_rectangle(
                             x,
                             y,
-                            x + tile_size,
-                            y + tile_size,
+                            x + self.tile_size,
+                            y + self.tile_size,
                             fill="black",
                             outline="",
                             tag=f"tile_{row}_{col}",
                         )
                         # Draw character
                         self.canvas.create_text(
-                            x + tile_size // 2,
-                            y + tile_size // 2,
+                            x + self.tile_size // 2,
+                            y + self.tile_size // 2,
                             text=char,
                             fill=color,
                             font=(self.def_font, self.font_size),
@@ -578,6 +678,15 @@ class Pyrogue_Game:
         print("GAME: Turnloop started")
         self._next_turn()
 
+    # Ends the game, destroying the canvas and unbinding event listeners.
+    def _end_game(self):
+            # Destroy the canvas for this game, also unbinding event listeners
+            self.canvas.unbind("<Configure>")
+            self.canvas.destroy()
+            self.root.unbind("<Key>")
+            # Relinquish control back to the main menu
+            self.menu_main.toggle_ingame()
+        
     # Handles a single turn in the turnloop.
     def _next_turn(self):
         # If player's turn, do nothing and wait

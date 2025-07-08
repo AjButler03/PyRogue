@@ -153,6 +153,8 @@ class Menu_Main:
                 # Settings page
                 self.curr_mode = self.menu_modes["settings"]
                 self.need_full_rerender = True
+                self.setting_select_col = 0
+                self.setting_select_row = 0
                 self._render_settings(self.scrsize_h, self.scrsize_w)
             elif self.home_select_idx == 5:
                 # Force exit; maybe not the way to do it, but it seems to work fine

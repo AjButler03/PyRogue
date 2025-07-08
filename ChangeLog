@@ -19,6 +19,7 @@ v0.05 ==========================================================================
     - Added render options for rendering current walkmap / distmap by pressing 'z'.
 07/07/2025
     - Fixed bug where mid-turn messages would not be displayed
+    - Added quit menu to game; opens with esc key, gives options to continue, end game, or quit pyrogue
 v0.04 ===========================================================================================================================
 06/17/2025
     - Added error checking where no optimal move based on path found; now results in no move instead of crash
