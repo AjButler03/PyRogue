@@ -1,20 +1,15 @@
 PyRogue v0.05 By Andrew Butler, Summer 2025
 Built to run using Python 3.12
 
-pyrogue.py is the main file, and running it will do the following:
-    - A new window for PyRogue will open, with a simple message at the top, followed by the dungeon display, then a couple more information labels
-    - The PyRogue window can be scaled to whatever size you would like, and the contents will grow / shrink to fill the space as best it can
-    - Pressing any key will start the game; your goal is to 'kill' all monsters by moving into the space they occupy. The monsters are attempting to do the same to you.
-    - The PyRogue Game ends when either you are defeated, or all the monsters are defeated.
+pyrogue.py is the main file, and running it will open a new window with the PyRogue main menu.
 
 New features with v0.05:
     - Main menu with following features:
         - Game launcher, allowing several games to be played without re-executing PyRogue.py.
         - Settings page, allowing user to select from dungeon size and game difficulty options
-        - Manual page, displaying information about PyRogue gameplay and controls.
         - Quit, which closes the PyRogue from the UI instead of force quitting the window
-    - Monster list sub-menu in game?
-    - Walk/tunnel distance map display?
+    - Game now has a 'pause' menu, allowing pause of game input + options to end game/quit.
+    - Render modes for the main copies of the walking/tunneling distance maps.
 
 The game has the following key binds:
 ================================   MOVEMENT   ================================
@@ -28,12 +23,16 @@ The game has the following key binds:
   2 or j : Attempt to move PC one cell down.
   3 or n : Attempt to move PC one cell to the lower right.
   > or 0 : attempt to escape to new dungeon level using a staircase.
+================================    OTHER     ================================
+  z : Cycles through standard / walking map / tunnelmap render modes.
+  esc : Opens / closes pause menu.
+
 
 Descriptions of the attributes that the monsters can have (Those that are implemented as of v03):
-    - INTELLIGENT: An intelligent monster follows the optimal route to the player, and remembers where the player was when it last saw them.
-    - TELEPATHIC: A telepathic monster will always know where the player character is, regardless of distance or line of sight.
-    - TUNNEL: A tunneling monster has the ability to bore through rock, creating new paths between rooms.
-    - ERRATIC: On any given turn, an erratic monster will have a 50% chance to move randomly.
+    - INTELLIGENT: Follow the optimal route to the player, and remember player location at last sighting.
+    - TELEPATHIC: Always know where the player character is, regardless of distance or line of sight.
+    - TUNNEL: Ability to bore through rock, creating new paths between rooms.
+    - ERRATIC: On every turn, 50% chance to move randomly.
 
 Known Issues:
     - Monsters attempting to move into other monsters around the player might result in the player being removed from the map temporarily, resulting in immortality.
