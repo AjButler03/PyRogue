@@ -84,3 +84,24 @@ class PriorityQueue:
 
     def __contains__(self, node):
         return node in self.pos_map
+
+
+# Dice class for rolling 'randomized' values, such as damage in combat.
+class Dice:
+    def __init__(self, base: int, rolls: int, sides: int):
+        self.base = base
+        self.rolls = rolls
+        self.sides = sides
+
+    def roll(self) -> int:
+        """Rolls the dice and returns the total value."""
+        total = self.base
+        for _ in range(self.rolls):
+            total += random.randint(1, self.sides)
+        return total
+
+    def __repr__(self):
+        return f"Dice({self.base}+{self.rolls}d{self.sides})"
+
+    def __str__(self):
+        return f"{self.base} + {self.rolls}d{self.sides}"

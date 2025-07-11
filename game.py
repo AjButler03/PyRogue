@@ -754,6 +754,8 @@ class Pyrogue_Game:
                 self._update_top_label("You have been defeated; Game Over", "red")
                 print("You have been defeated; Game Over")
             print("=== GAME OVER ===")
+            self.curr_render_mode = self.render_modes["x-ray"]
+            self.need_full_rerender = True
             self.game_over = True
             self._render_frame(self.scrsize_h, self.scrsize_w)
             return

@@ -1,5 +1,6 @@
 import tkinter as tk
 from game import Pyrogue_Game
+from parsedesc import *
 
 # This file handles PyRogue's main menu, its associated submenus, input handling, etc. with Tkinter.
 
@@ -39,6 +40,10 @@ class Menu_Main:
         self.difficulty = 2
         self.dungeon_size = 2
 
+        # Parse monster descriptions
+        monster_type_list = []
+        parse_monsters(monster_type_list)
+        
         # Now init the canvas that will hold everything
         self.canvas = tk.Canvas(
             self.root,
