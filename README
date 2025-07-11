@@ -1,15 +1,13 @@
-PyRogue v0.05 By Andrew Butler, Summer 2025
+PyRogue v0.06 By Andrew Butler, Summer 2025
 Built to run using Python 3.12
 
 pyrogue.py is the main file, and running it will open a new window with the PyRogue main menu.
 
-New features with v0.05:
-    - Main menu with following features:
-        - Game launcher, allowing several games to be played without re-executing PyRogue.py.
-        - Settings page, allowing user to select from dungeon size and game difficulty options
-        - Quit, which closes the PyRogue from the UI instead of force quitting the window
-    - Game now has a 'pause' menu, allowing pause of game input + options to end game/quit.
-    - Render modes for the main copies of the walking/tunneling distance maps.
+New features with v0.06:
+    - Fog of war, toggleable with f
+    - Monster type definition parsing + type-based generation
+    - Monster inspection (?)
+    - Monster list submenu to show what monsters exist (?)
 
 The game has the following key binds:
 ================================   MOVEMENT   ================================
@@ -25,6 +23,7 @@ The game has the following key binds:
   > or 0 : attempt to escape to new dungeon level using a staircase.
 ================================    OTHER     ================================
   z : Cycles through standard / walking map / tunnelmap render modes.
+  f : Toggle fog of war effect. 
   esc : Opens / closes pause menu.
 
 

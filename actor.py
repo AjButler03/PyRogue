@@ -99,6 +99,153 @@ class Player(Actor):
         self.alive = True
         self.char = "@"
 
+        self.view_dist = 3  # default 3
+
+        # Player's memory of dungeon
+        self.tmem = []
+        # To keep track of if a given tile is currently 'visible' to the player; either true/false.
+        self.visible_tiles = []
+
+    # Player specific implementation for initializing position in dungeon
+    def init_pos(self, dungeon: Dungeon, actor_map: list, r: int, c: int) -> bool:
+        # Clear the player's memory of the dungeon.
+        self.tmem = [
+            [Dungeon.Terrain.debug] * dungeon.width for _ in range(dungeon.height)
+        ]
+
+        if (
+            dungeon.valid_point(r, c)
+            and dungeon.rmap[r][c] == 0
+            and actor_map[r][c] == None
+        ):
+            self.r = r
+            self.c = c
+            actor_map[r][c] = self
+
+            # Initialize the player's memory of the dungeon
+            self._update_terrain_memory(dungeon)
+
+            return True
+        else:
+            return False
+
+    # Gets the correct information for an octant, or part of the scan circle for player visually scanning dungeon.
+    def _get_octant_transform(self, octant):
+        """
+        Return the transformation matrix for the given octant.
+        These are used to rotate the FOV scan into the correct direction.
+        """
+        # Each tuple: (xx, xy, yx, yy)
+        # These control how dx/dy are applied to reach other octants
+        mult = [
+            (1, 0, 0, 1),  # Octant 0: E
+            (0, 1, 1, 0),  # Octant 1: NE
+            (-1, 0, 0, 1),  # Octant 2: W
+            (0, -1, 1, 0),  # Octant 3: SE
+            (-1, 0, 0, -1),  # Octant 4: W2
+            (0, -1, -1, 0),  # Octant 5: SW
+            (1, 0, 0, -1),  # Octant 6: E2
+            (0, 1, -1, 0),  # Octant 7: NW
+        ]
+        return mult[octant]
+
+    # Shadowcasting helper method for determining what the player can 'see'.
+    def _cast_light(
+        self, row, start_slope, end_slope, xx, xy, yx, yy, dungeon: Dungeon
+    ):
+        """
+        Recursively 'casts light' in a given octant from the player (source_x, source_y),
+        effectively finding tiles that are visible to the PC in that octant.
+
+        Parameters:
+            source_x, source_y      — origin (player position)
+            radius      — max vision distance
+            row         — current row (distance from origin)
+            start_slope — left bound of current scan sector
+            end_slope   — right bound of current scan sector
+            xx, xy,
+            yx, yy      — octant transform multipliers (from get_octant_transform)
+            map_data    — 2D list of map tiles
+            visible     — set collecting visible tile coordinates
+        """
+
+        source_x = self.c
+        source_y = self.r
+        radius = self.view_dist
+
+        # Stop if the current scan sector is invalid
+        if start_slope < end_slope:
+            return
+
+        for i in range(row, radius + 1):
+            dx = -i
+            blocked = False
+            new_start = start_slope
+
+            while dx <= 0:
+                dy = -i
+                # Map coordinates for this octant
+                X = source_x + dx * xx + dy * xy
+                Y = source_y + dx * yx + dy * yy
+
+                # Compute slopes
+                l_slope = (dx - 0.5) / (dy + 0.5)
+                r_slope = (dx + 0.5) / (dy - 0.5)
+
+                # Skip tile if outside of this field-of-view segment
+                if r_slope > start_slope:
+                    dx += 1
+                    continue
+                elif l_slope < end_slope:
+                    break
+
+                # Bounds check
+                if dungeon.valid_point(Y, X):
+                    dist = dx * dx + dy * dy
+                    if dist <= radius * radius:
+                        self.tmem[Y][X] = dungeon.tmap[Y][X]
+                        self.visible_tiles[Y][X] = True
+
+                    is_wall = dungeon.tmap[Y][X] in {
+                        Dungeon.Terrain.stdrock,
+                        Dungeon.Terrain.immrock,
+                    }
+
+                    if blocked:
+                        if is_wall:
+                            new_start = r_slope  # Wall continues
+                        else:
+                            blocked = False
+                            start_slope = new_start
+                    else:
+                        if is_wall and i < radius:
+                            blocked = True
+                            self._cast_light(
+                                i + 1, start_slope, l_slope, xx, xy, yx, yy, dungeon
+                            )
+                            new_start = r_slope
+
+                dx += 1
+            if blocked:
+                break
+
+    # Starts recursive shadowcasting to determine what the player can 'see'.
+    def _update_terrain_memory(self, dungeon: Dungeon):
+        """
+        Compute what the player can see from its current location using recursive shadowcasting.
+        Updates player.tmem, which is the player's remembered dungeon terrain.
+        """
+        self.visible_tiles = [[False] * dungeon.width for _ in range(dungeon.height)]
+
+        cx = self.c
+        cy = self.r
+        self.tmem[cy][cx] = dungeon.tmap[cy][cx]
+        self.visible_tiles[cy][cx] = True
+
+        for octant in range(8):
+            # Process all 8 octants
+            self._cast_light(1, 1, 0, *self._get_octant_transform(octant), dungeon)
+
     # Determines if the player can be at this position.
     def _valid_pos(self, dungeon: Dungeon, r: int, c: int) -> bool:
         if dungeon.valid_point(r, c) and dungeon.rmap[r][c] == 0:
@@ -112,6 +259,8 @@ class Player(Actor):
         actor_map[r][c] = self
         self.r = r
         self.c = c
+        # Update the player's knowledge of the dungeon.
+        self._update_terrain_memory(dungeon)
 
     # Turn handler for the player.
     def handle_turn(self, dungeon: Dungeon, actor_map: list, player, move: int):
@@ -133,10 +282,7 @@ class Player(Actor):
             dmg = float("inf")
         else:
             dmg = 0
-        actor_map[self.r][self.c] = None
-        actor_map[new_r][new_c] = self
-        self.r = new_r
-        self.c = new_c
+        self._force_pos_update(dungeon, actor_map, new_r, new_c)
         dungeon.calc_dist_maps(new_r, new_c)
 
         # For combat dialog

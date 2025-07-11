@@ -147,7 +147,7 @@ class Dungeon:
                     self.rmap[r][c] = random.randint(1, 254)
 
         # There was originally more to this to allow it to be more 'smooth', but that resulted in boring corridors.
-        
+
         # # Step 2: Generate one random origin for each rock hardness level (1–254, 0 reserved for floor & 255 is immutable rock)
         # rock_origins = [
         #     (random.randint(1, self.height - 2), random.randint(1, self.width - 2))

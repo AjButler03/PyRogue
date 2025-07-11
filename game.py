@@ -85,7 +85,7 @@ class Pyrogue_Game:
         self.curr_render_mode = self.render_modes["standard"]
         # {(row, col): (char, color)}. Stores last updated render info.
         self.render_cache = {}
-        
+
         # Fields to handle submenus and their navigation
         self.submenu_canvas = None
         self.submenu_select_idx = 0
@@ -121,7 +121,7 @@ class Pyrogue_Game:
         self.root.bind("<Key>", self._on_key_press)
         self.input_modes = {"none": 0, "player_turn": 1, "menu_exit": 2}
         self.curr_input_mode = self.input_modes["player_turn"]
-        
+
         # Misc game control fields
         self.turnloop_started = False
         self.game_over = False
@@ -169,7 +169,7 @@ class Pyrogue_Game:
 
         # Any input after end of game returns control to main menu
         if self.game_over:
-            # For now, just end game. 
+            # For now, just end game.
             # Maybe I'll print a message to use the exit menu, but thats a design choice, not a technical limitation.
             self._end_game()
 
@@ -225,6 +225,18 @@ class Pyrogue_Game:
                     self.curr_render_mode = self.render_modes["tunnmap"]
                 elif self.curr_render_mode == self.render_modes["tunnmap"]:
                     self.curr_render_mode = self.render_modes["standard"]
+                self.need_full_rerender = True
+                self._render_frame(self.scrsize_h, self.scrsize_w)
+            elif key == "f":
+                # Toggle fog of war
+                if self.curr_render_mode == self.render_modes["standard"]:
+                    # Turn on x-ray mode to show the full dungeon
+                    self.curr_render_mode = self.render_modes["x-ray"]
+                    print("GAME: Enabled x-ray render mode")
+                else:
+                    # return to standard render mode, known tiles
+                    self.curr_render_mode = self.render_modes["standard"]
+                    print("GAME: Returned to standard render mode")
                 self.need_full_rerender = True
                 self._render_frame(self.scrsize_h, self.scrsize_w)
             elif key == "Escape":
@@ -444,57 +456,70 @@ class Pyrogue_Game:
     # Handles creating/rendering the exit menu
     def _render_exit_menu(self):
         menu_height = int(self.tile_size * 3.75)
-        menu_width = (self.tile_size * 7)
-        
+        menu_width = self.tile_size * 7
+
         if self.need_full_rerender or self.need_submenu_rerender:
             self.submenu_canvas.destroy()
-        
-        self.submenu_canvas = tk.Canvas(self.canvas, height=menu_height, width = menu_width, bg="black", highlightthickness=self.tile_size // 6,)
-        self.canvas.create_window(self.scrsize_w // 2, (self.tile_size * self.mapsize_h // 2), height=menu_height, width=menu_width, window=self.submenu_canvas, anchor="center")
-        
+
+        self.submenu_canvas = tk.Canvas(
+            self.canvas,
+            height=menu_height,
+            width=menu_width,
+            bg="black",
+            highlightthickness=self.tile_size // 6,
+        )
+        self.canvas.create_window(
+            self.scrsize_w // 2,
+            (self.tile_size * self.mapsize_h // 2),
+            height=menu_height,
+            width=menu_width,
+            window=self.submenu_canvas,
+            anchor="center",
+        )
+
         offset = self.tile_size // 2
         if self.submenu_select_idx == 0:
             text = "Continue <--"
         else:
             text = "Continue"
         self.submenu_canvas.create_text(
-                offset,
-                offset // 2,
-                text=text,
-                fill="gold",
-                font=(self.def_font, self.font_size),
-                tag="exit_opt_continue",
-                anchor="nw",
-            )
-        
+            offset,
+            offset // 2,
+            text=text,
+            fill="gold",
+            font=(self.def_font, self.font_size),
+            tag="exit_opt_continue",
+            anchor="nw",
+        )
+
         if self.submenu_select_idx == 1:
             text = "End game <--"
         else:
             text = "End game"
         self.submenu_canvas.create_text(
-                offset,
-                offset // 2  + self.tile_size,
-                text=text,
-                fill="gold",
-                font=(self.def_font, self.font_size),
-                tag="exit_opt_endgame",
-                anchor="nw",
-            )
-        
+            offset,
+            offset // 2 + self.tile_size,
+            text=text,
+            fill="gold",
+            font=(self.def_font, self.font_size),
+            tag="exit_opt_endgame",
+            anchor="nw",
+        )
+
         if self.submenu_select_idx == 2:
             text = "Quit <--"
         else:
             text = "Quit"
         self.submenu_canvas.create_text(
-                offset,
-                offset // 2 + (self.tile_size * 2),
-                text=text,
-                fill="gold",
-                font=(self.def_font, self.font_size),
-                tag="exit_opt_quit",
-                anchor="nw",
-            )
-    
+            offset,
+            offset // 2 + (self.tile_size * 2),
+            text=text,
+            fill="gold",
+            font=(self.def_font, self.font_size),
+            tag="exit_opt_quit",
+            anchor="nw",
+        )
+
     # Renders the dungeon to the screen canvas.
     def _render_frame(self, height, width):
         max_tile_width = width // self.dungeon.width
@@ -509,7 +534,7 @@ class Pyrogue_Game:
             Dungeon.Terrain.stair: ">",
             Dungeon.Terrain.stdrock: " ",
             Dungeon.Terrain.immrock: "X",
-            Dungeon.Terrain.debug: "!",
+            Dungeon.Terrain.debug: " ",
         }
 
         x_offset = (width - self.tile_size * self.dungeon.width) // 2  # To center
@@ -522,10 +547,14 @@ class Pyrogue_Game:
             dungeon_left = x_offset + self.tile_size
             dungeon_top = y_offset + self.tile_size
             dungeon_right = (
-                dungeon_left + ((self.dungeon.width - 1) * self.tile_size) - self.tile_size
+                dungeon_left
+                + ((self.dungeon.width - 1) * self.tile_size)
+                - self.tile_size
             )
             dungeon_bottom = (
-                dungeon_top + ((self.dungeon.height - 1) * self.tile_size) - self.tile_size
+                dungeon_top
+                + ((self.dungeon.height - 1) * self.tile_size)
+                - self.tile_size
             )
 
             # Deleting existing messages and border
@@ -578,10 +607,10 @@ class Pyrogue_Game:
                 width=self.tile_size // 2,
                 tag="dungeon_border",
             )
-        
+
         if self.curr_submenu == self.display_submenus["menu_exit"]:
             self._render_exit_menu()
-        
+
         self.need_full_rerender = False
 
         for row in range(self.dungeon.height):
@@ -599,10 +628,26 @@ class Pyrogue_Game:
 
                     # default
                     char = "!"
-                    color = "gray"
+                    color = "gray15"
 
                     # determine the current render mode to grab char & color
                     if self.curr_render_mode == self.render_modes["standard"]:
+                        actor = self.actor_map[row][col]
+                        if self.player.visible_tiles[row][col]:
+                            # Tile is visible, just render as normal.
+                            if actor:
+                                char = actor.get_char()
+                                color = "gold" if isinstance(actor, Player) else "red"
+                            else:
+                                terrain = self.dungeon.tmap[row][col]
+                                char = terrain_char[terrain]
+                                color = "white"
+                        else:
+                            # Tile is not visible, so only render player's remembered terrain.
+                            terrain = self.player.tmem[row][col]
+                            char = terrain_char[terrain]
+                    elif self.curr_render_mode == self.render_modes["x-ray"]:
+                        # Ignoring player memory of dungeon; just displaying dungeon
                         actor = self.actor_map[row][col]
                         if actor:
                             char = actor.get_char()
@@ -611,10 +656,6 @@ class Pyrogue_Game:
                             terrain = self.dungeon.tmap[row][col]
                             char = terrain_char[terrain]
                             color = "white"
-                    elif self.curr_render_mode == self.render_modes["x-ray"]:
-                        # Eventually, the player will have view distance, and 'x-ray' will disable this feature.
-                        # For now, I'm just leaving a placeholder.
-                        pass
                     elif self.curr_render_mode == self.render_modes["walkmap"]:
                         # Grab walkmap character
                         val = self.dungeon.walk_distmap[row][col]
@@ -683,13 +724,13 @@ class Pyrogue_Game:
 
     # Ends the game, destroying the canvas and unbinding event listeners.
     def _end_game(self):
-            # Destroy the canvas for this game, also unbinding event listeners
-            self.canvas.unbind("<Configure>")
-            self.canvas.destroy()
-            self.root.unbind("<Key>")
-            # Relinquish control back to the main menu
-            self.menu_main.toggle_ingame()
-        
+        # Destroy the canvas for this game, also unbinding event listeners
+        self.canvas.unbind("<Configure>")
+        self.canvas.destroy()
+        self.root.unbind("<Key>")
+        # Relinquish control back to the main menu
+        self.menu_main.toggle_ingame()
+
     # Handles a single turn in the turnloop.
     def _next_turn(self):
         # If player's turn, do nothing and wait
