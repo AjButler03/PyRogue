@@ -4,6 +4,10 @@ v0.06 ==========================================================================
 07/11/2025
     - Implemented a dice class in utility.py
     - Starting on parsing monster descriptions
+07/12/2025
+    - Continued progress on parsing monster descriptions
+07/13/2025
+    - Once again, made slight progress on parsing monster descriptions
 v0.05 ===========================================================================================================================
 06/26/2025
     - Init Menu_Main class to handle the main menu and its future sub-menus; Work in progress
