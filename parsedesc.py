@@ -1,6 +1,18 @@
+import re
 from utility import Dice
+from actor import *
 
 # This file will read monster_desc.txt and object_desc.txt to populate lists of monster descriptions and item descriptions, respectively.
+
+
+# Takes a string in the format {base}+{num}d{sides} and creates a dice object.
+def dice_from_str(str: str):
+    match = re.fullmatch(r"(\d+)\+(\d+)d(\d+)", str.strip())
+    if not match:
+        # Just return false for failure
+        return False, None
+    base, num, sides = map(int, match.groups())
+    return True, Dice(base, num, sides)
 
 
 # Method to parse monster descriptions. Returns True on success, False on failure.
@@ -9,22 +21,23 @@ def parse_monsters(monster_type_list) -> bool:
     try:
         with open("monster_desc.txt", "r") as file:
             file_lines = file.readlines()
-            curr_line = 0 # To point to next line to look at
+            curr_line = 0  # To point to next line to look at
             print("PARSEDESC: monster_desc.txt opened... ", end="")
     except FileNotFoundError:
         # File wasn't found; return False for failure
         print("PARSEDESC: monster_desc.txt not found")
         return False
-    
+
     # Start reading the lines, first checking that file header matches
     line = file_lines[curr_line]
     line = line.strip()
+    types_found = 0
     if line == "PYROGUE MONSTER DESCRIPTION FILE":
         print("file header matches")
-        
         # Header matches; now read the monster descriptions
         curr_line += 1
         line_count = len(file_lines)
+        print("PARSEDESC: monster_desc.txt read with", line_count, "lines")
         while curr_line < line_count:
             line = file_lines[curr_line].strip()
             # Check for beginning of monster definition
@@ -32,60 +45,193 @@ def parse_monsters(monster_type_list) -> bool:
                 curr_line += 1
                 # Init all fields to None, with the intention of populating them with actual values.
                 name = desc = color = abil = speed = hp = dam = symb = rrty = None
-                
+                is_uniq = False
+
                 line = file_lines[curr_line].strip()
                 while line != "END":
                     if line.startswith("NAME"):
                         # Parse name field
-                        name = line[0:4]
+                        name = line[5:].strip()
                     elif line.startswith("DESC"):
                         # Parse text description field; read until "." found
-                        curr_line += 1 # move to the line that starts the actual description
-                        line = file_lines[curr_line]
-                        desc = ""
+                        curr_line += 1
+                        line = file_lines[curr_line].strip()
+                        desc = []
                         while line != ".":
                             # Check to make sure that we don't try and read past the end of the file
                             if curr_line >= line_count:
                                 # Did not find termination ".", so the file is not formatted correctly. Return False.
+                                print(
+                                    "PARSEDESC: Monster definition",
+                                    types_found + 1,
+                                    "has incorrect RRTY field",
+                                )
                                 return False
                             else:
                                 # Read line; add to desc field
-                                desc += line
+                                desc.append(line)
                                 curr_line += 1
-                                line = file_lines[curr_line]
+                                line = file_lines[curr_line].strip()
                     elif line.startswith("COLOR"):
-                        # Parse color field(s)
-                        # TODO
-                        pass
+                        # Parse color field(s), placing into list
+                        line = line[
+                            6:
+                        ].strip()  # Remove "COLOR " and newline character from line
+                        color = line.split()  # Split into the color keywords
                     elif line.startswith("ABIL"):
                         # Parse abilities field(s)
-                        # TODO
-                        pass
+                        line = line[
+                            5:
+                        ].strip()  # Remove "ABIL " and newline character from line
+                        abil_keys = line.split()  # Split into the ability keywords
+                        currkey_idx = 0  # key idx
+                        currkey = abil_keys[currkey_idx]  # Grab first ability key
+                        abil = 0b0000_0000_0000_0000  # Init ability bitfield
+                        while currkey_idx < len(abil_keys):
+                            # Determine what the keyword indicates; add that ability.
+                            # There are 9 possibilites; not all are fully implented in monsters, but still want to parse them.
+                            if currkey == "SMART":
+                                add_attribute(abil, ATTR_INTELLIGENT)
+                            elif currkey == "TELE":
+                                add_attribute(abil, ATTR_TELEPATHIC_)
+                            elif currkey == "TUNNEL":
+                                add_attribute(abil, ATTR_TUNNEL_____)
+                            elif currkey == "ERRATIC":
+                                add_attribute(abil, ATTR_ERRATIC____)
+                            elif currkey == "PASS":
+                                add_attribute(abil, ATTR_PASS_______)
+                            elif currkey == "PICKUP":
+                                add_attribute(abil, ATTR_PICKUP_____)
+                            elif currkey == "DESTROY":
+                                add_attribute(abil, ATTR_DESTROY____)
+                            elif currkey == "UNIQ":
+                                add_attribute(abil, ATTR_UNIQ_______)
+                                is_uniq = True
+                            elif currkey == "BOSS":
+                                add_attribute(abil, ATTR_BOSS_______)
+                            currkey_idx += 1
                     elif line.startswith("SPEED"):
                         # Parse speed field
-                        # TODO
-                        pass
+                        line = line[
+                            6:
+                        ]  # Remove "SPEED " and newline character from line
+                        success, dice = dice_from_str(line)
+                        if success:
+                            speed = dice
+                        else:
+                            # Formatting error; return False for read failure
+                            print(
+                                "PARSEDESC: Monster definition",
+                                types_found + 1,
+                                "has incorrect SPEED field",
+                            )
+                            return False
                     elif line.startswith("HP"):
                         # Parse health field
-                        # TODO
-                        pass
+                        line = line[3:]  # Remove "HP " and newline character from line
+                        success, dice = dice_from_str(line)
+                        if success:
+                            hp = dice
+                        else:
+                            # Formatting error; return False for read failure
+                            print(
+                                "PARSEDESC: Monster definition",
+                                types_found + 1,
+                                "has incorrect HP field",
+                            )
+                            return False
                     elif line.startswith("DAM"):
                         # Parse damage field
-                        # TODO
-                        pass
+                        line = line[4:]  # Remove "DAM " and newline character from line
+                        success, dice = dice_from_str(line)
+                        if success:
+                            dam = dice
+                        else:
+                            # Formatting error; return False for read failure
+                            print(
+                                "PARSEDESC: Monster definition",
+                                types_found + 1,
+                                "has incorrect DAM field",
+                            )
+                            return False
                     elif line.startswith("SYMB"):
-                        # Parse character symbol field
-                        # TODO
-                        pass
+                        symb = line[5]  # 5th character will be the symbol
                     elif line.startswith("RRTY"):
                         # Parse rarity field
-                        # TODO
-                        pass
+                        match = re.fullmatch(r"RRTY (\d+)", line.strip())
+                        if not match:
+                            # return False for format mismatch
+                            print(
+                                "PARSEDESC: Monster definition",
+                                types_found + 1,
+                                "has incorrect RRTY field",
+                            )
+                            return False
+                        else:
+                            rrty = map(int, match.groups())
+                    curr_line += 1
+                    line = file_lines[curr_line].strip()
+                # Check that all fields were filled
+                complete = (
+                    name != None
+                    and desc != None
+                    and color != None
+                    and abil != None
+                    and speed != None
+                    and hp != None
+                    and dam != None
+                    and symb != None
+                    and rrty != None
+                )
+                if complete:
+                    # Append the new monster type definition
+                    monster_type_list.append(
+                        Monster_Type(
+                            name,
+                            symb,
+                            desc,
+                            len(desc),
+                            color,
+                            abil,
+                            speed,
+                            hp,
+                            dam,
+                            rrty,
+                            is_uniq,
+                        )
+                    )
+                    types_found += 1
+                else:
+                    # One or more fields were not found; return False, as there is an incomplete definition
+                    print(
+                        "PARSEDESC: Monster def", types_found + 1, "incomplete"
+                    )
+                    error = "     Missing fields: "
+                    if name == None:
+                        error += "NAME "
+                    if symb == None:
+                        error += "SYMB "
+                    if desc == None:
+                        error += "DESC "
+                    if color == None:
+                        error += "COLOR "
+                    if abil == None:
+                        error += "ABIL "
+                    if speed == None:
+                        error += "SPEED "
+                    if hp == None:
+                        error += "HP "
+                    if dam == None:
+                        error += "DAM "
+                    if rrty == None:
+                        error += "RRTY "
+                    print(error)
+                    return False
+            curr_line += 1
+
+        print("PARSEDESC: Found", types_found, "Monster definitions")
     else:
         # Header does not match; file is probably in incorrect format
         # Return False for failure
         print("header mismatch")
         return False
-    
-        
-        

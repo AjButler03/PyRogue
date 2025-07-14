@@ -9,15 +9,15 @@ from utility import Dice
 
 # A monster can have any number of attributes. I will be indicating these using a bit field.
 # For v03, only the first 4 will be fully implemented. The others will come later, if I decide to do them at all.
-_ATTR_INTELLIGENT = 0b0000_0000_0000_0001  # Bit 1 (0000 0000 0000 0001)
-_ATTR_TELEPATHIC_ = 0b0000_0000_0000_0010  # Bit 2 (0000 0000 0000 0010)
-_ATTR_TUNNEL_____ = 0b0000_0000_0000_0100  # Bit 3 (0000 0000 0000 0100)
-_ATTR_ERRATIC____ = 0b0000_0000_0000_1000  # Bit 4 (0000 0000 0000 1000)
-_ATTR_PASS_______ = 0b0000_0000_0001_0000  # Bit 5 (0000 0000 0001 0000)
-_ATTR_PICKUP_____ = 0b0000_0000_0010_0000  # Bit 6 (0000 0000 0010 0000)
-_ATTR_DESTROY____ = 0b0000_0000_0100_0000  # Bit 7 (0000 0000 0100 0000)
-_ATTR_UNIQ_______ = 0b0000_0000_1000_0000  # Bit 8 (0000 0000 1000 0000)
-_ATTR_BOSS_______ = 0b0000_0001_0000_0000  # Bit 9 (0000 0001 0000 0000)
+ATTR_INTELLIGENT = 0b0000_0000_0000_0001  # Bit 1 (0000 0000 0000 0001)
+ATTR_TELEPATHIC_ = 0b0000_0000_0000_0010  # Bit 2 (0000 0000 0000 0010)
+ATTR_TUNNEL_____ = 0b0000_0000_0000_0100  # Bit 3 (0000 0000 0000 0100)
+ATTR_ERRATIC____ = 0b0000_0000_0000_1000  # Bit 4 (0000 0000 0000 1000)
+ATTR_PASS_______ = 0b0000_0000_0001_0000  # Bit 5 (0000 0000 0001 0000)
+ATTR_PICKUP_____ = 0b0000_0000_0010_0000  # Bit 6 (0000 0000 0010 0000)
+ATTR_DESTROY____ = 0b0000_0000_0100_0000  # Bit 7 (0000 0000 0100 0000)
+ATTR_UNIQ_______ = 0b0000_0000_1000_0000  # Bit 8 (0000 0000 1000 0000)
+ATTR_BOSS_______ = 0b0000_0001_0000_0000  # Bit 9 (0000 0001 0000 0000)
 
 
 # Activates a given attribute bit, returning the new integer value.
@@ -387,8 +387,8 @@ class Monster(Actor):
         if dungeon.valid_point(r, c):
             if (
                 dungeon.rmap[r][c] == 0
-                or has_attribute(self.attributes, _ATTR_TUNNEL_____)
-                or has_attribute(self.attributes, _ATTR_PASS_______)
+                or has_attribute(self.attributes, ATTR_TUNNEL_____)
+                or has_attribute(self.attributes, ATTR_PASS_______)
             ):
                 return True
         return False
@@ -523,11 +523,11 @@ class Monster(Actor):
             # Check if there is rock in the way
             if dungeon.rmap[new_r][new_c] != 0:
                 hardness = dungeon.rmap[new_r][new_c]
-                if has_attribute(self.attributes, _ATTR_TUNNEL_____):
+                if has_attribute(self.attributes, ATTR_TUNNEL_____):
                     # Bore rock
                     hardness = max(0, hardness - 86)
                     dungeon.rmap[new_r][new_c] = hardness
-                if hardness < 1 or has_attribute(self.attributes, _ATTR_PASS_______):
+                if hardness < 1 or has_attribute(self.attributes, ATTR_PASS_______):
                     # Rock has been cleared and/or monster can pass through
                     dungeon.tmap[new_r][new_c] = dungeon.Terrain.floor
                     # Update the actor map + position information
@@ -589,12 +589,12 @@ class Monster(Actor):
     # Returns True on a successful path update, False otherwise.
     def _update_path(self, dungeon: Dungeon, player: Player) -> bool:
         # Check if monster is intelligent
-        if has_attribute(self.attributes, _ATTR_INTELLIGENT):
+        if has_attribute(self.attributes, ATTR_INTELLIGENT):
             # Check if monster is a telepath
-            if has_attribute(self.attributes, _ATTR_TELEPATHIC_):
+            if has_attribute(self.attributes, ATTR_TELEPATHIC_):
                 # Monster is intelligent and telepathic; thus, it should get a full distance map; not a copy.
                 # Check if monster is a tunneling monster to determine which it should get.
-                if has_attribute(self.attributes, _ATTR_TUNNEL_____):
+                if has_attribute(self.attributes, ATTR_TUNNEL_____):
                     # Tunneler, get tunneling distance map.
                     self.path = dungeon.tunn_distmap
                     return True
@@ -607,14 +607,14 @@ class Monster(Actor):
                 if self._has_pc_los(dungeon, player):
                     # Has line of sight, so need to check which distance map monster should recieve a copy of.
                     # Also: Copy instead of direct assignment to emmulate 'memory' of last PC sighting.
-                    if has_attribute(self.attributes, _ATTR_TUNNEL_____):
+                    if has_attribute(self.attributes, ATTR_TUNNEL_____):
                         self.path = copy.deepcopy(dungeon.tunn_distmap)
                         return True
                     else:
                         self.path = copy.deepcopy(dungeon.walk_distmap)
                         return True
         else:
-            if has_attribute(self.attributes, _ATTR_TELEPATHIC_):
+            if has_attribute(self.attributes, ATTR_TELEPATHIC_):
                 # Monster is telepathic, but not intelligent. Will need to calculate a straightline path.
                 self._calc_straight_path(dungeon, player)
                 return True
@@ -633,7 +633,7 @@ class Monster(Actor):
         # Update the monster's path.
         if self._update_path(dungeon, player):
             if (
-                has_attribute(self.attributes, _ATTR_ERRATIC____)
+                has_attribute(self.attributes, ATTR_ERRATIC____)
                 and random.randint(0, 1) > 0
             ):
                 # Erratic attribute triggered
