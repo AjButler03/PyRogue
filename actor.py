@@ -67,7 +67,7 @@ class Monster_Typedef:
         self.colors = colors
         self.abilities = abilities
         self.speed_dice = speed_dice
-        self.health_dice = health_dice
+        self.hp_dice = health_dice
         self.damage_dice = damage_dice
         self.rarity = rarity
         self.is_unique = is_unique
@@ -110,7 +110,7 @@ class Monster_Typedef:
         # print speed
         string += "SPEED: " + str(self.speed_dice) + "\n"
         # print hp
-        string += "HEALTH: " + str(self.health_dice) + "\n"
+        string += "HEALTH: " + str(self.hp_dice) + "\n"
         # print dam
         string += "DAMAGE: " + str(self.damage_dice) + "\n"
         # print symb
@@ -119,8 +119,9 @@ class Monster_Typedef:
         string += "RRTY: " + str(self.rarity)
         return string + "\n"
 
+
 # Class to store item type definitions, which instantiated items will be based on.
-class Item_Definition:
+class Item_Typedef:
 
     # Item_Definition constructor
     def __init__(
@@ -140,7 +141,52 @@ class Item_Definition:
     ):
         self.name = name
         self.type = type
-        
+        self.desc = desc
+        self.colors = colors
+        self.hp_dice = hp
+        self.damage_dice = damage
+        self.attr_dice = attr
+        self.defense_dice = defense
+        self.dodge_dice = dodge
+        self.speed_dice = speed
+        self.rarity = rarity
+        self.artifact = artifact
+
+    def __str__(self):
+        string = "NAME: "
+        # print name
+        string += self.name + "\n"
+        # print item type
+        string += "TYPE: " + self.type + "\n"
+        # print desc
+        string += "DESCRIPTION: \n"
+        for line in self.desc:
+            string += line
+        # print color(s)
+        string += "COLORS: "
+        for color in self.colors:
+            string += color + " "
+        string += "\n"
+        # print speed
+        string += "SPEED: " + str(self.speed_dice) + "\n"
+        # print hp
+        string += "HEALTH: " + str(self.hp_dice) + "\n"
+        # print dam
+        string += "DAMAGE: " + str(self.damage_dice) + "\n"
+        # print attr
+        string += "ATTR: " + str(self.attr_dice) + "\n"
+        # print defense
+        string += "DEFENSE: " + str(self.defense_dice) + "\n"
+        # print dodge
+        string += "DODGE: " + str(self.dodge_dice) + "\n"
+        # print rrty
+        string += "RRTY: " + str(self.rarity) + "\n"
+        # Print artifact status
+        if self.artifact:
+            string += "ART: True\n"
+        else:
+            string += "ART: FALSE\n"
+        return string + "\n"
 
 
 # This is the generic actor class to be used in the general turn loop.

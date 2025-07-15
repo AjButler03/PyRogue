@@ -10,6 +10,8 @@ v0.06 ==========================================================================
     - Once again, made slight progress on parsing monster descriptions
 07/14/2025
     - Monster definition parser complete
+07/15/2025
+    - Item definitino parser complete
 v0.05 ===========================================================================================================================
 06/26/2025
     - Init Menu_Main class to handle the main menu and its future sub-menus; Work in progress

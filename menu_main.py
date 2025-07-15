@@ -42,9 +42,15 @@ class Menu_Main:
 
         # Parse monster descriptions
         monster_type_list = []
-        mparse_success = parse_monsters(monster_type_list)
+        item_type_list = []
+        mparse_success = parse_monster_typedefs(monster_type_list)
+        iparse_success = parse_item_typedefs(item_type_list)
+        print_item_defs(item_type_list)
         if not mparse_success:
             print("MENU: Monster type definition parser failed. Quitting")
+            exit(0)
+        if not iparse_success:
+            print("MENU: Item type definition parser failed. Quitting")
             exit(0)
             
         

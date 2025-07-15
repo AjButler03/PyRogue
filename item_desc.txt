@@ -1,6 +1,6 @@
 PYROGUE ITEM DESCRIPTION FILE
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME a NERF(R) dagger
 TYPE WEAPON
 COLOR magenta
@@ -21,7 +21,7 @@ RRTY 90
 ART FALSE
 END
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME the Vorpal Blade
 DESC
 One, two! One, two! And through and through!
@@ -39,27 +39,7 @@ RRTY 10
 ART TRUE
 END
 
-BEGIN OBJECT
-NAME a prom dress
-HIT 0+2d3
-DAM 0+2d3
-DODGE 0+0d1
-SPEED -5+0d1
-ATTR 0+0d1
-DEF 0+0d1
-DESC
-This dress is totes fab! It's off-the-shoulder with an A-line waste, sequins,
-and lavender chiffon.  It fits tight to mid-calf and you totally can't take
-full steps in it, but, like, who cares?  You'll be the hit of the party as
-long as Shirley doesn't show up wearing the same thing again.
-.
-TYPE ARMOR
-COLOR magenta
-RRTY 70
-ART FALSE
-END
-
-BEGIN OBJECT
+BEGIN ITEM
 NAME the Aegis
 DESC
 A very high-quality shield.  Nobody knows what it looks like, except for
@@ -78,7 +58,7 @@ RRTY 30
 ART TRUE
 END
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME the cloak of invisibility
 TYPE CLOAK
 DESC
@@ -96,7 +76,7 @@ RRTY 20
 ART TRUE
 END
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME the One Ring
 TYPE RING
 COLOR yellow
@@ -115,7 +95,7 @@ RRTY 3
 ART TRUE
 END
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME a torch
 TYPE LIGHT
 COLOR white
@@ -133,7 +113,7 @@ RRTY 100
 ART FALSE
 END
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME a Wicked Lasers(R) Torch
 TYPE LIGHT
 COLOR white
@@ -153,7 +133,7 @@ RRTY 30
 ART FALSE
 END
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME the Moon Stick
 TYPE OFFHAND
 COLOR magenta
@@ -171,7 +151,7 @@ RRTY 25
 ART TRUE
 END
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME a ring of speed
 TYPE RING
 COLOR red
@@ -188,7 +168,7 @@ RRTY 80
 ART FALSE
 END
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME a ring of damage
 TYPE RING
 COLOR cyan
@@ -205,7 +185,7 @@ RRTY 80
 ART FALSE
 END
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME Mjolnir
 TYPE WEAPON
 COLOR green
@@ -223,7 +203,7 @@ RRTY 50
 ART TRUE
 END
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME Sting
 TYPE WEAPON
 COLOR blue
@@ -240,7 +220,7 @@ RRTY 80
 ART TRUE
 END
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME the Heart of the Ocean
 TYPE AMULET
 COLOR blue
@@ -260,7 +240,7 @@ RRTY 80
 ART TRUE
 END
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME the Halo 1 pistol
 TYPE WEAPON
 COLOR gray
@@ -284,7 +264,7 @@ RRTY 75
 ART TRUE
 END
 
-BEGIN OBJECT
+BEGIN ITEM
 NAME Battle Rifle
 TYPE RANGED
 COLOR gray
