@@ -57,7 +57,7 @@ def parse_monsters(monster_type_list) -> bool:
                         curr_line += 1
                         line = file_lines[curr_line].strip()
                         desc = []
-                        while line != ".":
+                        while line.strip() != ".":
                             # Check to make sure that we don't try and read past the end of the file
                             if curr_line >= line_count:
                                 # Did not find termination ".", so the file is not formatted correctly. Return False.
@@ -71,7 +71,7 @@ def parse_monsters(monster_type_list) -> bool:
                                 # Read line; add to desc field
                                 desc.append(line)
                                 curr_line += 1
-                                line = file_lines[curr_line].strip()
+                                line = file_lines[curr_line]
                     elif line.startswith("COLOR"):
                         # Parse color field(s), placing into list
                         line = line[
@@ -84,32 +84,29 @@ def parse_monsters(monster_type_list) -> bool:
                             5:
                         ].strip()  # Remove "ABIL " and newline character from line
                         abil_keys = line.split()  # Split into the ability keywords
-                        currkey_idx = 0  # key idx
-                        currkey = abil_keys[currkey_idx]  # Grab first ability key
                         abil = 0b0000_0000_0000_0000  # Init ability bitfield
-                        while currkey_idx < len(abil_keys):
+                        for currkey in abil_keys:
                             # Determine what the keyword indicates; add that ability.
                             # There are 9 possibilites; not all are fully implented in monsters, but still want to parse them.
                             if currkey == "SMART":
-                                add_attribute(abil, ATTR_INTELLIGENT)
+                                abil = add_attribute(abil, ATTR_INTELLIGENT)
                             elif currkey == "TELE":
-                                add_attribute(abil, ATTR_TELEPATHIC_)
+                                abil = add_attribute(abil, ATTR_TELEPATHIC_)
                             elif currkey == "TUNNEL":
-                                add_attribute(abil, ATTR_TUNNEL_____)
+                                abil = add_attribute(abil, ATTR_TUNNEL_____)
                             elif currkey == "ERRATIC":
-                                add_attribute(abil, ATTR_ERRATIC____)
+                                abil = add_attribute(abil, ATTR_ERRATIC____)
                             elif currkey == "PASS":
-                                add_attribute(abil, ATTR_PASS_______)
+                                abil = add_attribute(abil, ATTR_PASS_______)
                             elif currkey == "PICKUP":
-                                add_attribute(abil, ATTR_PICKUP_____)
+                                abil = add_attribute(abil, ATTR_PICKUP_____)
                             elif currkey == "DESTROY":
-                                add_attribute(abil, ATTR_DESTROY____)
+                                abil = add_attribute(abil, ATTR_DESTROY____)
                             elif currkey == "UNIQ":
-                                add_attribute(abil, ATTR_UNIQ_______)
+                                abil = add_attribute(abil, ATTR_UNIQ_______)
                                 is_uniq = True
                             elif currkey == "BOSS":
-                                add_attribute(abil, ATTR_BOSS_______)
-                            currkey_idx += 1
+                                abil = add_attribute(abil, ATTR_BOSS_______)
                     elif line.startswith("SPEED"):
                         # Parse speed field
                         line = line[
@@ -168,7 +165,7 @@ def parse_monsters(monster_type_list) -> bool:
                             )
                             return False
                         else:
-                            rrty = map(int, match.groups())
+                            rrty = int(match.group(1))
                     curr_line += 1
                     line = file_lines[curr_line].strip()
                 # Check that all fields were filled
@@ -235,3 +232,11 @@ def parse_monsters(monster_type_list) -> bool:
         # Return False for failure
         print("header mismatch")
         return False
+
+# FOR TESTING PURPOSES
+def print_monst_defs(monster_type_list):
+    num = 1
+    for mdef in monster_type_list:
+        print("MONSTER TYPE DEFINITION", num)
+        print(mdef)
+        num += 1

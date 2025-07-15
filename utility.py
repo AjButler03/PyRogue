@@ -104,4 +104,4 @@ class Dice:
         return f"Dice({self.base}+{self.rolls}d{self.sides})"
 
     def __str__(self):
-        return f"{self.base} + {self.rolls}d{self.sides}"
+        return f"{self.base}+{self.rolls}d{self.sides}"

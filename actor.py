@@ -64,7 +64,7 @@ class Monster_Type:
         is_unique: bool,
     ):
         self.name = name
-        self.sybm = symb
+        self.symb = symb
         self.desc = desc
         self.desc_line_count = desc_line_count
         self.colors = colors
@@ -75,6 +75,53 @@ class Monster_Type:
         self.rarity = rarity
         self.is_unique = is_unique
 
+
+    def __str__(self):
+        string ="NAME: "
+        # print name
+        string += self.name + "\n"
+        # print desc
+        string += "DESCRIPTION: \n"
+        for line in self.desc:
+            string += line
+        # print color(s)
+        string += "COLORS: "
+        for color in self.colors:
+            string += color + " "
+        string += "\n"
+        # print abilities
+        string += "ABILITIES: "
+        abil = self.abilities
+        if has_attribute(abil, ATTR_INTELLIGENT):
+            string += "SMART "
+        if has_attribute(abil, ATTR_TELEPATHIC_):
+            string += "TELE "
+        if has_attribute(abil, ATTR_TUNNEL_____):
+            string += "TUNNEL "
+        if has_attribute(abil, ATTR_ERRATIC____):
+            string += "ERRATIC "
+        if has_attribute(abil, ATTR_PASS_______):
+            string += "PASS "
+        if has_attribute(abil, ATTR_PICKUP_____):
+            string += "PICKUP "
+        if has_attribute(abil, ATTR_DESTROY____):
+            string += "DESTROY "
+        if has_attribute(abil, ATTR_UNIQ_______):
+            string += "UNIQ "
+        if has_attribute(abil, ATTR_BOSS_______):
+            string += "BOSS "
+        string += "\n"
+        # print speed
+        string += "SPEED: " + str(self.speed_dice) + "\n"
+        # print hp
+        string += "HEALTH: " + str(self.health_dice) + "\n"
+        # print dam
+        string += "DAMAGE: " + str(self.damage_dice) + "\n"
+        # print symb
+        string += "SYMB: " + self.symb + "\n"
+        # print rrty
+        string += "RRTY: " + str(self.rarity)
+        return string + "\n"
 
 # This is the generic actor class to be used in the general turn loop.
 class Actor(abc.ABC):

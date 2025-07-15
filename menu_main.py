@@ -43,6 +43,7 @@ class Menu_Main:
         # Parse monster descriptions
         monster_type_list = []
         parse_monsters(monster_type_list)
+        print_monst_defs(monster_type_list)
         
         # Now init the canvas that will hold everything
         self.canvas = tk.Canvas(
