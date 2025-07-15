@@ -71,6 +71,7 @@ class Monster_Typedef:
         self.damage_dice = damage_dice
         self.rarity = rarity
         self.is_unique = is_unique
+        self.gen_eligible = True
 
     def __str__(self):
         string = "NAME: "
@@ -225,8 +226,14 @@ class Actor(abc.ABC):
         return self.speed
 
     # Returns the character representation of the actor.
+    @abc.abstractmethod
     def get_char(self) -> str:
-        return self.char
+        pass
+
+    # Returns a color for the character of the actor.
+    @abc.abstractmethod
+    def get_color(self) -> str:
+        pass
 
     # Sets the current turn of the given actor.
     def set_currturn(self, turn: int):
@@ -266,7 +273,6 @@ class Player(Actor):
         self.speed = 10
         # Define the player as alive
         self.alive = True
-        self.char = "@"
 
         self.view_dist = 3  # default 3
 
@@ -297,6 +303,14 @@ class Player(Actor):
             return True
         else:
             return False
+
+    # Returns the character representation of the actor.
+    def get_char(self) -> str:
+        return "@"
+
+    # Returns a color for the character of the actor.
+    def get_color(self) -> str:
+        return "gold"
 
     # Gets the correct information for an octant, or part of the scan circle for player visually scanning dungeon.
     def _get_octant_transform(self, octant):
@@ -462,38 +476,29 @@ class Player(Actor):
 class Monster(Actor):
 
     # Monster constructor
-    def __init__(self, attributes: int, speed: int):
+    def __init__(self, typedef: Monster_Typedef):
         # Declare fields for location
         self.r = 0
         self.c = 0
+        self.typedef = typedef
         # Monster's 'path'; this is a distance map of the dungeon to determine where to move next
         self.path = []
         # Speed modifier; lower is better
-        self.speed = speed
+        self.speed = typedef.speed_dice.roll()
         # bitfield to indicate what sort of attributes that the monster has
-        self.attributes = attributes
+        self.attributes = typedef.abilities
         # Set the monsters current turn to zero
         self.turn = 0
         # Declare the monster as initially alive
         self.alive = True
-        # Declaring a character to represent this monster in the dungeon
-        # This is a temporary setup, as monsters will have custom definitions in the future
-        if 0 <= attributes < 10:
-            self.char = str(attributes)
-        elif attributes == 10:
-            self.char = "A"
-        elif attributes == 11:
-            self.char = "B"
-        elif attributes == 12:
-            self.char = "C"
-        elif attributes == 13:
-            self.char = "D"
-        elif attributes == 14:
-            self.char = "E"
-        elif attributes == 15:
-            self.char = "F"
-        else:
-            self.char = "!"
+
+    # Returns the character representation of the actor.
+    def get_char(self) -> str:
+        return self.typedef.symb
+
+    # Returns a color for the character of the actor.
+    def get_color(self) -> str:
+        return self.typedef.colors[random.randint(0, len(self.typedef.colors) - 1)]
 
     # Determines if the monster can be at this position.
     def _valid_pos(self, dungeon: Dungeon, r: int, c: int):

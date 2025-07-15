@@ -41,11 +41,10 @@ class Menu_Main:
         self.dungeon_size = 2
 
         # Parse monster descriptions
-        monster_type_list = []
-        item_type_list = []
-        mparse_success = parse_monster_typedefs(monster_type_list)
-        iparse_success = parse_item_typedefs(item_type_list)
-        print_item_defs(item_type_list)
+        self.monster_type_list = []
+        self.item_type_list = []
+        mparse_success = parse_monster_typedefs(self.monster_type_list)
+        iparse_success = parse_item_typedefs(self.item_type_list)
         if not mparse_success:
             print("MENU: Monster type definition parser failed. Quitting")
             exit(0)
@@ -139,6 +138,7 @@ class Menu_Main:
                 mapsize_h,
                 mapsize_w,
                 self.difficulty_setting[self.difficulty],
+                self.monster_type_list
             )
             self.canvas.pack_forget()
 

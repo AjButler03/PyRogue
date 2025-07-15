@@ -20,6 +20,7 @@ class Pyrogue_Game:
         mapsize_h: int,
         mapsize_w: int,
         difficulty: float,
+        monster_type_list : list,
         generate=True,
     ):
         # Menu from which this game instance was launched from
@@ -58,6 +59,7 @@ class Pyrogue_Game:
         self.player_score = 0
 
         # Init lists for monsters as well as the map storing all actor locations
+        self.monster_type_list = monster_type_list
         self.monster_list = []
         self.actor_map = []
         self.turn_pq = None
@@ -323,19 +325,22 @@ class Pyrogue_Game:
 
         # Generate monsters; runs until minimum number and attempt limit are met
         while (monsterc < min_monsterc) or (attemptc < attempt_limit):
-            # Create monster
-            new_monster = Monster(random.randint(0, 15), random.randint(5, 20))
-            if monsterc <= min_monsterc or exp_chancetime(
-                monsterc - min_monsterc, decay_rate
-            ):
-                if new_monster.init_pos(
-                    self.dungeon,
-                    self.actor_map,
-                    random.randint(1, self.dungeon.height - 2),
-                    random.randint(1, self.dungeon.width - 2),
+            # Grab a monster type definition
+            mtypedef = self.monster_type_list[random.randint(0, len(self.monster_type_list) - 1)]
+            if mtypedef.gen_eligible and random.randint(0, 100) >= mtypedef.rarity:
+                # Create monster
+                new_monster = Monster(mtypedef)
+                if monsterc <= min_monsterc or exp_chancetime(
+                    monsterc - min_monsterc, decay_rate
                 ):
-                    monsterc += 1
-                    self.monster_list.append(new_monster)
+                    if new_monster.init_pos(
+                        self.dungeon,
+                        self.actor_map,
+                        random.randint(1, self.dungeon.height - 2),
+                        random.randint(1, self.dungeon.width - 2),
+                    ):
+                        monsterc += 1
+                        self.monster_list.append(new_monster)
             attemptc += 1
         print(
             "MONSTERS:",
@@ -637,7 +642,7 @@ class Pyrogue_Game:
                             # Tile is visible, just render as normal.
                             if actor:
                                 char = actor.get_char()
-                                color = "gold" if isinstance(actor, Player) else "red"
+                                color = actor.get_color()
                             else:
                                 terrain = self.dungeon.tmap[row][col]
                                 char = terrain_char[terrain]
@@ -651,7 +656,7 @@ class Pyrogue_Game:
                         actor = self.actor_map[row][col]
                         if actor:
                             char = actor.get_char()
-                            color = "gold" if isinstance(actor, Player) else "red"
+                            color = actor.get_color()
                         else:
                             terrain = self.dungeon.tmap[row][col]
                             char = terrain_char[terrain]
