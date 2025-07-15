@@ -45,16 +45,14 @@ class Move(Enum):
 
 
 # Class to store monster type definitions, which instantiated monsters will be based on.
-# Essentially just an information container.
-class Monster_Type:
+class Monster_Typedef:
 
     # Monster_Type constructor
     def __init__(
         self,
         name: str,
         symb: str,
-        desc: str,
-        desc_line_count: int,
+        desc: list,
         colors: list,
         abilities: int,
         speed_dice: Dice,
@@ -66,7 +64,6 @@ class Monster_Type:
         self.name = name
         self.symb = symb
         self.desc = desc
-        self.desc_line_count = desc_line_count
         self.colors = colors
         self.abilities = abilities
         self.speed_dice = speed_dice
@@ -75,9 +72,8 @@ class Monster_Type:
         self.rarity = rarity
         self.is_unique = is_unique
 
-
     def __str__(self):
-        string ="NAME: "
+        string = "NAME: "
         # print name
         string += self.name + "\n"
         # print desc
@@ -122,6 +118,30 @@ class Monster_Type:
         # print rrty
         string += "RRTY: " + str(self.rarity)
         return string + "\n"
+
+# Class to store item type definitions, which instantiated items will be based on.
+class Item_Definition:
+
+    # Item_Definition constructor
+    def __init__(
+        self,
+        name: str,
+        type: str,
+        desc: list,
+        colors: list,
+        hp: Dice,
+        damage: Dice,
+        attr: Dice,
+        defense: Dice,
+        dodge: Dice,
+        speed: Dice,
+        rarity: int,
+        artifact: bool,
+    ):
+        self.name = name
+        self.type = type
+        
+
 
 # This is the generic actor class to be used in the general turn loop.
 class Actor(abc.ABC):

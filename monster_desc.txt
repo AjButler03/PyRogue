@@ -29,7 +29,7 @@ over life.  You may just be her next victim.  You fear for your soul as you
 quake before her malevolent majesty.
 .
 SYMB p
-COLOR black red magenta
+COLOR white red magenta
 ABIL SMART PASS
 DAM 30+5d9
 HP 2999+1d1001

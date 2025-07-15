@@ -88,8 +88,8 @@ Manual Page 3:
 /___/\__/\__/_/_/_/___/             
 
 Scattered throughout the dungeon you will find various items that will help you 
-survive; these include potions, melee weapons, ranged weapons, armor, amulet, 
-light, and rings.
+survive; these include potions, melee weapons, ranged weapons, offhand equipment, 
+armor, amulets, light sources, and rings.
 
 You have inventory space for up to ten items; with the exception of potions, you can
 equip slots to 'use' the items. You can equip one ring on each hand, and only one of

@@ -183,11 +183,10 @@ def parse_monsters(monster_type_list) -> bool:
                 if complete:
                     # Append the new monster type definition
                     monster_type_list.append(
-                        Monster_Type(
+                        Monster_Typedef(
                             name,
                             symb,
                             desc,
-                            len(desc),
                             color,
                             abil,
                             speed,
@@ -200,9 +199,7 @@ def parse_monsters(monster_type_list) -> bool:
                     types_found += 1
                 else:
                     # One or more fields were not found; return False, as there is an incomplete definition
-                    print(
-                        "PARSEDESC: Monster def", types_found + 1, "incomplete"
-                    )
+                    print("PARSEDESC: Monster def", types_found + 1, "incomplete")
                     error = "     Missing fields: "
                     if name == None:
                         error += "NAME "
@@ -227,11 +224,17 @@ def parse_monsters(monster_type_list) -> bool:
             curr_line += 1
 
         print("PARSEDESC: Found", types_found, "Monster definitions")
+        return True # True for success
     else:
         # Header does not match; file is probably in incorrect format
         # Return False for failure
         print("header mismatch")
         return False
+
+
+# Method to parse item descriptions. Returns True on success, False on failure.
+def parse_items(item_type_list) -> bool:
+    pass
 
 # FOR TESTING PURPOSES
 def print_monst_defs(monster_type_list):

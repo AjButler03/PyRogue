@@ -1,14 +1,12 @@
-RLG327 OBJECT DESCRIPTION 1
+PYROGUE ITEM DESCRIPTION FILE
 
 BEGIN OBJECT
 NAME a NERF(R) dagger
 TYPE WEAPON
-COLOR MAGENTA
-WEIGHT 1+0d1
+COLOR magenta
 HIT 0+0d1
 DAM 0+0d1
 ATTR 0+0d1
-VAL 9+1d6
 DODGE 10+0d1
 DEF 0+0d1
 SPEED 0+0d1
@@ -30,11 +28,9 @@ One, two! One, two! And through and through!
 It goes snicker-snack.
 .
 TYPE WEAPON
-COLOR RED
-WEIGHT 15+0d1
+COLOR red
 HIT 12+3d4
 ATTR 0+0d1
-VAL 198+2d51
 DAM 314+15d92
 DODGE 0+0d1
 DEF 0+0d1
@@ -50,7 +46,6 @@ DAM 0+2d3
 DODGE 0+0d1
 SPEED -5+0d1
 ATTR 0+0d1
-VAL 449+0d1
 DEF 0+0d1
 DESC
 This dress is totes fab! It's off-the-shoulder with an A-line waste, sequins,
@@ -59,50 +54,8 @@ full steps in it, but, like, who cares?  You'll be the hit of the party as
 long as Shirley doesn't show up wearing the same thing again.
 .
 TYPE ARMOR
-COLOR MAGENTA
-WEIGHT 0+2d2
+COLOR magenta
 RRTY 70
-ART FALSE
-END
-
-BEGIN OBJECT
-NAME a pair of Prada dress sandals
-HIT 0+0d1
-DAM 0+3d10
-DODGE 0+0d1
-SPEED -5+0d1
-ATTR 0+0d1
-VAL 449+0d1
-DEF 0+0d1
-DESC
-You'll be the belle of the prom in these Prada dress sandals.  The 3" spike
-heel makes you a bit unsteady, but they look like they could cause some 
-major damage.
-.
-TYPE BOOTS
-COLOR MAGENTA
-WEIGHT 0+2d2
-RRTY 80
-ART FALSE
-END
-
-
-BEGIN OBJECT
-NAME a chainmail coif
-WEIGHT 8+0d1
-HIT 0+0d1
-DAM 0+0d1
-ATTR 0+0d1
-DODGE 0+0d1
-VAL 48+2d11
-DEF 10+2d6
-SPEED 0+0d1
-DESC
-A heavy chainmail head covering.
-.
-TYPE HELMET
-COLOR BLACK
-RRTY 100
 ART FALSE
 END
 
@@ -114,15 +67,13 @@ maybe--now--you, but you're not telling.  The back side is inscribed with the
 words: "If found, please return to Zeus, Mount Olympus".
 .
 TYPE OFFHAND
-WEIGHT 3+0d1
 HIT 0+0d1
 DAM 0+0d1
-VAL 17000+0d1
 DODGE 20+2d8
 ATTR 0+0d1
 DEF 20+3d8
 SPEED 10+0d1
-COLOR YELLOW
+COLOR yellow
 RRTY 30
 ART TRUE
 END
@@ -130,19 +81,17 @@ END
 BEGIN OBJECT
 NAME the cloak of invisibility
 TYPE CLOAK
-VAL 10000+5d1000
 DESC
 One of the Deathly Hallows, this cloak grants the wearer invisibility.  Last
 know to be the property of the Boy Who Lived.
 .
-WEIGHT 1+0d1
 DODGE 24+5d4
 DEF 0+0d1
 HIT 0+0d1
 ATTR 0+0d1
 DAM 0+0d1
 SPEED 0+0d1
-COLOR CYAN
+COLOR cyan
 RRTY 20
 ART TRUE
 END
@@ -150,10 +99,8 @@ END
 BEGIN OBJECT
 NAME the One Ring
 TYPE RING
-WEIGHT 1+0d1
-COLOR YELLOW
+COLOR yellow
 DODGE 50+6d8
-VAL 1000000+2d1000000
 DEF 50+6d8
 ATTR 0+0d1
 HIT 10+2d5
@@ -171,10 +118,8 @@ END
 BEGIN OBJECT
 NAME a torch
 TYPE LIGHT
-WEIGHT 2+1d2
-COLOR BLACK
+COLOR white
 DODGE 0+0d1
-VAL 0+1d3
 DAM 0+0d1
 DEF 0+0d1
 HIT 0+0d1
@@ -191,10 +136,8 @@ END
 BEGIN OBJECT
 NAME a Wicked Lasers(R) Torch
 TYPE LIGHT
-WEIGHT 1+1d2
-COLOR BLACK
+COLOR white
 DODGE 0+0d1
-VAL 199+0d1
 DAM 0+0d1
 DEF 0+0d1
 HIT 0+0d1
@@ -211,32 +154,10 @@ ART FALSE
 END
 
 BEGIN OBJECT
-NAME the Moon Tiara
-TYPE HELMET
-WEIGHT 1+1d2
-COLOR WHITE
-DODGE 10+0d1
-VAL 199+0d1
-DAM 0+0d1
-DEF 100+0d1
-HIT 0+0d1
-SPEED 0+0d1
-DESC
-Sailor Moon's Moon Tiara.  Maybe you can use it to do Moon Tiara Action?  But
-she's probably looking for it.
-.
-ATTR 200+0d1
-RRTY 35
-ART TRUE
-END
-
-BEGIN OBJECT
 NAME the Moon Stick
 TYPE OFFHAND
-WEIGHT 1+1d2
-COLOR MAGENTA
+COLOR magenta
 DODGE 10+0d1
-VAL 199+0d1
 DAM 25+0d1
 DEF 100+0d1
 HIT 0+0d1
@@ -253,10 +174,8 @@ END
 BEGIN OBJECT
 NAME a ring of speed
 TYPE RING
-WEIGHT 1+0d1
-COLOR RED
+COLOR red
 DODGE 0+0d1
-VAL 1000+0d1
 DAM 0+0d1
 DEF 0+0d1
 HIT 0+0d1
@@ -272,10 +191,8 @@ END
 BEGIN OBJECT
 NAME a ring of damage
 TYPE RING
-WEIGHT 1+0d1
-COLOR CYAN
+COLOR cyan
 DODGE 0+0d1
-VAL 1000+0d1
 DAM 25+10d50
 DEF 0+0d1
 HIT 0+0d1
@@ -291,10 +208,8 @@ END
 BEGIN OBJECT
 NAME Mjolnir
 TYPE WEAPON
-WEIGHT 1000+0d1
-COLOR GREEN
+COLOR green
 DODGE 10+10d10
-VAL 19900+0d1
 DAM 10+500d10
 DEF 100+0d1
 HIT 100+0d1
@@ -311,10 +226,8 @@ END
 BEGIN OBJECT
 NAME Sting
 TYPE WEAPON
-WEIGHT 10+0d1
-COLOR BLUE
+COLOR blue
 DODGE 0+0d1
-VAL 300+0d1
 DAM 10+15d30
 DEF 10+0d1
 HIT 10+0d1
@@ -328,31 +241,10 @@ ART TRUE
 END
 
 BEGIN OBJECT
-NAME fingerless gloves
-TYPE GLOVES
-WEIGHT 2+0d1
-COLOR GREEN
-DODGE 0+0d1
-VAL 3+0d1
-DAM 0+0d1
-DEF 10+0d1
-HIT 10+0d1
-SPEED 0+0d1
-DESC
-Put these on and you'll be bad like Michael Jackson.
-.
-ATTR 0+0d1
-RRTY 80
-ART FALSE
-END
-
-BEGIN OBJECT
 NAME the Heart of the Ocean
 TYPE AMULET
-WEIGHT 2+0d1
-COLOR BLUE
+COLOR blue
 DODGE 0+0d1
-VAL 20000000+0d1
 DAM 20+10d2
 DEF 10+0d1
 HIT 10+0d1
@@ -371,10 +263,8 @@ END
 BEGIN OBJECT
 NAME the Halo 1 pistol
 TYPE WEAPON
-WEIGHT 2+0d1
-COLOR YELLOW
+COLOR gray
 DODGE 15+0d1
-VAL 20000000+0d1
 DAM 100+10d500
 DEF 25+0d1
 HIT 75+0d1
@@ -397,10 +287,8 @@ END
 BEGIN OBJECT
 NAME Battle Rifle
 TYPE RANGED
-WEIGHT 2+0d1
-COLOR YELLOW
+COLOR gray
 DODGE 5+0d1
-VAL 50+0d1
 DAM 15+3d10
 DEF 10+0d1
 HIT 15+0d1
