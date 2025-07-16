@@ -98,6 +98,10 @@ class Menu_Main:
 
             # Re-bind event listener for key input
             self.root.bind("<Key>", self._on_key_press)
+            
+            for mdef in self.monster_type_list:
+                print(mdef)
+                print()
 
             self.need_full_rerender = True
             self._resize_frame()

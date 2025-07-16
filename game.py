@@ -345,6 +345,9 @@ class Pyrogue_Game:
                         random.randint(1, self.dungeon.height - 2),
                         random.randint(1, self.dungeon.width - 2),
                     ):
+                        # If unique, update generation eligibility
+                        if mtypedef.is_unique:
+                            mtypedef.gen_eligible = False
                         monsterc += 1
                         self.monster_list.append(new_monster)
             attemptc += 1
@@ -380,7 +383,14 @@ class Pyrogue_Game:
             random.randint(1, self.mapsize_w - 2),
         ):
             continue
-
+        
+        # Reset monster generation eligibility
+        for monster in self.monster_list:
+            mtypedef = monster.typedef
+            if mtypedef.is_unique: 
+                if not mtypedef.been_killed:
+                    mtypedef.gen_eligible = True
+        
         # Generate new monsters
         self._generate_monsters()
 

@@ -72,6 +72,7 @@ class Monster_Typedef:
         self.rarity = rarity
         self.is_unique = is_unique
         self.gen_eligible = True
+        self.been_killed = False
 
     def __str__(self):
         string = "NAME: "
@@ -118,6 +119,7 @@ class Monster_Typedef:
         string += "SYMB: " + self.symb + "\n"
         # print rrty
         string += "RRTY: " + str(self.rarity)
+        string += "GENERATION ELIGIBLE: " + str(self.gen_eligible)
         return string + "\n"
 
 
@@ -462,6 +464,8 @@ class Player(Actor):
         if not a == None:
             # Mark actor as dead
             a.kill()
+            if a.typedef.is_unique:
+                a.typedef.been_killed = True
             dmg = float("inf")
         else:
             dmg = 0
