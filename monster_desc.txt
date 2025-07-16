@@ -1,5 +1,8 @@
 PYROGUE MONSTER DESCRIPTION FILE
 
+Note 1: The color fields in this file will be parsed as keystrings for the Python Tkinter library's color options.
+Note 2: Multiple colors can be specified; the game will randomly rotate between them.
+
 BEGIN MONSTER
 NAME Junior Barbarian
 SYMB p
@@ -179,6 +182,21 @@ RRTY 35
 END
 
 BEGIN MONSTER
+SYMB R
+COLOR red orange yellow green blue violet
+SPEED 5+5d2
+ABIL SMART ERRATIC
+HP 100+0d1
+DAM 2+5d3
+NAME RoyGeeBiv
+DESC
+Pretty, in a tacky sort of way.
+It must have escaped from a nearby gaming computer.
+.
+RRTY 50
+END
+
+BEGIN MONSTER
 SYMB P
 COLOR yellow
 SPEED 5+0d1
@@ -262,7 +280,7 @@ END
 
 BEGIN MONSTER
 SYMB J
-COLOR pink
+COLOR deeppink1
 SPEED 100+0d1
 ABIL SMART TELE BOSS UNIQ
 HP 99999+0d1

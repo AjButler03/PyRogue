@@ -16,6 +16,7 @@ v0.06 ==========================================================================
 07/16/2025
     - Implemented continuous rendering, allowing rotation of monster colors
     - Fixed bug with PASS attribute causing the creation of new floor tiles, when it should not
+    - Updated combat messages to use monster names
 v0.05 ===========================================================================================================================
 06/26/2025
     - Init Menu_Main class to handle the main menu and its future sub-menus; Work in progress
