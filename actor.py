@@ -647,7 +647,8 @@ class Monster(Actor):
                     dungeon.rmap[new_r][new_c] = hardness
                 if hardness < 1 or has_attribute(self.attributes, ATTR_PASS_______):
                     # Rock has been cleared and/or monster can pass through
-                    dungeon.tmap[new_r][new_c] = dungeon.Terrain.floor
+                    if has_attribute(self.attributes, ATTR_TUNNEL_____):
+                        dungeon.tmap[new_r][new_c] = dungeon.Terrain.floor
                     # Update the actor map + position information
                     actor_map[self.r][self.c] = None
                     actor_map[new_r][new_c] = self

@@ -126,7 +126,8 @@ class Pyrogue_Game:
 
         # Misc game control fields
         self.turnloop_started = False
-        self.game_over = False
+        self.game_over = False # Indicate game over
+        self.game_exit = False # Indicate that user intends to exit to main menu
 
         # Start the turnloop for the game
         self._start_turnloop()
@@ -166,7 +167,7 @@ class Pyrogue_Game:
                 self.player.set_currturn(new_turn)
                 self.root.after(10, self._next_turn)
             else:
-                # Player input was not correct
+                # Player turn was not concluded; turn continues
                 print("GAME: Player turn continues")
 
         # Any input after end of game returns control to main menu
@@ -282,6 +283,7 @@ class Pyrogue_Game:
                 self.curr_input_mode = self.input_modes["player_turn"]
                 self.curr_submenu = self.display_submenus["none"]
                 self.submenu_canvas.destroy()
+                self.need_full_rerender = True
                 print("GAME: Exit sub-menu closed")
                 self._update_top_label("")
             elif self.submenu_select_idx == 1:
@@ -309,6 +311,7 @@ class Pyrogue_Game:
             self.curr_input_mode = self.input_modes["player_turn"]
             self.curr_submenu = self.display_submenus["none"]
             self.submenu_canvas.destroy()
+            self.need_full_rerender = True
             print("GAME: Exit sub-menu closed")
             self._update_top_label("")
 
@@ -729,6 +732,7 @@ class Pyrogue_Game:
 
     # Ends the game, destroying the canvas and unbinding event listeners.
     def _end_game(self):
+        self.game_exit = True
         # Destroy the canvas for this game, also unbinding event listeners
         self.canvas.unbind("<Configure>")
         self.canvas.destroy()
@@ -738,9 +742,14 @@ class Pyrogue_Game:
 
     # Handles a single turn in the turnloop.
     def _next_turn(self):
-        # If player's turn, do nothing and wait
-        if self.curr_input_mode == self.input_modes["player_turn"]:
-            print("GAME: Player turn; no render")
+        # Stop calling _next_turn if user is exiting game
+        if self.game_exit:
+            return
+        
+        # loop for re-rendering the dungeon
+        if self.curr_input_mode != self.input_modes["none"] or self.game_over:
+            self._render_frame(self.scrsize_h, self.scrsize_w)
+            self.root.after(200, self._next_turn)
             return
 
         # Game over check
@@ -762,11 +771,11 @@ class Pyrogue_Game:
             self.curr_render_mode = self.render_modes["x-ray"]
             self.need_full_rerender = True
             self.game_over = True
-            self._render_frame(self.scrsize_h, self.scrsize_w)
+            self.root.after(200, self._next_turn)
             return
-
+        
         self._render_frame(self.scrsize_h, self.scrsize_w)
-
+        
         # Pop actor; check if player turn
         _, actor = self.turn_pq.pop()
         player_turn = isinstance(actor, Player)
