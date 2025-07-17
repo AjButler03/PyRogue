@@ -453,6 +453,12 @@ class Player(Actor):
 
     # Turn handler for the player.
     def handle_turn(self, dungeon: Dungeon, actor_map: list, player, move: int):
+        '''
+        This function handles the turn for the player.
+        It requires the dungeon instance, the actor map for that dungeon, the player object (redundant), and a specified move, in that order.
+        It will return a target actor (potentially None) and a damage value (potentially 0) for comabt messages.
+        '''
+        
         if move == Move.none:
             # No move? Then just return.
             return True, None, 0
@@ -504,10 +510,33 @@ class Monster(Actor):
 
     # Returns a color for the character of the actor.
     def get_color(self) -> str:
+        '''
+        Returns a string for a Tkinter color that the monster's sybol is intended to be.
+        '''
         return self.typedef.colors[random.randint(0, len(self.typedef.colors) - 1)]
 
+    # Returns True if the monster is unqiue, false otherwise.
+    def is_unique(self) -> bool:
+        '''
+        Returns the uniqueness of the monster's type definition.
+        '''
+        return self.typedef.is_unique
+    
     # resets gneration eligibility of type definition
     def update_gen_eligible(self, is_new_mon: bool, force_reset: bool):
+        '''
+        This function updates the generation eligibility of this monsters type definition.
+        It is only intended to be called in a few circumstances:
+        A) Initial generation, in which case it will be updated to False if this is a unique monster.
+        B) Changing to new dungeon level, in which case the eligibility will be updated based on uniqueness and then if alive/dead.
+        C) Game over, in which case it will be force updated back to True.
+        
+        Calling this method in any other situation will likely produce unintended behavior.
+        
+        The first parameter, is_new_mon, is a boolean if this is the first call after creating the monster.
+            This should be false anytime except immediately following the creation of a monster instance.
+        The second parameter, force_rest, indicates that the game is over and eligibility should be automatically reset to True.
+        '''
         if force_reset:
             # Force reset to True
             self.typedef.gen_eligible = True
@@ -521,7 +550,12 @@ class Monster(Actor):
                 self.typedef.gen_eligible = True
 
     # Determines if the monster can be at this position.
-    def _valid_pos(self, dungeon: Dungeon, r: int, c: int):
+    def _valid_pos(self, dungeon: Dungeon, r: int, c: int) -> bool:
+        '''
+        This function checks that the row, column coordinate is a valid position for the monster to be within the dungeon.
+        Returns True if it is, False otherwise.
+        '''
+        
         if dungeon.valid_point(r, c):
             if (
                 dungeon.rmap[r][c] == 0
@@ -769,6 +803,11 @@ class Monster(Actor):
     def handle_turn(
         self, dungeon: Dungeon, actor_map: list, player: Player, move: Move
     ):
+        '''
+        This function handles the turn for the monster.
+        It requires the dungeon instance, the actor map for that dungeon, the player object, and a specified move, in that order.
+        It will return a target actor (potentially None) and a damage value (potentially 0) for comabt messages.
+        '''
         # Update the monster's path.
         if self._update_path(dungeon, player):
             if (

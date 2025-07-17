@@ -262,7 +262,7 @@ class Pyrogue_Game:
             )
             if success:
                 if targ_actor != None:
-                    if targ_actor.typedef.is_unique:
+                    if targ_actor.is_unique():
                         message = "You killed " + targ_actor.typedef.name
                     else:
                         message = "You killed a " + targ_actor.typedef.name
@@ -830,7 +830,7 @@ class Pyrogue_Game:
             self.turn_pq.push(actor, new_turn)
 
             if isinstance(targ_actor, Player):
-                if actor.typedef.is_unique:
+                if actor.is_unique():
                     message = actor.typedef.name + " dealt damage to you"
                 else:
                     message = "a " + actor.typedef.name + " dealt damage to you"

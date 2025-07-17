@@ -79,6 +79,10 @@ class Dungeon:
 
     # Boolean function; checks if point is within immutable outer border of dungeon
     def valid_point(self, r, c):
+        '''
+        Determines if the row, column coordinate is within the dungeon bounds (within immutable outer border).
+        Returns True if so, False otherwise.
+        '''
         if (r < 1) or (c < 1) or (r > self.height - 2) or (c > self.width - 2):
             return False
         else:
@@ -487,11 +491,19 @@ class Dungeon:
 
     # Calculates the distance maps from specified point
     def calc_dist_maps(self, r, c):
+        '''
+        This calculates distance maps for walking and tunneling to a given row, column coordinate.
+        These distance maps are used for monster pathfinding, so that coordinate is intended to be the player's position.
+        '''
+        
         self._calc_walk_distmap(r, c)
         self._calc_tunn_distmap(r, c)
 
     # Generates a random dungeon
     def generate_dungeon(self):
+        '''
+        Generates the dungeon's terrain.
+        '''
         self._generate_rockmap()
         self._generate_terrain()
         return
