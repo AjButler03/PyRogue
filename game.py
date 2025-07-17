@@ -20,7 +20,7 @@ class Pyrogue_Game:
         mapsize_h: int,
         mapsize_w: int,
         difficulty: float,
-        monster_type_list : list,
+        monster_type_list: list,
         generate=True,
     ):
         # Menu from which this game instance was launched from
@@ -126,8 +126,8 @@ class Pyrogue_Game:
 
         # Misc game control fields
         self.turnloop_started = False
-        self.game_over = False # Indicate game over
-        self.game_exit = False # Indicate that user intends to exit to main menu
+        self.game_over = False  # Indicate game over
+        self.game_exit = False  # Indicate that user intends to exit to main menu
 
         # Start the turnloop for the game
         self._start_turnloop()
@@ -332,8 +332,10 @@ class Pyrogue_Game:
         # Generate monsters; runs until minimum number and attempt limit are met
         while (monsterc < min_monsterc) or (attemptc < attempt_limit):
             # Grab a monster type definition
-            mtypedef = self.monster_type_list[random.randint(0, len(self.monster_type_list) - 1)]
-            if mtypedef.gen_eligible and random.randint(0, 100) >= mtypedef.rarity:
+            mtypedef = self.monster_type_list[
+                random.randint(0, len(self.monster_type_list) - 1)
+            ]
+            if mtypedef.is_gen_eligible() and random.randint(0, 100) >= mtypedef.rarity:
                 # Create monster
                 new_monster = Monster(mtypedef)
                 if monsterc <= min_monsterc or exp_chancetime(
@@ -345,9 +347,8 @@ class Pyrogue_Game:
                         random.randint(1, self.dungeon.height - 2),
                         random.randint(1, self.dungeon.width - 2),
                     ):
-                        # If unique, update generation eligibility
-                        if mtypedef.is_unique:
-                            mtypedef.gen_eligible = False
+                        # Update gen eligibility of monster type; Newly generated monster True, force reset False
+                        new_monster.update_gen_eligible(True, False)
                         monsterc += 1
                         self.monster_list.append(new_monster)
             attemptc += 1
@@ -361,9 +362,21 @@ class Pyrogue_Game:
             "Placed",
         )
 
+    # Resets the generation eligibility for item/monster type definitions
+    def _reset_gen_eligibility(self):
+        # Reset monster generation eligibility
+        # Note that unique monsters only reset if they were not killed or if the game is over
+        for monster in self.monster_list:
+            # If game exit, force full reset. Otherwise depends on uniqueness and alive/dead
+            monster.update_gen_eligible(False, self.game_exit)
+
     # Initializes a new dungeon for the game to use; this also re-generates the monsters and restarts the turnloop.
     def _replace_dungeon(self):
         print("STAIRCASE; NEW DUNGEON")
+        
+        # Reset monster generation eligibility 
+        self._reset_gen_eligibility()
+        
         # Init the dungeon itself
         self.dungeon = Dungeon(self.mapsize_h, self.mapsize_w)
         self.dungeon.generate_dungeon()
@@ -383,13 +396,7 @@ class Pyrogue_Game:
             random.randint(1, self.mapsize_w - 2),
         ):
             continue
-        
-        # Reset monster generation eligibility
-        for monster in self.monster_list:
-            mtypedef = monster.typedef
-            if mtypedef.is_unique: 
-                if not mtypedef.been_killed:
-                    mtypedef.gen_eligible = True
+
         
         # Generate new monsters
         self._generate_monsters()
@@ -750,6 +757,7 @@ class Pyrogue_Game:
         self.canvas.unbind("<Configure>")
         self.canvas.destroy()
         self.root.unbind("<Key>")
+        self._reset_gen_eligibility()
         # Relinquish control back to the main menu
         self.menu_main.toggle_ingame()
 
@@ -758,7 +766,7 @@ class Pyrogue_Game:
         # Stop calling _next_turn if user is exiting game
         if self.game_exit:
             return
-        
+
         # loop for re-rendering the dungeon
         if self.curr_input_mode != self.input_modes["none"] or self.game_over:
             self._render_frame(self.scrsize_h, self.scrsize_w)
@@ -786,9 +794,9 @@ class Pyrogue_Game:
             self.game_over = True
             self.root.after(200, self._next_turn)
             return
-        
+
         self._render_frame(self.scrsize_h, self.scrsize_w)
-        
+
         # Pop actor; check if player turn
         _, actor = self.turn_pq.pop()
         player_turn = isinstance(actor, Player)

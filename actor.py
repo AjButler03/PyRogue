@@ -72,7 +72,6 @@ class Monster_Typedef:
         self.rarity = rarity
         self.is_unique = is_unique
         self.gen_eligible = True
-        self.been_killed = False
 
     def __str__(self):
         string = "NAME: "
@@ -118,10 +117,15 @@ class Monster_Typedef:
         # print symb
         string += "SYMB: " + self.symb + "\n"
         # print rrty
-        string += "RRTY: " + str(self.rarity)
+        string += "RRTY: " + str(self.rarity) + "\n"
         string += "GENERATION ELIGIBLE: " + str(self.gen_eligible)
         return string + "\n"
 
+    def is_gen_eligible(self) -> bool:
+        return self.gen_eligible
+    
+    def is_unique(self) -> bool:
+        return self.is_unique
 
 # Class to store item type definitions, which instantiated items will be based on.
 class Item_Typedef:
@@ -464,8 +468,6 @@ class Player(Actor):
         if not a == None:
             # Mark actor as dead
             a.kill()
-            if a.typedef.is_unique:
-                a.typedef.been_killed = True
             dmg = float("inf")
         else:
             dmg = 0
@@ -503,6 +505,20 @@ class Monster(Actor):
     # Returns a color for the character of the actor.
     def get_color(self) -> str:
         return self.typedef.colors[random.randint(0, len(self.typedef.colors) - 1)]
+
+    # resets gneration eligibility of type definition
+    def update_gen_eligible(self, is_new_mon: bool, force_reset: bool):
+        if force_reset:
+            # Force reset to True
+            self.typedef.gen_eligible = True
+        elif self.typedef.is_unique:
+            if is_new_mon:
+                # Newly generated monster, so set eligibility to False so there aren't duplicates.
+                self.typedef.gen_eligible = False
+            elif self.alive and not is_new_mon:
+                # still alive, and not the initial generation.
+                # This will reset to True for a new dungeon (presumably why this was called)
+                self.typedef.gen_eligible = True
 
     # Determines if the monster can be at this position.
     def _valid_pos(self, dungeon: Dungeon, r: int, c: int):
