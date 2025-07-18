@@ -123,9 +123,10 @@ class Monster_Typedef:
 
     def is_gen_eligible(self) -> bool:
         return self.gen_eligible
-    
+
     def is_unique(self) -> bool:
         return self.is_unique
+
 
 # Class to store item type definitions, which instantiated items will be based on.
 class Item_Typedef:
@@ -231,6 +232,10 @@ class Actor(abc.ABC):
     def get_speed(self) -> int:
         return self.speed
 
+    # Returns the current number of hitpoints of the actor.
+    def get_hp(self) -> int:
+        return self.hp
+
     # Returns the character representation of the actor.
     @abc.abstractmethod
     def get_char(self) -> str:
@@ -279,6 +284,11 @@ class Player(Actor):
         self.speed = 10
         # Define the player as alive
         self.alive = True
+        self.hp = 200
+
+        # Base damage for the player, assuming that it has no other weapons
+        # This is heavily buffed until weapons are implemented.
+        self.fisticuffs_dice = Dice(50, 5, 50)
 
         self.view_dist = 3  # default 3
 
@@ -453,12 +463,12 @@ class Player(Actor):
 
     # Turn handler for the player.
     def handle_turn(self, dungeon: Dungeon, actor_map: list, player, move: int):
-        '''
+        """
         This function handles the turn for the player.
         It requires the dungeon instance, the actor map for that dungeon, the player object (redundant), and a specified move, in that order.
         It will return a target actor (potentially None) and a damage value (potentially 0) for comabt messages.
-        '''
-        
+        """
+
         if move == Move.none:
             # No move? Then just return.
             return True, None, 0
@@ -472,13 +482,18 @@ class Player(Actor):
         # Move the PC, removing whatever monster may be there
         a = actor_map[new_r][new_c]
         if not a == None:
-            # Mark actor as dead
-            a.kill()
-            dmg = float("inf")
+            dmg = self.fisticuffs_dice.roll()
+            new_hp = a.hp - dmg
+            if new_hp <= 0:
+                a.hp = 0
+                a.kill()
+            else:
+                a.hp = new_hp
         else:
+            # No actor; move
             dmg = 0
-        self._force_pos_update(dungeon, actor_map, new_r, new_c)
-        dungeon.calc_dist_maps(new_r, new_c)
+            self._force_pos_update(dungeon, actor_map, new_r, new_c)
+            dungeon.calc_dist_maps(new_r, new_c)
 
         # For combat dialog
         return True, a, dmg
@@ -503,6 +518,7 @@ class Monster(Actor):
         self.turn = 0
         # Declare the monster as initially alive
         self.alive = True
+        self.hp = typedef.hp_dice.roll()
 
     # Returns the character representation of the actor.
     def get_char(self) -> str:
@@ -510,33 +526,36 @@ class Monster(Actor):
 
     # Returns a color for the character of the actor.
     def get_color(self) -> str:
-        '''
+        """
         Returns a string for a Tkinter color that the monster's sybol is intended to be.
-        '''
+        """
         return self.typedef.colors[random.randint(0, len(self.typedef.colors) - 1)]
 
     # Returns True if the monster is unqiue, false otherwise.
     def is_unique(self) -> bool:
-        '''
+        """
         Returns the uniqueness of the monster's type definition.
-        '''
+        """
         return self.typedef.is_unique
-    
+
+    def get_score_val(self) -> int:
+        return self.typedef.rarity
+
     # resets gneration eligibility of type definition
     def update_gen_eligible(self, is_new_mon: bool, force_reset: bool):
-        '''
+        """
         This function updates the generation eligibility of this monsters type definition.
         It is only intended to be called in a few circumstances:
         A) Initial generation, in which case it will be updated to False if this is a unique monster.
         B) Changing to new dungeon level, in which case the eligibility will be updated based on uniqueness and then if alive/dead.
         C) Game over, in which case it will be force updated back to True.
-        
+
         Calling this method in any other situation will likely produce unintended behavior.
-        
+
         The first parameter, is_new_mon, is a boolean if this is the first call after creating the monster.
             This should be false anytime except immediately following the creation of a monster instance.
         The second parameter, force_rest, indicates that the game is over and eligibility should be automatically reset to True.
-        '''
+        """
         if force_reset:
             # Force reset to True
             self.typedef.gen_eligible = True
@@ -551,11 +570,11 @@ class Monster(Actor):
 
     # Determines if the monster can be at this position.
     def _valid_pos(self, dungeon: Dungeon, r: int, c: int) -> bool:
-        '''
+        """
         This function checks that the row, column coordinate is a valid position for the monster to be within the dungeon.
         Returns True if it is, False otherwise.
-        '''
-        
+        """
+
         if dungeon.valid_point(r, c):
             if (
                 dungeon.rmap[r][c] == 0
@@ -637,51 +656,58 @@ class Monster(Actor):
     def _handle_target_actor(
         self, dungeon: Dungeon, actor_map: list, dest_r: int, dest_c: int
     ) -> int:
-        # First determine if the targeted actor is a monster or the player character.
         a = actor_map[dest_r][dest_c]
+
         if isinstance(a, Player):
-            # Attack player
-            # For now, this is just an instant kill.
-            a.kill()
-            actor_map[dest_r][dest_c] = None
-            # This will eventually return the damage dealt to the player character.
-            return 100
-        else:
-            # displace monster (push them to another spot, or minimally swap places)
-            delta_r = [-1, -1, -1, 0, 0, 1, 1, 1]
-            delta_c = [-1, 0, 1, -1, 1, -1, 0, 1]
+            dam = self.typedef.damage_dice.roll()
+            new_hp = a.get_hp() - dam
+            if new_hp <= 0:
+                a.hp = 0
+                a.kill()
+                actor_map[dest_r][dest_c] = None
+            else:
+                a.hp = new_hp
+            return dam
 
-            # Attempt to randomly displace
-            for _ in range(8):
-                idx = random.randint(0, 7)
-                new_r = dest_r + delta_r[idx]
-                new_c = dest_c + delta_c[idx]
-                if (
-                    (dungeon.valid_point(new_r, new_c))
-                    and (actor_map[new_r][new_c] != None)
-                    and a._valid_pos(dungeon, new_r, new_c)
-                ):
-                    # New point works; move the monster to the new positions
-                    # Move the targeted monster
-                    actor_map[new_r][new_c] = a
-                    a.r = new_r
-                    a.c = new_c
-                    # Move the targeting monster
-                    actor_map[dest_r][dest_c] = self
-                    self.r = dest_r
-                    self.c = dest_c
-                    # Done; return no damage dealt.
-                    return 0
+        # Attempt to displace monster
+        delta_r = [-1, -1, -1, 0, 0, 1, 1, 1]
+        delta_c = [-1, 0, 1, -1, 1, -1, 0, 1]
 
-            # If make it to here, then random displacement failed; default to basic position swap.
-            actor_map[self.r][self.c] = a
-            a.r = self.r
-            a.c = self.c
-            actor_map[dest_r][dest_c] = self
-            self.r = dest_r
-            self.c = dest_c
-            # Done; return no damage dealt.
-            return 0
+        # Randomize the order in which the 8 surrounding points are attempted
+        indices = list(range(8))
+        random.shuffle(indices)
+
+        for idx in indices:
+            new_r = dest_r + delta_r[idx]
+            new_c = dest_c + delta_c[idx]
+            if (
+                dungeon.valid_point(new_r, new_c)
+                and actor_map[new_r][new_c] is None
+                and a._valid_pos(dungeon, new_r, new_c)
+            ):
+                # Move displaced monster
+                actor_map[new_r][new_c] = a
+                a.r = new_r
+                a.c = new_c
+
+                # Move self into vacated spot
+                actor_map[dest_r][dest_c] = self
+                actor_map[self.r][self.c] = None
+                self.r = dest_r
+                self.c = dest_c
+
+                return 0
+
+        # If displacement failed, swap positions
+        actor_map[self.r][self.c] = a
+        a.r = self.r
+        a.c = self.c
+
+        actor_map[dest_r][dest_c] = self
+        self.r = dest_r
+        self.c = dest_c
+
+        return 0
 
     # Handles moving monster, once target position found.
     def _move_handeler(self, dungeon: Dungeon, actor_map: list, new_r: int, new_c: int):
@@ -803,11 +829,11 @@ class Monster(Actor):
     def handle_turn(
         self, dungeon: Dungeon, actor_map: list, player: Player, move: Move
     ):
-        '''
+        """
         This function handles the turn for the monster.
         It requires the dungeon instance, the actor map for that dungeon, the player object, and a specified move, in that order.
         It will return a target actor (potentially None) and a damage value (potentially 0) for comabt messages.
-        '''
+        """
         # Update the monster's path.
         if self._update_path(dungeon, player):
             if (

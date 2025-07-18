@@ -112,9 +112,17 @@ class Pyrogue_Game:
         self.score_msg_cache = ("", "")
         self.pinfo_msg_cache = ("", "")
         self.top_msg = "Press any key to start"
-        self.score_msg = "Score: 0"
+        self.score_msg = "SCORE: 0"
         pc_r, pc_c = self.player.get_pos()
-        self.pinfo_msg = "Player Location: Row " + str(pc_r) + ", Column: " + str(pc_c)
+        self.pinfo_msg = (
+            "HEALTH: "
+            + str(self.player.hp)
+            + "   POS: (R:"
+            + str(pc_r)
+            + ", C:"
+            + str(pc_c)
+            + ")"
+        )
         self.top_msg_color = "gold"
         self.score_msg_color = "white"
         self.pinfo_msg_color = "white"
@@ -211,7 +219,13 @@ class Pyrogue_Game:
                     self._replace_dungeon()
                     pc_r, pc_c = self.player.get_pos()
                     pinfo_msg = (
-                        "Player Location: Row " + str(pc_r) + ", Column: " + str(pc_c)
+                        "HEALTH: "
+                        + str(self.player.hp)
+                        + "   POS: (R:"
+                        + str(pc_r)
+                        + ", C:"
+                        + str(pc_c)
+                        + ")"
                     )
                     self._update_pinfo_label(pinfo_msg)
                     message = "You escaped to a new level of the dungeon"
@@ -262,11 +276,32 @@ class Pyrogue_Game:
             )
             if success:
                 if targ_actor != None:
-                    if targ_actor.is_unique():
-                        message = "You killed " + targ_actor.typedef.name
+                    if targ_actor.is_alive():
+                        if targ_actor.is_unique():
+                            message = (
+                                "You dealt "
+                                + str(dmg)
+                                + " dmg to "
+                                + targ_actor.typedef.name
+                            )
+                        else:
+                            message = (
+                                "You dealt "
+                                + str(dmg)
+                                + " dmg to a "
+                                + targ_actor.typedef.name
+                            )
                     else:
-                        message = "You killed a " + targ_actor.typedef.name
-                    self.player_score += 10
+                        # Print kill message
+                        if targ_actor.is_unique():
+                            message = "You killed " + targ_actor.typedef.name
+                        else:
+                            message = "You killed a " + targ_actor.typedef.name
+                        # Remove monster from map
+                        targ_r, targ_c = targ_actor.get_pos()
+                        self.actor_map[targ_r][targ_c] = None
+                        self.player_score += targ_actor.get_score_val()
+
                     self._update_top_label(message)
                 else:
                     # Just a plain successful move; reset message
@@ -373,10 +408,10 @@ class Pyrogue_Game:
     # Initializes a new dungeon for the game to use; this also re-generates the monsters and restarts the turnloop.
     def _replace_dungeon(self):
         print("STAIRCASE; NEW DUNGEON")
-        
-        # Reset monster generation eligibility 
+
+        # Reset monster generation eligibility
         self._reset_gen_eligibility()
-        
+
         # Init the dungeon itself
         self.dungeon = Dungeon(self.mapsize_h, self.mapsize_w)
         self.dungeon.generate_dungeon()
@@ -397,7 +432,6 @@ class Pyrogue_Game:
         ):
             continue
 
-        
         # Generate new monsters
         self._generate_monsters()
 
@@ -775,7 +809,7 @@ class Pyrogue_Game:
 
         # Game over check
         if len(self.turn_pq) < 2 or not self.player.is_alive():
-            score_msg = "Score: " + str(self.player_score)
+            score_msg = "SCORE: " + str(self.player_score)
             self._update_score_label(score_msg, "gold")
 
             # Game has ended; if player is alive, then player won. Otherwise, the monsters won.
@@ -811,9 +845,15 @@ class Pyrogue_Game:
                     # Update bottom messages for player location and score
                     pc_r, pc_c = self.player.get_pos()
                     pinfo_msg = (
-                        "Player Location: Row " + str(pc_r) + ", Column: " + str(pc_c)
+                        "HEALTH: "
+                        + str(self.player.hp)
+                        + "   POS: (R:"
+                        + str(pc_r)
+                        + ", C:"
+                        + str(pc_c)
+                        + ")"
                     )
-                    score_msg = "Score: " + str(self.player_score)
+                    score_msg = "SCORE: " + str(self.player_score)
                     self._update_pinfo_label(pinfo_msg)
                     self._update_score_label(score_msg)
                     self.curr_input_mode = self.input_modes["player_turn"]
@@ -831,11 +871,18 @@ class Pyrogue_Game:
 
             if isinstance(targ_actor, Player):
                 if actor.is_unique():
-                    message = actor.typedef.name + " dealt damage to you"
+                    message = (
+                        actor.typedef.name + " dealt " + str(dmg) + " damage to you"
+                    )
                 else:
-                    message = "a " + actor.typedef.name + " dealt damage to you"
-                # self._update_top_label(message)
-                print("COMBAT:", message)
+                    message = (
+                        "a "
+                        + actor.typedef.name
+                        + " dealt "
+                        + str(dmg)
+                        + " damage to you"
+                    )
+                self._update_top_label(message)
 
         # Wait 1ms before running next turn
         self.root.after(1, self._next_turn)

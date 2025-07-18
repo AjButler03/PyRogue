@@ -34,4 +34,4 @@ Descriptions of the attributes that the monsters can have (Those that are implem
     - ERRATIC: On every turn, 50% chance to move randomly.
 
 Known Issues:
-    - Monsters attempting to move into other monsters around the player might result in the player being removed from the map temporarily, resulting in immortality.
+  - None currently
