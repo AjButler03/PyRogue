@@ -132,6 +132,9 @@ class Pyrogue_Game:
         self.input_modes = {"none": 0, "player_turn": 1, "menu_exit": 2}
         self.curr_input_mode = self.input_modes["player_turn"]
 
+        # To store important game msgs; combat, new dungeon, game start, etc
+        self.msg_log = ["GAME START"]
+
         # Misc game control fields
         self.turnloop_started = False
         self.game_over = False  # Indicate game over
@@ -230,6 +233,9 @@ class Pyrogue_Game:
                     self._update_pinfo_label(pinfo_msg)
                     message = "You escaped to a new level of the dungeon"
                     self._update_top_label(message, "gold")
+
+                    message = "TURN " + str(self.player.get_currturn()) + ": " + message
+                    self.msg_log.append(message)
                     return True
                 else:
                     message = "You can't escape from here; no staircase"
@@ -303,6 +309,8 @@ class Pyrogue_Game:
                         self.player_score += targ_actor.get_score_val()
 
                     self._update_top_label(message)
+                    message = "TURN " + str(self.player.get_currturn()) + ": " + message
+                    self.msg_log.append(message)
                 else:
                     # Just a plain successful move; reset message
                     self._update_top_label("")
@@ -407,8 +415,6 @@ class Pyrogue_Game:
 
     # Initializes a new dungeon for the game to use; this also re-generates the monsters and restarts the turnloop.
     def _replace_dungeon(self):
-        print("STAIRCASE; NEW DUNGEON")
-
         # Reset monster generation eligibility
         self._reset_gen_eligibility()
 
@@ -814,14 +820,14 @@ class Pyrogue_Game:
 
             # Game has ended; if player is alive, then player won. Otherwise, the monsters won.
             if self.player.is_alive():
-                self._update_top_label(
-                    "You have defeated all monsters; Game Over", "gold"
-                )
-                print("You have defeated all monsters; Game Over")
+                message = "You have defeated all monsters; Game Over"
+                self._update_top_label(message, "gold")
             else:
                 self._update_pinfo_label("Player Location: N/A")
-                self._update_top_label("You have been defeated; Game Over", "red")
-                print("You have been defeated; Game Over")
+                message = "You have been defeated; Game Over"
+                self._update_top_label(message, "red")
+            print(message)
+            self.msg_log.append(message)
             print("=== GAME OVER ===")
             self.curr_render_mode = self.render_modes["x-ray"]
             self.need_full_rerender = True
@@ -882,7 +888,10 @@ class Pyrogue_Game:
                         + str(dmg)
                         + " damage to you"
                     )
+
                 self._update_top_label(message)
+                message = "TURN " + str(actor.get_currturn()) + ": " + message
+                self.msg_log.append(message)
 
         # Wait 1ms before running next turn
         self.root.after(1, self._next_turn)

@@ -51,8 +51,7 @@ class Menu_Main:
         if not iparse_success:
             print("MENU: Item type definition parser failed. Quitting")
             exit(0)
-            
-        
+
         # Now init the canvas that will hold everything
         self.canvas = tk.Canvas(
             self.root,
@@ -98,10 +97,6 @@ class Menu_Main:
 
             # Re-bind event listener for key input
             self.root.bind("<Key>", self._on_key_press)
-            
-            for mdef in self.monster_type_list:
-                print(mdef)
-                print()
 
             self.need_full_rerender = True
             self._resize_frame()
@@ -142,7 +137,7 @@ class Menu_Main:
                 mapsize_h,
                 mapsize_w,
                 self.difficulty_setting[self.difficulty],
-                self.monster_type_list
+                self.monster_type_list,
             )
             self.canvas.pack_forget()
 
