@@ -129,7 +129,12 @@ class Pyrogue_Game:
 
         # Fields for handling keyboard input
         self.root.bind("<Key>", self._on_key_press)
-        self.input_modes = {"none": 0, "player_turn": 1, "menu_exit": 2}
+        self.input_modes = {
+            "none": 0,
+            "player_turn": 1,
+            "menu_exit": 2,
+            "menu_monster_list": 3,
+        }
         self.curr_input_mode = self.input_modes["player_turn"]
 
         # To store important game msgs; combat, new dungeon, game start, etc
@@ -162,10 +167,7 @@ class Pyrogue_Game:
         print(f"GAME KEY INPUT: {key}")
 
         # Check the current input mode and call the appropriate input handler
-        if self.curr_input_mode == self.input_modes["menu_exit"]:
-            # Calling exit submenu input handler
-            self._handle_exit_input(key)
-        elif self.curr_input_mode == self.input_modes["player_turn"]:
+        if self.curr_input_mode == self.input_modes["player_turn"]:
             # Calling player input handler
             turn_completed = self._handle_player_input(key)
             if turn_completed:
@@ -180,11 +182,15 @@ class Pyrogue_Game:
             else:
                 # Player turn was not concluded; turn continues
                 print("GAME: Player turn continues")
+        elif self.curr_input_mode == self.input_modes["menu_exit"]:
+            # Calling exit submenu input handler
+            self._handle_exit_input(key)
+        elif self.curr_input_mode == self.input_modes["menu_monster_list"]:
+            # Calling the monster list input handler
+            self._handle_mlist_input(key)
 
         # Any input after end of game returns control to main menu
         if self.game_over:
-            # For now, just end game.
-            # Maybe I'll print a message to use the exit menu, but thats a design choice, not a technical limitation.
             self._end_game()
 
     # Handles input for player turn. Returns True on completion of turn, false if turn is still ongoing.
@@ -240,16 +246,6 @@ class Pyrogue_Game:
                 else:
                     message = "You can't escape from here; no staircase"
                     self._update_top_label(message)
-            elif key == "z":
-                # Rotate through distance map displays
-                if self.curr_render_mode == self.render_modes["standard"]:
-                    self.curr_render_mode = self.render_modes["walkmap"]
-                elif self.curr_render_mode == self.render_modes["walkmap"]:
-                    self.curr_render_mode = self.render_modes["tunnmap"]
-                elif self.curr_render_mode == self.render_modes["tunnmap"]:
-                    self.curr_render_mode = self.render_modes["standard"]
-                self.need_full_rerender = True
-                self._render_frame(self.scrsize_h, self.scrsize_w)
             elif key == "f":
                 # Toggle fog of war
                 if self.curr_render_mode == self.render_modes["standard"]:
@@ -262,6 +258,26 @@ class Pyrogue_Game:
                     print("GAME: Returned to standard render mode")
                 self.need_full_rerender = True
                 self._render_frame(self.scrsize_h, self.scrsize_w)
+                return False  # Turn not over
+            elif key == "m":
+                # Enter the monster list menu
+                self.curr_input_mode = self.input_modes["menu_monster_list"]
+                self.curr_submenu = self.display_submenus["menu_monster_list"]
+                self._render_monster_list()
+                self._update_top_label("PAUSED")
+                print("GAME: Monster list sub-menu activated")
+                return False  # Turn not over
+            elif key == "z":
+                # Rotate through distance map displays
+                if self.curr_render_mode == self.render_modes["standard"]:
+                    self.curr_render_mode = self.render_modes["walkmap"]
+                elif self.curr_render_mode == self.render_modes["walkmap"]:
+                    self.curr_render_mode = self.render_modes["tunnmap"]
+                elif self.curr_render_mode == self.render_modes["tunnmap"]:
+                    self.curr_render_mode = self.render_modes["standard"]
+                self.need_full_rerender = True
+                self._render_frame(self.scrsize_h, self.scrsize_w)
+                return False  # Turn not over
             elif key == "Escape":
                 # Enter the "exit" menu for exit options
                 self.curr_input_mode = self.input_modes["menu_exit"]
@@ -270,9 +286,9 @@ class Pyrogue_Game:
                 self._render_exit_menu()
                 self._update_top_label("PAUSED")
                 print("GAME: Exit sub-menu activated")
-                return False
+                return False  # Turn not over
             else:
-                # Misinput; return false
+                # Misinput; turn not over
                 return False
         else:
             # Regular valid move
@@ -360,6 +376,14 @@ class Pyrogue_Game:
             self.need_full_rerender = True
             print("GAME: Exit sub-menu closed")
             self._update_top_label("")
+
+    # Handles input for the monster list submenu
+    def _handle_mlist_input(self, key):
+        if key == "Escape":
+            # Return to player input
+            self.curr_submenu = self.display_submenus["none"]
+            self.curr_input_mode = self.input_modes["player_turn"]
+            print("GAME: Exiting monster list menu")
 
     # Populates the actor_map with a dungeon size proportionate number of monsters.
     # Difficulty is a modifier for the spawn rate of monsters in the dungeon.
@@ -587,6 +611,13 @@ class Pyrogue_Game:
             tag="exit_opt_quit",
             anchor="nw",
         )
+
+    # Handles creating/rendering the monster list menu
+    def _render_monster_list(self):
+        # Number of monsters + menu header
+        menu_height = int(len(self.monster_list) + 1)
+        # Not quite the whole screen width
+        menu_width = self.tile_size * (self.mapsize_w - 4)
 
     # Renders the dungeon to the screen canvas.
     def _render_frame(self, height, width):

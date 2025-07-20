@@ -23,6 +23,8 @@ v0.06 ==========================================================================
     - Implemented a basic framework for the combat system
     - Fixed monster on monster displacement bug, which resulted in invisible player
     - Added msg_log to game class to store combat and other important messages; might be useful for debugging later
+07/20/2025
+    - Starting on creating the monster list submenu to display monsters in current dungeon level
 v0.05 ===========================================================================================================================
 06/26/2025
     - Init Menu_Main class to handle the main menu and its future sub-menus; Work in progress
