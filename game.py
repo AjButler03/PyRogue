@@ -713,12 +713,13 @@ class Pyrogue_Game:
                 anchor="nw",
             )
 
+            color = monster.get_color() if monster.is_alive() else "grey"
             # Add in monster character separately, with color
             self.submenu_canvas.create_text(
                 offset + int(self.tile_size * 2.25),
                 offset + (self.tile_size * (i + 1)),
                 text=monster.get_char(),
-                fill=monster.get_color(),
+                fill=color,
                 font=(self.def_font, self.font_size),
                 tag=f"monster_symb_{i + 1}",
                 anchor="nw",

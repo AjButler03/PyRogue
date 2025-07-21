@@ -301,3 +301,34 @@ She just wants attention, if only to yap about dinosaurs.
 .
 RRTY 95
 END
+
+BEGIN MONSTER
+SYMB S
+COLOR lawngreen
+SPEED 15+0d1
+ABIL UNIQ
+HP 2000+0d1
+DAM 0+1d5
+NAME The Sauce Man
+DESC
+With his mighty Prego, he smites thee.
+.
+RRTY 50
+END
+
+
+BEGIN MONSTER
+SYMB P
+COLOR maroon
+SPEED 10+0d1
+ABIL UNIQ SMART
+HP 2500+0d1
+DAM 0+2d4
+NAME Sir Pepper
+DESC
+The legend of Iowa renaissance fairs, he has come to claim this dungeon his own.
+Beware his blade of cherry, and bask in his armor of red.
+For he is the harbinger of Dr. Pepper.
+.
+RRTY 50
+END
