@@ -524,6 +524,10 @@ class Monster(Actor):
     def get_char(self) -> str:
         return self.typedef.symb
 
+    # Returns the string name for the monster.
+    def get_name(self) -> str:
+        return self.typedef.name
+    
     # Returns a color for the character of the actor.
     def get_color(self) -> str:
         """
@@ -538,6 +542,7 @@ class Monster(Actor):
         """
         return self.typedef.is_unique
 
+    # Returns the score value for defeating this monster.
     def get_score_val(self) -> int:
         return self.typedef.rarity
 

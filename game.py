@@ -263,6 +263,7 @@ class Pyrogue_Game:
                 # Enter the monster list menu
                 self.curr_input_mode = self.input_modes["menu_monster_list"]
                 self.curr_submenu = self.display_submenus["menu_monster_list"]
+                self.need_submenu_rerender = True
                 self._render_monster_list()
                 self._update_top_label("PAUSED")
                 print("GAME: Monster list sub-menu activated")
@@ -379,11 +380,20 @@ class Pyrogue_Game:
 
     # Handles input for the monster list submenu
     def _handle_mlist_input(self, key):
-        if key == "Escape":
+        if key == "Escape" or key == "m":
             # Return to player input
-            self.curr_submenu = self.display_submenus["none"]
             self.curr_input_mode = self.input_modes["player_turn"]
-            print("GAME: Exiting monster list menu")
+            self.curr_submenu = self.display_submenus["none"]
+            self.submenu_canvas.destroy()
+            self.need_full_rerender = True
+            print("GAME: Monster list sub-menu closed")
+            self._update_top_label("")
+        elif key == "j" or key == "Down" or key == "2":
+            # Scroll down
+            self.submenu_canvas.yview_scroll(1, "units")
+        elif key == "k" or key == "Up" or key == "8":
+            # Scroll up
+            self.submenu_canvas.yview_scroll(-1, "units")
 
     # Populates the actor_map with a dungeon size proportionate number of monsters.
     # Difficulty is a modifier for the spawn rate of monsters in the dungeon.
@@ -614,10 +624,109 @@ class Pyrogue_Game:
 
     # Handles creating/rendering the monster list menu
     def _render_monster_list(self):
+
+        lines = []
+        i = 1
+        max_line_width = 0
+
+        # Create lines first; longest line will determine menu width
+        for monster in self.monster_list:
+            r, c = monster.get_pos()
+            if monster.is_alive():
+                text = f"{i:3d}:   {monster.get_name()} at (R:{r:2d}, C:{c:2d})"
+            else:
+                text = f"{i:3d}:   {monster.get_name()} (DEFEATED)"
+            length = len(text)
+            if length > max_line_width:
+                max_line_width = length
+            lines.append(text)
+            i += 1
+
         # Number of monsters + menu header
-        menu_height = int(len(self.monster_list) + 1)
+        ideal_height = int(len(self.monster_list) + 2) * self.tile_size
+        max_height = (self.mapsize_h - 5) * self.tile_size
+        visible_menu_height = min(ideal_height, max_height)
+
         # Not quite the whole screen width
-        menu_width = self.tile_size * (self.mapsize_w - 4)
+        menu_width = min(
+            self.tile_size * (self.mapsize_w - 3),
+            (self.tile_size // 1.85) * max_line_width,
+        )
+
+        # Attempt to grab current y scroll value to return to it
+        try:
+            scroll_val = self.submenu_canvas.yview()[0]
+        except (tk.TclError, IndexError, AttributeError):
+            scroll_val = 0.0  # Revert to zero
+
+        # Determine if full canvas redraw needed
+        if self.need_submenu_rerender:
+            if self.submenu_canvas:
+                self.submenu_canvas.destroy()
+
+            self.submenu_canvas = tk.Canvas(
+                self.canvas,
+                height=visible_menu_height,
+                width=menu_width,
+                bg="black",
+                highlightthickness=self.tile_size // 6,
+                yscrollincrement=self.tile_size,
+            )
+
+            self.canvas.create_window(
+                self.scrsize_w // 2,
+                (self.tile_size * self.mapsize_h // 2),
+                height=visible_menu_height,
+                width=menu_width,
+                window=self.submenu_canvas,
+                anchor="center",
+            )
+
+            # Init canvas' ability to scroll
+            self.submenu_canvas.config(scrollregion=(0, 0, menu_width, ideal_height))
+
+        # Draw menu header
+        offset = self.tile_size // 2
+        self.submenu_canvas.create_text(
+            menu_width // 2,
+            int(offset * 1.5),
+            text="Monster List",
+            fill="red",
+            font=(self.def_font, self.font_size),
+            tag="exit_opt_continue",
+            anchor="center",
+        )
+
+        # Add all text lines to display
+        i = 0
+        for text in lines:
+            monster = self.monster_list[i]
+            color = "white" if monster.is_alive() else "grey"
+            # Monster name and coordinate
+            self.submenu_canvas.create_text(
+                offset,
+                offset + (self.tile_size * (i + 1)),
+                text=text,
+                fill=color,
+                font=(self.def_font, self.font_size),
+                tag=f"monster_txt_{i + 1}",
+                anchor="nw",
+            )
+
+            # Add in monster character separately, with color
+            self.submenu_canvas.create_text(
+                offset + int(self.tile_size * 2.25),
+                offset + (self.tile_size * (i + 1)),
+                text=monster.get_char(),
+                fill=monster.get_color(),
+                font=(self.def_font, self.font_size),
+                tag=f"monster_symb_{i + 1}",
+                anchor="nw",
+            )
+            i += 1
+
+        # Return to previous scroll value; I.e., scroll back to where user had it before redrawing
+        self.submenu_canvas.yview_moveto(scroll_val)
 
     # Renders the dungeon to the screen canvas.
     def _render_frame(self, height, width):
@@ -709,6 +818,8 @@ class Pyrogue_Game:
 
         if self.curr_submenu == self.display_submenus["menu_exit"]:
             self._render_exit_menu()
+        elif self.curr_submenu == self.display_submenus["menu_monster_list"]:
+            self._render_monster_list()
 
         self.need_full_rerender = False
 

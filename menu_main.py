@@ -264,19 +264,19 @@ class Menu_Main:
             key = event.keysym
             # Check which page that the user is on, go to the appropriate handler
             if self.curr_mode == self.menu_modes["home"]:
-                print(f"MENU HOME INPUT: {key}")
+                # print(f"MENU HOME INPUT: {key}")
                 self._home_input_handler(key)
             elif self.curr_mode == self.menu_modes["settings"]:
-                print(f"MENU SETTINGS INPUT: {key}")
+                # print(f"MENU SETTINGS INPUT: {key}")
                 self._settings_input_handler(key)
             elif self.curr_mode == self.menu_modes["manual"]:
-                print(f"MENU MANUAL INPUT: {key}")
+                # print(f"MENU MANUAL INPUT: {key}")
                 self._manual_input_handler(key)
             elif self.curr_mode == self.menu_modes["monstencyc"]:
-                print(f"MENU MONST INPUT: {key}")
+                # print(f"MENU MONST INPUT: {key}")
                 self._monstencyc_input_handler(key)
             elif self.curr_mode == self.menu_modes["itemencyc"]:
-                print(f"MENU ITEM INPUT: {key}")
+                # print(f"MENU ITEM INPUT: {key}")
                 self._itemencyc_input_handler(key)
 
     # Handles resizing the window.
