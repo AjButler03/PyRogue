@@ -131,26 +131,29 @@ class Monster_Typedef:
     def get_single_color(self) -> list:
         return self.colors[random.randint(0, len(self.colors) - 1)]
     
+    def get_desc(self):
+        return self.desc
+    
     def get_abil_str(self) -> str:
         abil_str = ""
         if has_attribute(self.abilities, ATTR_INTELLIGENT):
-            abil_str = abil_str + "SMART"
+            abil_str = abil_str + "SMART "
         if has_attribute(self.abilities, ATTR_TELEPATHIC_):
-            abil_str = abil_str + "TELEPATHIC"
+            abil_str = abil_str + "TELEPATHIC "
         if has_attribute(self.abilities, ATTR_TUNNEL_____):
-            abil_str = abil_str + "TUNNELER"
+            abil_str = abil_str + "TUNNELER "
         if has_attribute(self.abilities, ATTR_ERRATIC____):
-            abil_str = abil_str + "ERRATIC"
+            abil_str = abil_str + "ERRATIC "
         if has_attribute(self.abilities, ATTR_PASS_______):
-            abil_str = abil_str + "PASS"
+            abil_str = abil_str + "PASS "
         if has_attribute(self.abilities, ATTR_PICKUP_____):
-            abil_str = abil_str + "PICKUP"
+            abil_str = abil_str + "PICKUP "
         if has_attribute(self.abilities, ATTR_DESTROY____):
-            abil_str = abil_str + "DESTROY"
+            abil_str = abil_str + "DESTROY "
         if has_attribute(self.abilities, ATTR_UNIQ_______):
-            abil_str = abil_str + "UNIQUE"
+            abil_str = abil_str + "UNIQUE "
         if has_attribute(self.abilities, ATTR_BOSS_______):
-            abil_str = abil_str + "BOSS"
+            abil_str = abil_str + "BOSS "
         return abil_str
     
     def get_speed_str(self) -> str:

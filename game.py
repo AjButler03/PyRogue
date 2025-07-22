@@ -693,7 +693,7 @@ class Pyrogue_Game:
             text="Monster List",
             fill="red",
             font=(self.def_font, self.font_size),
-            tag="exit_opt_continue",
+            tag="mlist_header",
             anchor="center",
         )
 

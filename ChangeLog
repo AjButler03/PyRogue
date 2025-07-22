@@ -28,6 +28,8 @@ v0.06 ==========================================================================
 07/21/2025
     - Finished monster list submenu with scrolling
     - Start on monster encyclopedia
+07/21/2025
+    - Monster encyclopedia functionally complete
 v0.05 ===========================================================================================================================
 06/26/2025
     - Init Menu_Main class to handle the main menu and its future sub-menus; Work in progress

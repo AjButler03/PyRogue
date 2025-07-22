@@ -326,9 +326,8 @@ HP 2500+0d1
 DAM 0+2d4
 NAME Sir Pepper
 DESC
-The legend of Iowa renaissance fairs, he has come to claim this dungeon his own.
-Beware his blade of cherry, and bask in his armor of red.
-For he is the harbinger of Dr. Pepper.
+Beware his blade the crimson carver, and bask in his armor of red- 
+For he is the harbinger of Dr. Pepper, and you'll soon be dead.
 .
 RRTY 50
 END

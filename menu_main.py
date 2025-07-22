@@ -76,10 +76,18 @@ class Menu_Main:
         self.in_game = False
 
         # Stuff for keeping track of what is currently being hovered on when selecting
+        self.home_select_opts = {
+            "start_game": 0,
+            "settings": 1,
+            "manual": 2,
+            "monstencyc": 3,
+            "itemencyc": 4,
+            "quit": 5,
+        }
         self.home_select_idx = 0
         self.setting_select_row = 0
         self.setting_select_col = 0
-        self.curr_monstencyc_idx = 0
+        self.curr_encyc_idx = 0
         self.window_canvas = None
 
         # Some things that help handle dynamic screen resizing
@@ -162,17 +170,28 @@ class Menu_Main:
     def _home_input_handler(self, key):
         if key == "Return":
             # User made selection for new page
-            if self.home_select_idx == 0:
+            if self.home_select_idx == self.home_select_opts["start_game"]:
                 # Start a new game
                 self.toggle_ingame()
-            elif self.home_select_idx == 1:
+            elif self.home_select_idx == self.home_select_opts["settings"]:
                 # Settings page
                 self.curr_mode = self.menu_modes["settings"]
                 self.need_full_rerender = True
                 self.setting_select_col = 0
                 self.setting_select_row = 0
                 self._render_settings(self.scrsize_h, self.scrsize_w)
-            elif self.home_select_idx == 5:
+            elif self.home_select_idx == self.home_select_opts["manual"]:
+                pass  # Later problem
+            elif self.home_select_idx == self.home_select_opts["monstencyc"]:
+                # Monster encyclopedia page
+                self.curr_encyc_idx = 0
+                self.curr_mode = self.menu_modes["monstencyc"]
+                self.need_full_rerender = True
+                self._render_monstencyc(self.scrsize_h, self.scrsize_w)
+                self._render_loop_helper()
+            elif self.home_select_idx == self.home_select_opts["itemencyc"]:
+                pass  # Later problem
+            elif self.home_select_idx == self.home_select_opts["quit"]:
                 # Force exit; maybe not the way to do it, but it seems to work fine
                 exit(0)
         elif key == "j" or key == "Down" or key == "2":
@@ -254,7 +273,34 @@ class Menu_Main:
 
     # Input event handler for the monster encyclopedia page
     def _monstencyc_input_handler(self, key):
-        pass
+        if key == "Escape":
+            # Head back to main menu
+            self.window_canvas.destroy()
+            self.curr_mode = self.menu_modes["home"]
+            self.need_full_rerender = True
+            self._render_home(self.scrsize_h, self.scrsize_w)
+        elif key == "Right" or key == "l" or key == "6":
+            # Cycle right in the list of monster definitions
+            if self.curr_encyc_idx >= len(self.monster_type_list) - 1:
+                self.curr_encyc_idx = 0
+            else:
+                self.curr_encyc_idx += 1
+            self.need_full_rerender = True
+            self._render_monstencyc(self.scrsize_h, self.scrsize_w)
+        elif key == "Left" or key == "h" or key == "4":
+            # Cycle left in the list of monster definitions
+            if self.curr_encyc_idx <= 0:
+                self.curr_encyc_idx = len(self.monster_type_list) - 1
+            else:
+                self.curr_encyc_idx -= 1
+            self.need_full_rerender = True
+            self._render_monstencyc(self.scrsize_h, self.scrsize_w)
+        elif key == "j" or key == "Down" or key == "2":
+            # Scroll down
+            self.window_canvas.yview_scroll(1, "units")
+        elif key == "k" or key == "Up" or key == "8":
+            # Scroll up
+            self.window_canvas.yview_scroll(-1, "units")
 
     # Input event handler for the item encyclopedia page
     def _itemencyc_input_handler(self, key):
@@ -298,6 +344,13 @@ class Menu_Main:
             elif self.curr_mode == self.menu_modes["settings"]:
                 print("MENU: Rendered settings")
                 self._render_settings(self.scrsize_h, self.scrsize_w)
+            elif self.curr_mode == self.menu_modes["manual"]:
+                pass  # Later problem
+            elif self.curr_mode == self.menu_modes["monstencyc"]:
+                print("MENU: Rendered Monster Encyclopedia")
+                self._render_monstencyc(self.scrsize_h, self.scrsize_w)
+            elif self.curr_mode == self.menu_modes["itemencyc"]:
+                pass  # Later problem
 
     # Renderer for the main menu's home page.
     def _render_home(self, height, width):
@@ -363,11 +416,12 @@ class Menu_Main:
                 4: "opt_itemencyc",
                 5: "opt_quit",
             }
+            # This exists just so that I can visually show that some options don't do anything.
             select_opts_colors = {
                 0: "gold",
                 1: "gold",
                 2: "gray",
-                3: "gray",
+                3: "gold",
                 4: "gray",
                 5: "gold",
             }
@@ -441,9 +495,7 @@ class Menu_Main:
 
         # Decide how big in pixels elements should be based on screen size
         max_tile_width = width // settings_scr_charcol
-        max_tile_height = (
-            height // settings_scr_charrow
-        )  # Note that there are 3 extra rows for messages / player information
+        max_tile_height = height // settings_scr_charrow
         tile_size = min(max_tile_width, max_tile_height)
         self.font_size = int(tile_size / 1.5)
 
@@ -603,10 +655,25 @@ class Menu_Main:
                 anchor="w",
             )
 
+    # Attempts to repeatedly render every few hundred milliseconds
+    # This rotates monster/item colors on screen
+    def _render_loop_helper(self):
+        if self.curr_mode == self.menu_modes["monstencyc"]:
+            self._render_monstencyc(self.scrsize_h, self.scrsize_w)
+            self.root.after(200, self._render_loop_helper)
+
     # Renderer for the main menu's monster encyclopedia page.
     def _render_monstencyc(self, height, width):
-        # Grab current monster
-        mtypedef = self.monster_type_list[self.curr_monstencyc_idx]
+        # Arbitrary bounds to determine how big the screen text should be
+        # Height is irrelevant; the menu can/will scroll
+        settings_scr_charcol = 40  # arbitrary; doesn't cut off provided desc line lengths
+
+        # Decide how big in pixels elements should be based on screen size
+        tile_size = width // settings_scr_charcol
+        self.font_size = int(tile_size / 1.5)
+
+        # Grab current monster + associated information strings
+        mtypedef = self.monster_type_list[self.curr_encyc_idx]
         symb = mtypedef.get_symb()
         name = mtypedef.get_name()
         desc_lines = mtypedef.get_desc()
@@ -614,41 +681,165 @@ class Menu_Main:
         speed_str = mtypedef.get_speed_str()
         health_str = mtypedef.get_hp_str()
         damage_str = mtypedef.get_damage_str()
-        
+
         # Total number of lines to the monster description entry
-        line_count = len(desc_lines) + 7 # 7 are the other lines above
-        
-        
+        # 7 are the other lines above, plus another 3 just for spacing
+        line_count = len(desc_lines) + 10
+        full_height = line_count * tile_size
+
         # Attempt to grab current y scroll value to return to it
         try:
             scroll_val = self.window_canvas.yview()[0]
         except (tk.TclError, IndexError, AttributeError):
             scroll_val = 0.0  # Revert to zero
-            
+
         # Determine if full canvas redraw needed
         if self.need_full_rerender:
             if self.window_canvas:
                 self.window_canvas.destroy()
-            
-            self.submenu_canvas = tk.Canvas(
+
+            self.window_canvas = tk.Canvas(
                 self.canvas,
-                height=self.scrsize_h,
-                width=self.scrsize_w,
+                height=height,
+                width=width,
                 bg="black",
                 highlightthickness=5,
-                yscrollincrement=self.tile_size,
+                yscrollincrement=tile_size,
             )
-            
+
             self.canvas.create_window(
                 0,
                 0,
-                height=self.scrsize_h,
-                width=self.scrsize_w,
-                window=self.submenu_canvas,
+                height=height,
+                width=width,
+                window=self.window_canvas,
                 anchor="nw",
             )
-        
-        
-        
-        
-        
+
+            # Init canvas' ability to scroll
+            self.window_canvas.config(scrollregion=(0, 0, self.scrsize_w, full_height))
+
+        # Now draw the actual screen elements
+        offset = tile_size
+        curr_line = 1
+
+        # Header
+        text = f"Monster Definition {self.curr_encyc_idx + 1} of {len(self.monster_type_list)}"
+        self.window_canvas.create_text(
+            width // 2,
+            curr_line * tile_size,
+            text=text,
+            fill="red",
+            font=(self.def_font, self.font_size),
+            tag="monstencyc_header",
+            anchor="center",
+        )
+        curr_line += 1
+
+        # Symbol (separate for defined color, appears on same line as name)
+        color = mtypedef.get_single_color()
+        self.window_canvas.create_text(
+            offset,
+            curr_line * tile_size,
+            text=symb,
+            fill=color,
+            font=(self.def_font, self.font_size),
+            tag="monstencyc_symb",
+            anchor="nw",
+        )
+
+        # Name (same line as symbol, again separate for separate colors)
+        self.window_canvas.create_text(
+            offset + tile_size,
+            curr_line * tile_size,
+            text=name,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="monstencyc_name",
+            anchor="nw",
+        )
+        curr_line += 1
+
+        # Description
+        curr_line += 1
+        i = 1
+        for line in desc_lines:
+            self.window_canvas.create_text(
+                offset,
+                (tile_size * (curr_line)),
+                text=line,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag=f"monstencyc_desc_{i}",
+                anchor="nw",
+            )
+            i += 1
+            curr_line += 1
+        curr_line += 1
+
+        # Abilities
+        text = "ATTRIBUTES: " + abil_str
+        self.window_canvas.create_text(
+            offset,
+            curr_line * tile_size,
+            text=text,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="monstencyc_abil",
+            anchor="nw",
+        )
+        curr_line += 1
+
+        # Speed
+        text = "SPEED: " + speed_str
+        self.window_canvas.create_text(
+            offset,
+            curr_line * tile_size,
+            text=text,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="monstencyc_speed",
+            anchor="nw",
+        )
+        curr_line += 1
+
+        # Health
+        text = "HIT POINTS: " + health_str
+        self.window_canvas.create_text(
+            offset,
+            curr_line * tile_size,
+            text=text,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="monstencyc_hp",
+            anchor="nw",
+        )
+        curr_line += 1
+
+        # Damage
+        text = "DAMAGE: " + damage_str
+        self.window_canvas.create_text(
+            offset,
+            curr_line * tile_size,
+            text=text,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="monstencyc_damage",
+            anchor="nw",
+        )
+        curr_line += 1
+
+        # Rarity
+        text = "RARITY: " + str(mtypedef.get_rarity())
+        self.window_canvas.create_text(
+            offset,
+            curr_line * tile_size,
+            text=text,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="monstencyc_rrty",
+            anchor="nw",
+        )
+
+        # Return to previous scroll value; I.e., scroll back to where user had it before redrawing
+        self.window_canvas.yview_moveto(scroll_val)

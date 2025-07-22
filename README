@@ -34,4 +34,5 @@ Descriptions of the attributes that the monsters can have (Those that are implem
     - ERRATIC: On every turn, 50% chance to move randomly.
 
 Known Issues:
-  - None currently
+  - {VISUAL} Scrolling menus have some boundary issues; i.e., scrolling possible when unnecessary
+
