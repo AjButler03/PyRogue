@@ -27,6 +27,7 @@ v0.06 ==========================================================================
     - Starting on creating the monster list submenu to display monsters in current dungeon level
 07/21/2025
     - Finished monster list submenu with scrolling
+    - Start on monster encyclopedia
 v0.05 ===========================================================================================================================
 06/26/2025
     - Init Menu_Main class to handle the main menu and its future sub-menus; Work in progress

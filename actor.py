@@ -73,6 +73,7 @@ class Monster_Typedef:
         self.is_unique = is_unique
         self.gen_eligible = True
 
+    # String method; mainly for testing
     def __str__(self):
         string = "NAME: "
         # print name
@@ -121,6 +122,49 @@ class Monster_Typedef:
         string += "GENERATION ELIGIBLE: " + str(self.gen_eligible)
         return string + "\n"
 
+    def get_name(self) -> str:
+        return self.name
+    
+    def get_symb(self) -> str:
+        return self.symb
+    
+    def get_single_color(self) -> list:
+        return self.colors[random.randint(0, len(self.colors) - 1)]
+    
+    def get_abil_str(self) -> str:
+        abil_str = ""
+        if has_attribute(self.abilities, ATTR_INTELLIGENT):
+            abil_str = abil_str + "SMART"
+        if has_attribute(self.abilities, ATTR_TELEPATHIC_):
+            abil_str = abil_str + "TELEPATHIC"
+        if has_attribute(self.abilities, ATTR_TUNNEL_____):
+            abil_str = abil_str + "TUNNELER"
+        if has_attribute(self.abilities, ATTR_ERRATIC____):
+            abil_str = abil_str + "ERRATIC"
+        if has_attribute(self.abilities, ATTR_PASS_______):
+            abil_str = abil_str + "PASS"
+        if has_attribute(self.abilities, ATTR_PICKUP_____):
+            abil_str = abil_str + "PICKUP"
+        if has_attribute(self.abilities, ATTR_DESTROY____):
+            abil_str = abil_str + "DESTROY"
+        if has_attribute(self.abilities, ATTR_UNIQ_______):
+            abil_str = abil_str + "UNIQUE"
+        if has_attribute(self.abilities, ATTR_BOSS_______):
+            abil_str = abil_str + "BOSS"
+        return abil_str
+    
+    def get_speed_str(self) -> str:
+        return str(self.speed_dice)
+    
+    def get_hp_str(self) -> str:
+        return str(self.hp_dice)
+    
+    def get_damage_str(self) -> str:
+        return str(self.damage_dice)
+    
+    def get_rarity(self) -> int:
+        return self.rarity
+    
     def is_gen_eligible(self) -> bool:
         return self.gen_eligible
 
@@ -535,6 +579,10 @@ class Monster(Actor):
         """
         return self.typedef.colors[random.randint(0, len(self.typedef.colors) - 1)]
 
+    # Returns the list of lines for the monster's description.
+    def get_desc(self) -> list:
+        return self.typedef.desc
+    
     # Returns True if the monster is unqiue, false otherwise.
     def is_unique(self) -> bool:
         """

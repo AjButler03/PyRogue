@@ -79,6 +79,8 @@ class Menu_Main:
         self.home_select_idx = 0
         self.setting_select_row = 0
         self.setting_select_col = 0
+        self.curr_monstencyc_idx = 0
+        self.window_canvas = None
 
         # Some things that help handle dynamic screen resizing
         self.resize_id = None
@@ -600,3 +602,53 @@ class Menu_Main:
                 tag="setting_select_arrow",
                 anchor="w",
             )
+
+    # Renderer for the main menu's monster encyclopedia page.
+    def _render_monstencyc(self, height, width):
+        # Grab current monster
+        mtypedef = self.monster_type_list[self.curr_monstencyc_idx]
+        symb = mtypedef.get_symb()
+        name = mtypedef.get_name()
+        desc_lines = mtypedef.get_desc()
+        abil_str = mtypedef.get_abil_str()
+        speed_str = mtypedef.get_speed_str()
+        health_str = mtypedef.get_hp_str()
+        damage_str = mtypedef.get_damage_str()
+        
+        # Total number of lines to the monster description entry
+        line_count = len(desc_lines) + 7 # 7 are the other lines above
+        
+        
+        # Attempt to grab current y scroll value to return to it
+        try:
+            scroll_val = self.window_canvas.yview()[0]
+        except (tk.TclError, IndexError, AttributeError):
+            scroll_val = 0.0  # Revert to zero
+            
+        # Determine if full canvas redraw needed
+        if self.need_full_rerender:
+            if self.window_canvas:
+                self.window_canvas.destroy()
+            
+            self.submenu_canvas = tk.Canvas(
+                self.canvas,
+                height=self.scrsize_h,
+                width=self.scrsize_w,
+                bg="black",
+                highlightthickness=5,
+                yscrollincrement=self.tile_size,
+            )
+            
+            self.canvas.create_window(
+                0,
+                0,
+                height=self.scrsize_h,
+                width=self.scrsize_w,
+                window=self.submenu_canvas,
+                anchor="nw",
+            )
+        
+        
+        
+        
+        
