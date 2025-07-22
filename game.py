@@ -392,8 +392,15 @@ class Pyrogue_Game:
             # Scroll down
             self.submenu_canvas.yview_scroll(1, "units")
         elif key == "k" or key == "Up" or key == "8":
-            # Scroll up
-            self.submenu_canvas.yview_scroll(-1, "units")
+            # Attempt to grab current y scroll value to return to it
+            try:
+                scroll_val = self.submenu_canvas.yview()[0]
+            except (tk.TclError, IndexError, AttributeError):
+                scroll_val = 0.0  # Revert to zero
+            
+            # Scroll up, but only if possible (scroll_val > 0/0)
+            if scroll_val > 0.0:
+                self.submenu_canvas.yview_scroll(-1, "units")
 
     # Populates the actor_map with a dungeon size proportionate number of monsters.
     # Difficulty is a modifier for the spawn rate of monsters in the dungeon.
@@ -643,7 +650,7 @@ class Pyrogue_Game:
             i += 1
 
         # Number of monsters + menu header
-        ideal_height = int(len(self.monster_list) + 2) * self.tile_size
+        ideal_height = int((len(self.monster_list) + 2) * self.tile_size)
         max_height = (self.mapsize_h - 5) * self.tile_size
         visible_menu_height = min(ideal_height, max_height)
 
@@ -683,7 +690,7 @@ class Pyrogue_Game:
             )
 
             # Init canvas' ability to scroll
-            self.submenu_canvas.config(scrollregion=(0, 0, menu_width, ideal_height))
+            self.submenu_canvas.config(scrollregion=(0, 0, menu_width, ideal_height - self.tile_size))
 
         # Draw menu header
         offset = self.tile_size // 2

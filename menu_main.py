@@ -299,8 +299,14 @@ class Menu_Main:
             # Scroll down
             self.window_canvas.yview_scroll(1, "units")
         elif key == "k" or key == "Up" or key == "8":
-            # Scroll up
-            self.window_canvas.yview_scroll(-1, "units")
+            # Attempt to grab current y scroll value to return to it
+            try:
+                scroll_val = self.window_canvas.yview()[0]
+            except (tk.TclError, IndexError, AttributeError):
+                scroll_val = 0.0  # Revert to zero
+            # Scroll up, but only if resulting yview is 0.0 or more
+            if scroll_val > 0.0:
+                self.window_canvas.yview_scroll(-1, "units")
 
     # Input event handler for the item encyclopedia page
     def _itemencyc_input_handler(self, key):
@@ -717,6 +723,7 @@ class Menu_Main:
             )
 
             # Init canvas' ability to scroll
+            scroll_h = max(full_height, self.scrsize_h)
             self.window_canvas.config(scrollregion=(0, 0, self.scrsize_w, full_height))
 
         # Now draw the actual screen elements
@@ -791,7 +798,7 @@ class Menu_Main:
         curr_line += 1
 
         # Speed
-        text = "SPEED: " + speed_str
+        text = "SPEED:      " + speed_str
         self.window_canvas.create_text(
             offset,
             curr_line * tile_size,
@@ -817,7 +824,7 @@ class Menu_Main:
         curr_line += 1
 
         # Damage
-        text = "DAMAGE: " + damage_str
+        text = "DAMAGE:     " + damage_str
         self.window_canvas.create_text(
             offset,
             curr_line * tile_size,
@@ -830,7 +837,7 @@ class Menu_Main:
         curr_line += 1
 
         # Rarity
-        text = "RARITY: " + str(mtypedef.get_rarity())
+        text = "RARITY:     " + str(mtypedef.get_rarity())
         self.window_canvas.create_text(
             offset,
             curr_line * tile_size,
