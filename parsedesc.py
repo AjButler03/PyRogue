@@ -271,7 +271,17 @@ def parse_item_typedefs(item_type_list) -> bool:
                         # Parse name field
                         name = line[5:].strip()
                     elif line.startswith("TYPE"):
-                        itype = line[5:]
+                        type_key = line[5:].strip()
+                        if type_key not in Item_Typedef.item_type_opts:
+                            print(
+                                    "PARSEDESC: Item definition",
+                                    types_found + 1,
+                                    "is unknown type \""+ type_key + "\"",
+                                )
+                            return False
+                        else:
+                            itype = Item_Typedef.item_type_opts[type_key]
+                        
                     elif line.startswith("DESC"):
                         # Parse text description field; read until "." found
                         curr_line += 1

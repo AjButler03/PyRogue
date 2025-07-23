@@ -1,15 +1,10 @@
-PyRogue v0.06 By Andrew Butler, Summer 2025
+PyRogue v0.07 By Andrew Butler, Summer 2025
 Built to run using Python 3.12
 
 pyrogue.py is the main file, and running it will open a new window with the PyRogue main menu.
 
-New features with v0.06:
-    - Fog of war, toggleable with f
-    - Monster type definition parsing
-    - Monster Encyclopedia
-    - Monster Type definition based generation, with custom monster colors
-    - Monster list submenu to show what monsters exist (bound to m)
-    - Basic combat mechanics, monster/player hit points
+New features with v0.07:
+    - TBD
 
 The game has the following key binds:
 ================================   MOVEMENT   ================================

@@ -5,7 +5,7 @@ from enum import Enum
 from dungeon import *
 from utility import Dice
 
-# This file contains the class information for the Actor class and its children, the player and monster classes.
+# This file contains the class information for 'actors' - Monsters, the player, and the various items.
 
 # A monster can have any number of attributes. I will be indicating these using a bit field.
 # For v03, only the first 4 will be fully implemented. The others will come later, if I decide to do them at all.
@@ -124,16 +124,16 @@ class Monster_Typedef:
 
     def get_name(self) -> str:
         return self.name
-    
+
     def get_symb(self) -> str:
         return self.symb
-    
+
     def get_single_color(self) -> list:
         return self.colors[random.randint(0, len(self.colors) - 1)]
-    
+
     def get_desc(self):
         return self.desc
-    
+
     def get_abil_str(self) -> str:
         abil_str = ""
         if has_attribute(self.abilities, ATTR_INTELLIGENT):
@@ -155,19 +155,19 @@ class Monster_Typedef:
         if has_attribute(self.abilities, ATTR_BOSS_______):
             abil_str = abil_str + "BOSS "
         return abil_str
-    
+
     def get_speed_str(self) -> str:
         return str(self.speed_dice)
-    
+
     def get_hp_str(self) -> str:
         return str(self.hp_dice)
-    
+
     def get_damage_str(self) -> str:
         return str(self.damage_dice)
-    
+
     def get_rarity(self) -> int:
         return self.rarity
-    
+
     def is_gen_eligible(self) -> bool:
         return self.gen_eligible
 
@@ -178,11 +178,44 @@ class Monster_Typedef:
 # Class to store item type definitions, which instantiated items will be based on.
 class Item_Typedef:
 
+    item_type_opts = {
+        "POTION": 0,
+        "WEAPON": 1,
+        "RANGED": 2,
+        "OFFHAND": 3,
+        "ARMOR": 4,
+        "AMULET": 5,
+        "LIGHT": 6,
+        "RING": 7,
+    }
+
+    item_type_to_str = {
+        0: "POTION",
+        1: "WEAPON",
+        2: "RANGED",
+        3: "OFFHAND",
+        4: "ARMOR",
+        5: "AMULET",
+        6: "LIGHT",
+        7: "",
+    }
+
+    symb_by_type = {
+        0: "!",  # Potion
+        1: "|",  # Weapon
+        2: "}",  # Ranged
+        3: ")",  # Offhand
+        4: "[",  # Armor
+        5: '"',  # Amulet
+        6: "_",  # Light
+        7: "=",  # Ring
+    }
+
     # Item_Definition constructor
     def __init__(
         self,
         name: str,
-        type: str,
+        type: int,
         desc: list,
         colors: list,
         hp: Dice,
@@ -207,12 +240,48 @@ class Item_Typedef:
         self.rarity = rarity
         self.artifact = artifact
 
+    def get_name(self) -> str:
+        return self.name
+
+    def get_symb(self) -> str:
+        return self.symb_by_type[self.type]
+    
+    def get_single_color(self) -> str:
+        return self.colors[random.randint(0, len(self.colors) - 1)]
+    
+    def get_desc(self) -> list:
+        return self.desc
+    
+    def get_hp_restore_str(self) -> str:
+        return str(self.hp_dice)
+    
+    def get_damage_str(self) -> str:
+        return str(self.damage_dice)
+    
+    def get_attr_str(self) -> str:
+        return str(self.attr_dice)
+    
+    def get_defense_str(self) -> str:
+        return str(self.damage_dice)
+    
+    def get_dodge_dice(self) -> str:
+        return str(self.dodge_dice)
+    
+    def get_speed_dice(self) -> str:
+        return str(self.speed_dice)
+    
+    def get_rarity(self) -> int:
+        return self.rarity
+    
+    def is_artifact(self) -> bool:
+        return self.artifact
+
     def __str__(self):
         string = "NAME: "
         # print name
         string += self.name + "\n"
         # print item type
-        string += "TYPE: " + self.type + "\n"
+        string += "TYPE: " + self.item_type_to_str[self.type] + "\n"
         # print desc
         string += "DESCRIPTION: \n"
         for line in self.desc:
@@ -574,7 +643,7 @@ class Monster(Actor):
     # Returns the string name for the monster.
     def get_name(self) -> str:
         return self.typedef.name
-    
+
     # Returns a color for the character of the actor.
     def get_color(self) -> str:
         """
@@ -585,7 +654,7 @@ class Monster(Actor):
     # Returns the list of lines for the monster's description.
     def get_desc(self) -> list:
         return self.typedef.desc
-    
+
     # Returns True if the monster is unqiue, false otherwise.
     def is_unique(self) -> bool:
         """

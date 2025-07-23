@@ -190,7 +190,12 @@ class Menu_Main:
                 self._render_monstencyc(self.scrsize_h, self.scrsize_w)
                 self._render_loop_helper()
             elif self.home_select_idx == self.home_select_opts["itemencyc"]:
-                pass  # Later problem
+                # Item encyclopedia page
+                self.curr_encyc_idx = 0
+                self.curr_mode = self.menu_modes["itemencyc"]
+                self.need_full_rerender = True
+                self._render_itemencyc(self.scrsize_h, self.scrsize_w)
+                self._render_loop_helper()
             elif self.home_select_idx == self.home_select_opts["quit"]:
                 # Force exit; maybe not the way to do it, but it seems to work fine
                 exit(0)
@@ -310,7 +315,40 @@ class Menu_Main:
 
     # Input event handler for the item encyclopedia page
     def _itemencyc_input_handler(self, key):
-        pass
+        if key == "Escape":
+            # Head back to main menu
+            self.window_canvas.destroy()
+            self.curr_mode = self.menu_modes["home"]
+            self.need_full_rerender = True
+            self._render_home(self.scrsize_h, self.scrsize_w)
+        elif key == "Right" or key == "l" or key == "6":
+            # Cycle right in the list of item definitions
+            if self.curr_encyc_idx >= len(self.item_type_list) - 1:
+                self.curr_encyc_idx = 0
+            else:
+                self.curr_encyc_idx += 1
+            self.need_full_rerender = True
+            self._render_itemencyc(self.scrsize_h, self.scrsize_w)
+        elif key == "Left" or key == "h" or key == "4":
+            # Cycle left in the list of item definitions
+            if self.curr_encyc_idx <= 0:
+                self.curr_encyc_idx = len(self.item_type_list) - 1
+            else:
+                self.curr_encyc_idx -= 1
+            self.need_full_rerender = True
+            self._render_itemencyc(self.scrsize_h, self.scrsize_w)
+        elif key == "j" or key == "Down" or key == "2":
+            # Scroll down
+            self.window_canvas.yview_scroll(1, "units")
+        elif key == "k" or key == "Up" or key == "8":
+            # Attempt to grab current y scroll value to return to it
+            try:
+                scroll_val = self.window_canvas.yview()[0]
+            except (tk.TclError, IndexError, AttributeError):
+                scroll_val = 0.0  # Revert to zero
+            # Scroll up, but only if resulting yview is 0.0 or more
+            if scroll_val > 0.0:
+                self.window_canvas.yview_scroll(-1, "units")
 
     # Event handler for keyboard input.
     def _on_key_press(self, event):
@@ -376,7 +414,7 @@ class Menu_Main:
         y_offset = tile_size
 
         if self.need_full_rerender:
-            version_str = "v0.06 July 2025"
+            version_str = "v0.07 July 2025"
 
             # This is a series of string lines that form the PyRogue ASCII art text.
             # It's a little garbled here because of excape character \.
@@ -428,7 +466,7 @@ class Menu_Main:
                 1: "gold",
                 2: "gray",
                 3: "gold",
-                4: "gray",
+                4: "gold",
                 5: "gold",
             }
 
@@ -667,6 +705,9 @@ class Menu_Main:
         if self.curr_mode == self.menu_modes["monstencyc"]:
             self._render_monstencyc(self.scrsize_h, self.scrsize_w)
             self.root.after(200, self._render_loop_helper)
+        elif self.curr_mode == self.menu_modes["itemencyc"]:
+            self._render_itemencyc(self.scrsize_h, self.scrsize_w)
+            self.root.after(200, self._render_loop_helper)
 
     # Renderer for the main menu's monster encyclopedia page.
     def _render_monstencyc(self, height, width):
@@ -849,6 +890,191 @@ class Menu_Main:
             tag="monstencyc_rrty",
             anchor="nw",
         )
+
+        # Return to previous scroll value; I.e., scroll back to where user had it before redrawing
+        self.window_canvas.yview_moveto(scroll_val)
+
+    # Renderer for the main menu's item encyclopedia page.
+    def _render_itemencyc(self, height, width):
+        # Arbitrary bounds to determine how big the screen text should be
+        # Height is irrelevant; the menu can/will scroll
+        settings_scr_charcol = (
+            40  # arbitrary; doesn't cut off provided desc line lengths
+        )
+
+        # Decide how big in pixels elements should be based on screen size
+        tile_size = width // settings_scr_charcol
+        self.font_size = int(tile_size / 1.5)
+
+        # Grab current monster + associated information strings
+        itypedef = self.monster_type_list[self.curr_encyc_idx]
+        symb = itypedef.get_symb()
+        name = itypedef.get_name()
+        desc_lines = itypedef.get_desc()
+        # abil_str = mtypedef.get_abil_str()
+        # speed_str = mtypedef.get_speed_str()
+        # health_str = mtypedef.get_hp_str()
+        # damage_str = mtypedef.get_damage_str()
+
+        # Total number of lines to the monster description entry
+        # 7 are the other lines above, plus another 3 just for spacing
+        line_count = len(desc_lines) + 10
+        full_height = line_count * tile_size
+
+        # Attempt to grab current y scroll value to return to it
+        try:
+            scroll_val = self.window_canvas.yview()[0]
+        except (tk.TclError, IndexError, AttributeError):
+            scroll_val = 0.0  # Revert to zero
+
+        # Determine if full canvas redraw needed
+        if self.need_full_rerender:
+            if self.window_canvas:
+                self.window_canvas.destroy()
+
+            self.window_canvas = tk.Canvas(
+                self.canvas,
+                height=height,
+                width=width,
+                bg="black",
+                highlightthickness=5,
+                yscrollincrement=tile_size,
+            )
+
+            self.canvas.create_window(
+                0,
+                0,
+                height=height,
+                width=width,
+                window=self.window_canvas,
+                anchor="nw",
+            )
+
+            # Init canvas' ability to scroll
+            scroll_h = max(full_height, self.scrsize_h)
+            self.window_canvas.config(scrollregion=(0, 0, self.scrsize_w, full_height))
+
+        # Now draw the actual screen elements
+        offset = tile_size
+        curr_line = 1
+
+        # Header
+        text = f"Item Definition {self.curr_encyc_idx + 1} of {len(self.item_type_list)}"
+        self.window_canvas.create_text(
+            width // 2,
+            curr_line * tile_size,
+            text=text,
+            fill="red",
+            font=(self.def_font, self.font_size),
+            tag="itemencyc_header",
+            anchor="center",
+        )
+        curr_line += 1
+
+        # # Symbol (separate for defined color, appears on same line as name)
+        # color = mtypedef.get_single_color()
+        # self.window_canvas.create_text(
+        #     offset,
+        #     curr_line * tile_size,
+        #     text=symb,
+        #     fill=color,
+        #     font=(self.def_font, self.font_size),
+        #     tag="itemencyc_symb",
+        #     anchor="nw",
+        # )
+
+        # # Name (same line as symbol, again separate for separate colors)
+        # self.window_canvas.create_text(
+        #     offset + tile_size,
+        #     curr_line * tile_size,
+        #     text=name,
+        #     fill="white",
+        #     font=(self.def_font, self.font_size),
+        #     tag="itemencyc_name",
+        #     anchor="nw",
+        # )
+        # curr_line += 1
+
+        # # Description
+        # curr_line += 1
+        # i = 1
+        # for line in desc_lines:
+        #     self.window_canvas.create_text(
+        #         offset,
+        #         (tile_size * (curr_line)),
+        #         text=line,
+        #         fill="white",
+        #         font=(self.def_font, self.font_size),
+        #         tag=f"itemencyc_desc_{i}",
+        #         anchor="nw",
+        #     )
+        #     i += 1
+        #     curr_line += 1
+        # curr_line += 1
+
+        # # Abilities
+        # text = "ATTRIBUTES: " + abil_str
+        # self.window_canvas.create_text(
+        #     offset,
+        #     curr_line * tile_size,
+        #     text=text,
+        #     fill="white",
+        #     font=(self.def_font, self.font_size),
+        #     tag="itemencyc_abil",
+        #     anchor="nw",
+        # )
+        # curr_line += 1
+
+        # # Speed
+        # text = "SPEED:      " + speed_str
+        # self.window_canvas.create_text(
+        #     offset,
+        #     curr_line * tile_size,
+        #     text=text,
+        #     fill="white",
+        #     font=(self.def_font, self.font_size),
+        #     tag="itemencyc_speed",
+        #     anchor="nw",
+        # )
+        # curr_line += 1
+
+        # # Health
+        # text = "HIT POINTS: " + health_str
+        # self.window_canvas.create_text(
+        #     offset,
+        #     curr_line * tile_size,
+        #     text=text,
+        #     fill="white",
+        #     font=(self.def_font, self.font_size),
+        #     tag="itemencyc_hp",
+        #     anchor="nw",
+        # )
+        # curr_line += 1
+
+        # # Damage
+        # text = "DAMAGE:     " + damage_str
+        # self.window_canvas.create_text(
+        #     offset,
+        #     curr_line * tile_size,
+        #     text=text,
+        #     fill="white",
+        #     font=(self.def_font, self.font_size),
+        #     tag="itemencyc_damage",
+        #     anchor="nw",
+        # )
+        # curr_line += 1
+
+        # # Rarity
+        # text = "RARITY:     " + str(mtypedef.get_rarity())
+        # self.window_canvas.create_text(
+        #     offset,
+        #     curr_line * tile_size,
+        #     text=text,
+        #     fill="white",
+        #     font=(self.def_font, self.font_size),
+        #     tag="itemencyc_rrty",
+        #     anchor="nw",
+        # )
 
         # Return to previous scroll value; I.e., scroll back to where user had it before redrawing
         self.window_canvas.yview_moveto(scroll_val)

@@ -59,24 +59,6 @@ ART TRUE
 END
 
 BEGIN ITEM
-NAME the cloak of invisibility
-TYPE CLOAK
-DESC
-One of the Deathly Hallows, this cloak grants the wearer invisibility.  Last
-know to be the property of the Boy Who Lived.
-.
-DODGE 24+5d4
-DEF 0+0d1
-HIT 0+0d1
-ATTR 0+0d1
-DAM 0+0d1
-SPEED 0+0d1
-COLOR cyan
-RRTY 20
-ART TRUE
-END
-
-BEGIN ITEM
 NAME the One Ring
 TYPE RING
 COLOR yellow
