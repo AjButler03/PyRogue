@@ -5,9 +5,11 @@ pyrogue.py is the main file, and running it will open a new window with the PyRo
 
 New features with v0.06:
     - Fog of war, toggleable with f
-    - Monster type definition parsing + type-based generation
-    - Monster inspection (?)
-    - Monster list submenu to show what monsters exist (?)
+    - Monster type definition parsing
+    - Monster Encyclopedia
+    - Monster Type definition based generation, with custom monster colors
+    - Monster list submenu to show what monsters exist (bound to m)
+    - Basic combat mechanics, monster/player hit points
 
 The game has the following key binds:
 ================================   MOVEMENT   ================================
@@ -22,17 +24,19 @@ The game has the following key binds:
   3 or n : Attempt to move PC one cell to the lower right.
   > or 0 : attempt to escape to new dungeon level using a staircase.
 ================================    OTHER     ================================
-  z : Cycles through standard / walking map / tunnelmap render modes.
   f : Toggle fog of war effect. 
+  m : opens a submenu to list all present monsters.
+  z : Cycles through standard / walking map / tunnelmap render modes.
   esc : Opens / closes pause menu.
 
 
-Descriptions of the attributes that the monsters can have (Those that are implemented as of v03):
+Descriptions of the attributes that the monsters can have (Those that are implemented as of v0.06):
     - INTELLIGENT: Follow the optimal route to the player, and remember player location at last sighting.
     - TELEPATHIC: Always know where the player character is, regardless of distance or line of sight.
     - TUNNEL: Ability to bore through rock, creating new paths between rooms.
     - ERRATIC: On every turn, 50% chance to move randomly.
+    - PASS: Monster can traverse through rock without drilling or creating new path.
 
 Known Issues:
-  - {VISUAL} Scrolling menus have some boundary issues; i.e., scrolling possible when unnecessary
+  - None Known
 

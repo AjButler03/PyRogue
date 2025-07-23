@@ -672,7 +672,9 @@ class Menu_Main:
     def _render_monstencyc(self, height, width):
         # Arbitrary bounds to determine how big the screen text should be
         # Height is irrelevant; the menu can/will scroll
-        settings_scr_charcol = 40  # arbitrary; doesn't cut off provided desc line lengths
+        settings_scr_charcol = (
+            40  # arbitrary; doesn't cut off provided desc line lengths
+        )
 
         # Decide how big in pixels elements should be based on screen size
         tile_size = width // settings_scr_charcol

@@ -31,6 +31,7 @@ v0.06 ==========================================================================
 07/22/2025
     - Monster encyclopedia functionally complete
     - Fixed visual bug with scrolling up on short monster list / monster descriptions
+    - Monster list now obscures the location of non-visible monsters
 v0.05 ===========================================================================================================================
 06/26/2025
     - Init Menu_Main class to handle the main menu and its future sub-menus; Work in progress

@@ -397,7 +397,7 @@ class Pyrogue_Game:
                 scroll_val = self.submenu_canvas.yview()[0]
             except (tk.TclError, IndexError, AttributeError):
                 scroll_val = 0.0  # Revert to zero
-            
+
             # Scroll up, but only if possible (scroll_val > 0/0)
             if scroll_val > 0.0:
                 self.submenu_canvas.yview_scroll(-1, "units")
@@ -640,8 +640,17 @@ class Pyrogue_Game:
         for monster in self.monster_list:
             r, c = monster.get_pos()
             if monster.is_alive():
-                text = f"{i:3d}:   {monster.get_name()} at (R:{r:2d}, C:{c:2d})"
+                if (
+                    self.player.visible_tiles[r][c]
+                    or self.curr_render_mode == self.render_modes["x-ray"]
+                ):
+                    # Location known, so display that information
+                    text = f"{i:3d}:   {monster.get_name()} at (R:{r:2d}, C:{c:2d})"
+                else:
+                    # Location unknown, so don't present that information
+                    text = f"{i:3d}:   {monster.get_name()} at (R:?, C:?)"
             else:
+                # monster is dead, so there is no location
                 text = f"{i:3d}:   {monster.get_name()} (DEFEATED)"
             length = len(text)
             if length > max_line_width:
@@ -690,7 +699,9 @@ class Pyrogue_Game:
             )
 
             # Init canvas' ability to scroll
-            self.submenu_canvas.config(scrollregion=(0, 0, menu_width, ideal_height - self.tile_size))
+            self.submenu_canvas.config(
+                scrollregion=(0, 0, menu_width, ideal_height - self.tile_size)
+            )
 
         # Draw menu header
         offset = self.tile_size // 2
