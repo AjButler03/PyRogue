@@ -1,7 +1,7 @@
 v0.07 ===========================================================================================================================
 07/23/2025
     - Slightly modified item definition parser to better define item types with error handling
-    - Started Item Encyclopedia
+    - Implemented Item Encyclopedia for most item types
 v0.06 ===========================================================================================================================
 07/10/2025
     - Implemented fog of war using recursive shadowcasting

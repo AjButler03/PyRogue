@@ -907,14 +907,17 @@ class Menu_Main:
         self.font_size = int(tile_size / 1.5)
 
         # Grab current monster + associated information strings
-        itypedef = self.monster_type_list[self.curr_encyc_idx]
+        itypedef = self.item_type_list[self.curr_encyc_idx]
         symb = itypedef.get_symb()
         name = itypedef.get_name()
         desc_lines = itypedef.get_desc()
-        # abil_str = mtypedef.get_abil_str()
-        # speed_str = mtypedef.get_speed_str()
-        # health_str = mtypedef.get_hp_str()
-        # damage_str = mtypedef.get_damage_str()
+        type_str = itypedef.get_type_str()
+        speed_str = itypedef.get_speed_str()
+        hp_restore_str = itypedef.get_hp_restore_str()
+        attr_str = itypedef.get_attr_str()
+        damage_str = itypedef.get_damage_str()
+        defense_str = itypedef.get_defense_str()
+        dodge_str = itypedef.get_dodge_str()
 
         # Total number of lines to the monster description entry
         # 7 are the other lines above, plus another 3 just for spacing
@@ -971,110 +974,169 @@ class Menu_Main:
         )
         curr_line += 1
 
-        # # Symbol (separate for defined color, appears on same line as name)
-        # color = mtypedef.get_single_color()
-        # self.window_canvas.create_text(
-        #     offset,
-        #     curr_line * tile_size,
-        #     text=symb,
-        #     fill=color,
-        #     font=(self.def_font, self.font_size),
-        #     tag="itemencyc_symb",
-        #     anchor="nw",
-        # )
+        # Symbol (separate for defined color, appears on same line as name)
+        color = itypedef.get_single_color()
+        self.window_canvas.create_text(
+            offset,
+            curr_line * tile_size,
+            text=symb,
+            fill=color,
+            font=(self.def_font, self.font_size),
+            tag="itemencyc_symb",
+            anchor="nw",
+        )
 
-        # # Name (same line as symbol, again separate for separate colors)
-        # self.window_canvas.create_text(
-        #     offset + tile_size,
-        #     curr_line * tile_size,
-        #     text=name,
-        #     fill="white",
-        #     font=(self.def_font, self.font_size),
-        #     tag="itemencyc_name",
-        #     anchor="nw",
-        # )
-        # curr_line += 1
+        # Name (same line as symbol, again separate for separate colors)
+        self.window_canvas.create_text(
+            offset + tile_size,
+            curr_line * tile_size,
+            text=name,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="itemencyc_name",
+            anchor="nw",
+        )
+        curr_line += 1
+        
+        # Item Type
+        text = "TYPE: " + type_str
+        if itypedef.is_artifact():
+            text = text + " ARTIFACT"
+        self.window_canvas.create_text(
+            offset,
+            curr_line * tile_size,
+            text=text,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="itemencyc_type",
+            anchor="nw",
+        )
+        curr_line += 1
 
-        # # Description
-        # curr_line += 1
-        # i = 1
-        # for line in desc_lines:
-        #     self.window_canvas.create_text(
-        #         offset,
-        #         (tile_size * (curr_line)),
-        #         text=line,
-        #         fill="white",
-        #         font=(self.def_font, self.font_size),
-        #         tag=f"itemencyc_desc_{i}",
-        #         anchor="nw",
-        #     )
-        #     i += 1
-        #     curr_line += 1
-        # curr_line += 1
+        # Description
+        curr_line += 1
+        i = 1
+        for line in desc_lines:
+            self.window_canvas.create_text(
+                offset,
+                (tile_size * (curr_line)),
+                text=line,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag=f"itemencyc_desc_{i}",
+                anchor="nw",
+            )
+            i += 1
+            curr_line += 1
+        curr_line += 1
 
-        # # Abilities
-        # text = "ATTRIBUTES: " + abil_str
-        # self.window_canvas.create_text(
-        #     offset,
-        #     curr_line * tile_size,
-        #     text=text,
-        #     fill="white",
-        #     font=(self.def_font, self.font_size),
-        #     tag="itemencyc_abil",
-        #     anchor="nw",
-        # )
-        # curr_line += 1
-
-        # # Speed
-        # text = "SPEED:      " + speed_str
-        # self.window_canvas.create_text(
-        #     offset,
-        #     curr_line * tile_size,
-        #     text=text,
-        #     fill="white",
-        #     font=(self.def_font, self.font_size),
-        #     tag="itemencyc_speed",
-        #     anchor="nw",
-        # )
-        # curr_line += 1
-
-        # # Health
-        # text = "HIT POINTS: " + health_str
-        # self.window_canvas.create_text(
-        #     offset,
-        #     curr_line * tile_size,
-        #     text=text,
-        #     fill="white",
-        #     font=(self.def_font, self.font_size),
-        #     tag="itemencyc_hp",
-        #     anchor="nw",
-        # )
-        # curr_line += 1
-
-        # # Damage
-        # text = "DAMAGE:     " + damage_str
-        # self.window_canvas.create_text(
-        #     offset,
-        #     curr_line * tile_size,
-        #     text=text,
-        #     fill="white",
-        #     font=(self.def_font, self.font_size),
-        #     tag="itemencyc_damage",
-        #     anchor="nw",
-        # )
-        # curr_line += 1
-
-        # # Rarity
-        # text = "RARITY:     " + str(mtypedef.get_rarity())
-        # self.window_canvas.create_text(
-        #     offset,
-        #     curr_line * tile_size,
-        #     text=text,
-        #     fill="white",
-        #     font=(self.def_font, self.font_size),
-        #     tag="itemencyc_rrty",
-        #     anchor="nw",
-        # )
+        # From here, display information based on item type, depending on relevance to that type.
+        # For example, a light only needs light displayed.
+        itype = itypedef.get_type()
+        if itype == itypedef.item_type_opts["POTION"]:
+            # Hit Point Restore
+            text = "HP RESTORE: " + hp_restore_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_hp_r",
+                anchor="nw",
+            )
+            curr_line += 1
+            
+            # MAX HIT POINT BONUS
+            text = "MAX HP BONUS: " + attr_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_hp_b",
+                anchor="nw",
+            )
+            curr_line += 1
+        elif itype == itypedef.item_type_opts["LIGHT"]:
+            # VIEW DIST BONUS            
+            text = "VIEW DIST BONUS: " + attr_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_attr",
+                anchor="nw",
+            )
+        else:
+            # All other types will present the same information
+            # Damage            
+            text = "DAMAGE BONUS:      " + damage_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_dam",
+                anchor="nw",
+            )
+            curr_line += 1
+            
+            # hp restore
+            text = "HIT POINT RESTORE: " + hp_restore_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_hp_r",
+                anchor="nw",
+            )
+            curr_line += 1
+            
+            # speed
+            text = "SPEED BONUS:       " + speed_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_spd",
+                anchor="nw",
+            )
+            curr_line += 1
+            
+            # Dodge
+            text = "DODGE BONUS:       " + dodge_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_dodge",
+                anchor="nw",
+            )
+            curr_line += 1
+            
+            # Defense
+            text = "DEFENSE BONUS:     " + defense_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_def",
+                anchor="nw",
+            )
+            curr_line += 1
 
         # Return to previous scroll value; I.e., scroll back to where user had it before redrawing
         self.window_canvas.yview_moveto(scroll_val)

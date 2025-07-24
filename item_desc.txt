@@ -77,6 +77,7 @@ RRTY 3
 ART TRUE
 END
 
+
 BEGIN ITEM
 NAME a torch
 TYPE LIGHT
@@ -211,6 +212,26 @@ DAM 20+10d2
 DEF 10+0d1
 HIT 10+0d1
 SPEED 10+0d1
+DESC
+A 56 carat diamond was originally owned by Louis XVI and cut into a heart
+shape after the French Revolution.  Last known whereabouts: Bottom of the
+Atlantic Ocean (thanks, Rose).  Little did she know, it's imbued with
+fantastic magical powers!
+.
+ATTR 0+0d1
+RRTY 80
+ART TRUE
+END
+
+BEGIN ITEM
+NAME Amulet of damage
+TYPE AMULET
+COLOR red
+DODGE 0+0d1
+DAM 10+3d6
+DEF 0+0d1
+HIT 0+0d1
+SPEED 0+0d1
 DESC
 A 56 carat diamond was originally owned by Louis XVI and cut into a heart
 shape after the French Revolution.  Last known whereabouts: Bottom of the

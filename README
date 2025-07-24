@@ -4,7 +4,9 @@ Built to run using Python 3.12
 pyrogue.py is the main file, and running it will open a new window with the PyRogue main menu.
 
 New features with v0.07:
-    - TBD
+    - Item Encyclopedia
+    - Randomized item generation in dungeon
+    - Player inventory + equipment usage
 
 The game has the following key binds:
 ================================   MOVEMENT   ================================

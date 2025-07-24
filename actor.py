@@ -197,7 +197,7 @@ class Item_Typedef:
         4: "ARMOR",
         5: "AMULET",
         6: "LIGHT",
-        7: "",
+        7: "RING",
     }
 
     symb_by_type = {
@@ -246,6 +246,12 @@ class Item_Typedef:
     def get_symb(self) -> str:
         return self.symb_by_type[self.type]
     
+    def get_type_str(self) -> str:
+        return self.item_type_to_str[self.type]
+    
+    def get_type(self) -> int:
+        return self.type
+    
     def get_single_color(self) -> str:
         return self.colors[random.randint(0, len(self.colors) - 1)]
     
@@ -264,10 +270,10 @@ class Item_Typedef:
     def get_defense_str(self) -> str:
         return str(self.damage_dice)
     
-    def get_dodge_dice(self) -> str:
+    def get_dodge_str(self) -> str:
         return str(self.dodge_dice)
     
-    def get_speed_dice(self) -> str:
+    def get_speed_str(self) -> str:
         return str(self.speed_dice)
     
     def get_rarity(self) -> int:
