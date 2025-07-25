@@ -6,7 +6,9 @@ pyrogue.py is the main file, and running it will open a new window with the PyRo
 New features with v0.07:
     - Item Encyclopedia
     - Randomized item generation in dungeon
+    - Displayable item list (opt?)
     - Player inventory + equipment usage
+    - Item / Monster inspection feature (opt?)
 
 The game has the following key binds:
 ================================   MOVEMENT   ================================

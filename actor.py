@@ -19,6 +19,42 @@ ATTR_DESTROY____ = 0b0000_0000_0100_0000  # Bit 7 (0000 0000 0100 0000)
 ATTR_UNIQ_______ = 0b0000_0000_1000_0000  # Bit 8 (0000 0000 1000 0000)
 ATTR_BOSS_______ = 0b0000_0001_0000_0000  # Bit 9 (0000 0001 0000 0000)
 
+# For defining types by string in file
+item_type_opts = {
+    "POTION": 0,
+    "WEAPON": 1,
+    "RANGED": 2,
+    "OFFHAND": 3,
+    "ARMOR": 4,
+    "AMULET": 5,
+    "LIGHT": 6,
+    "RING": 7,
+}
+
+# Shortcut to turn type (int) back into corresponding string
+_item_type_to_str = {
+    0: "POTION",
+    1: "WEAPON",
+    2: "RANGED",
+    3: "OFFHAND",
+    4: "ARMOR",
+    5: "AMULET",
+    6: "LIGHT",
+    7: "RING",
+}
+
+# Universal symbols depending on type
+_item_symb_by_type = {
+    0: "!",  # Potion
+    1: "|",  # Weapon
+    2: "}",  # Ranged
+    3: ")",  # Offhand
+    4: "[",  # Armor
+    5: '"',  # Amulet
+    6: "_",  # Light
+    7: "=",  # Ring
+}
+
 
 # Activates a given attribute bit, returning the new integer value.
 def add_attribute(curr_attributes: int, new_attr: int):
@@ -43,6 +79,132 @@ class Move(Enum):
     down_right = 7
     none = 8
 
+
+# Class to store item type definitions, which instantiated items will be based on.
+class Item_Typedef:
+
+    # Item_Definition constructor
+    def __init__(
+        self,
+        name: str,
+        type: int,
+        desc: list,
+        colors: list,
+        hp: Dice,
+        damage: Dice,
+        attr: Dice,
+        defense: Dice,
+        dodge: Dice,
+        speed: Dice,
+        rarity: int,
+        artifact: bool,
+    ):
+        self.name = name
+        self.type = type
+        self.desc = desc
+        self.colors = colors
+        self.hp_dice = hp
+        self.damage_dice = damage
+        self.attr_dice = attr
+        self.defense_dice = defense
+        self.dodge_dice = dodge
+        self.speed_dice = speed
+        self.rarity = rarity
+        self.artifact = artifact
+
+    def get_name(self) -> str:
+        return self.name
+
+    def get_symb(self) -> str:
+        return _item_symb_by_type[self.type]
+
+    def get_type_str(self) -> str:
+        return _item_type_to_str[self.type]
+
+    def get_type(self) -> int:
+        return self.type
+
+    def get_single_color(self) -> str:
+        return self.colors[random.randint(0, len(self.colors) - 1)]
+
+    def get_desc(self) -> list:
+        return self.desc
+
+    def get_hp_restore_str(self) -> str:
+        return str(self.hp_dice)
+
+    def get_damage_str(self) -> str:
+        return str(self.damage_dice)
+
+    def get_attr_str(self) -> str:
+        return str(self.attr_dice)
+
+    def get_defense_str(self) -> str:
+        return str(self.damage_dice)
+
+    def get_dodge_str(self) -> str:
+        return str(self.dodge_dice)
+
+    def get_speed_str(self) -> str:
+        return str(self.speed_dice)
+
+    def get_rarity(self) -> int:
+        return self.rarity
+
+    def is_artifact(self) -> bool:
+        return self.artifact
+
+    def __str__(self):
+        string = "NAME: "
+        # print name
+        string += self.name + "\n"
+        # print item type
+        string += "TYPE: " + _item_type_to_str[self.type] + "\n"
+        # print desc
+        string += "DESCRIPTION: \n"
+        for line in self.desc:
+            string += line
+        # print color(s)
+        string += "COLORS: "
+        for color in self.colors:
+            string += color + " "
+        string += "\n"
+        # print speed
+        string += "SPEED: " + str(self.speed_dice) + "\n"
+        # print hp
+        string += "HEALTH: " + str(self.hp_dice) + "\n"
+        # print dam
+        string += "DAMAGE: " + str(self.damage_dice) + "\n"
+        # print attr
+        string += "ATTR: " + str(self.attr_dice) + "\n"
+        # print defense
+        string += "DEFENSE: " + str(self.defense_dice) + "\n"
+        # print dodge
+        string += "DODGE: " + str(self.dodge_dice) + "\n"
+        # print rrty
+        string += "RRTY: " + str(self.rarity) + "\n"
+        # Print artifact status
+        if self.artifact:
+            string += "ART: True\n"
+        else:
+            string += "ART: FALSE\n"
+        return string + "\n"
+
+
+# Class to instantiate an item based on it's Item_Typedef definition.
+class Item:
+    def __init_(self, item_typedef: Item_Typedef):
+        # Remember type definition
+        self.typedef = item_typedef
+        
+        # Remember damage dice pointer (is it a pointer in python?)
+        self.damage_dice = self.typedef.damage_dice
+        
+        
+        
+        
+        self.is_unique = self.typedef.artifact
+        
 
 # Class to store monster type definitions, which instantiated monsters will be based on.
 class Monster_Typedef:
@@ -173,150 +335,6 @@ class Monster_Typedef:
 
     def is_unique(self) -> bool:
         return self.is_unique
-
-
-# Class to store item type definitions, which instantiated items will be based on.
-class Item_Typedef:
-
-    item_type_opts = {
-        "POTION": 0,
-        "WEAPON": 1,
-        "RANGED": 2,
-        "OFFHAND": 3,
-        "ARMOR": 4,
-        "AMULET": 5,
-        "LIGHT": 6,
-        "RING": 7,
-    }
-
-    item_type_to_str = {
-        0: "POTION",
-        1: "WEAPON",
-        2: "RANGED",
-        3: "OFFHAND",
-        4: "ARMOR",
-        5: "AMULET",
-        6: "LIGHT",
-        7: "RING",
-    }
-
-    symb_by_type = {
-        0: "!",  # Potion
-        1: "|",  # Weapon
-        2: "}",  # Ranged
-        3: ")",  # Offhand
-        4: "[",  # Armor
-        5: '"',  # Amulet
-        6: "_",  # Light
-        7: "=",  # Ring
-    }
-
-    # Item_Definition constructor
-    def __init__(
-        self,
-        name: str,
-        type: int,
-        desc: list,
-        colors: list,
-        hp: Dice,
-        damage: Dice,
-        attr: Dice,
-        defense: Dice,
-        dodge: Dice,
-        speed: Dice,
-        rarity: int,
-        artifact: bool,
-    ):
-        self.name = name
-        self.type = type
-        self.desc = desc
-        self.colors = colors
-        self.hp_dice = hp
-        self.damage_dice = damage
-        self.attr_dice = attr
-        self.defense_dice = defense
-        self.dodge_dice = dodge
-        self.speed_dice = speed
-        self.rarity = rarity
-        self.artifact = artifact
-
-    def get_name(self) -> str:
-        return self.name
-
-    def get_symb(self) -> str:
-        return self.symb_by_type[self.type]
-    
-    def get_type_str(self) -> str:
-        return self.item_type_to_str[self.type]
-    
-    def get_type(self) -> int:
-        return self.type
-    
-    def get_single_color(self) -> str:
-        return self.colors[random.randint(0, len(self.colors) - 1)]
-    
-    def get_desc(self) -> list:
-        return self.desc
-    
-    def get_hp_restore_str(self) -> str:
-        return str(self.hp_dice)
-    
-    def get_damage_str(self) -> str:
-        return str(self.damage_dice)
-    
-    def get_attr_str(self) -> str:
-        return str(self.attr_dice)
-    
-    def get_defense_str(self) -> str:
-        return str(self.damage_dice)
-    
-    def get_dodge_str(self) -> str:
-        return str(self.dodge_dice)
-    
-    def get_speed_str(self) -> str:
-        return str(self.speed_dice)
-    
-    def get_rarity(self) -> int:
-        return self.rarity
-    
-    def is_artifact(self) -> bool:
-        return self.artifact
-
-    def __str__(self):
-        string = "NAME: "
-        # print name
-        string += self.name + "\n"
-        # print item type
-        string += "TYPE: " + self.item_type_to_str[self.type] + "\n"
-        # print desc
-        string += "DESCRIPTION: \n"
-        for line in self.desc:
-            string += line
-        # print color(s)
-        string += "COLORS: "
-        for color in self.colors:
-            string += color + " "
-        string += "\n"
-        # print speed
-        string += "SPEED: " + str(self.speed_dice) + "\n"
-        # print hp
-        string += "HEALTH: " + str(self.hp_dice) + "\n"
-        # print dam
-        string += "DAMAGE: " + str(self.damage_dice) + "\n"
-        # print attr
-        string += "ATTR: " + str(self.attr_dice) + "\n"
-        # print defense
-        string += "DEFENSE: " + str(self.defense_dice) + "\n"
-        # print dodge
-        string += "DODGE: " + str(self.dodge_dice) + "\n"
-        # print rrty
-        string += "RRTY: " + str(self.rarity) + "\n"
-        # Print artifact status
-        if self.artifact:
-            string += "ART: True\n"
-        else:
-            string += "ART: FALSE\n"
-        return string + "\n"
 
 
 # This is the generic actor class to be used in the general turn loop.

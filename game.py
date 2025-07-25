@@ -21,6 +21,7 @@ class Pyrogue_Game:
         mapsize_w: int,
         difficulty: float,
         monster_type_list: list,
+        item_type_list: list,
         generate=True,
     ):
         # Menu from which this game instance was launched from
@@ -61,7 +62,9 @@ class Pyrogue_Game:
         # Init lists for monsters as well as the map storing all actor locations
         self.monster_type_list = monster_type_list
         self.monster_list = []
+        self.item_list = []
         self.actor_map = []
+        self.item_map = []
         self.turn_pq = None
 
         # here in case I implement game save/load; until then, always randomly generate
@@ -446,6 +449,12 @@ class Pyrogue_Game:
             "Placed",
         )
 
+    # Populates the item_map with a dungeon size proportionate number of items.
+    # Difficulty is a modifier for the spawn rate of items in the dungeon.
+    def _generate_items(self):
+        # TODO
+        pass
+    
     # Resets the generation eligibility for item/monster type definitions
     def _reset_gen_eligibility(self):
         # Reset monster generation eligibility

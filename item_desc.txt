@@ -253,14 +253,8 @@ DEF 25+0d1
 HIT 75+0d1
 SPEED 10+0d1
 DESC
-The Halo 1 pistol is 
-a) large enough to be a rifle, and 
-b) can take down a Spartan-II in full Mjolnir Mk.5 armor in 3 shots.
-
-It is of legendary power, outshining any other weapon that was in Halo 1.
-Well, except maybe the shotgun or the sniper.
-Point is, this thing has ended many friendships with its range and damage.
-In your hands, your victory is all but assured.
+Two for the shields, one for the head.
+Piss your friends off today!
 .
 ATTR 1+0d1
 RRTY 75
@@ -277,8 +271,7 @@ DEF 10+0d1
 HIT 15+0d1
 SPEED 0+0d1
 DESC
-the BR55 battle rifle is standard UNSC issue; with range and accuracy,
-it serves as an excellent addition to your arsenal. 
+Standard UNSC issue.
 .
 ATTR 1+0d1
 RRTY 50

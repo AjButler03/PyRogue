@@ -414,7 +414,7 @@ class Menu_Main:
         y_offset = tile_size
 
         if self.need_full_rerender:
-            version_str = "v0.07 July 2025"
+            version_str = "Andrew Butler v0.07 08/2025"
 
             # This is a series of string lines that form the PyRogue ASCII art text.
             # It's a little garbled here because of excape character \.
@@ -513,8 +513,9 @@ class Menu_Main:
                 select_opts_tags[self.home_select_idx], text=new_opt_text
             )
 
+            
             # Little version number at the bottom of the screen
-            x = int(width - tile_size * 3.25)
+            x = int(width - tile_size * 0.3)
             y = height - tile_size // 2
             self.canvas.create_text(
                 x,
@@ -523,9 +524,9 @@ class Menu_Main:
                 fill="white",
                 font=(self.def_font, (opt_fontsize // 2)),
                 tag="version",
-                anchor=ascii_anchor,
+                anchor="e",
             )
-
+            
             self.need_full_rerender = False
 
     # Renderer for the main menu's settings page.
@@ -1033,9 +1034,9 @@ class Menu_Main:
         # From here, display information based on item type, depending on relevance to that type.
         # For example, a light only needs light displayed.
         itype = itypedef.get_type()
-        if itype == itypedef.item_type_opts["POTION"]:
-            # Hit Point Restore
-            text = "HP RESTORE: " + hp_restore_str
+        if itype == item_type_opts["POTION"]:
+            # Hit Point Restore            
+            text = "HP RESTORE:        " + hp_restore_str
             self.window_canvas.create_text(
                 offset,
                 curr_line * tile_size,
@@ -1047,8 +1048,8 @@ class Menu_Main:
             )
             curr_line += 1
             
-            # MAX HIT POINT BONUS
-            text = "MAX HP BONUS: " + attr_str
+            # MAX HIT POINT BONUS            
+            text = "MAX HP BONUS:      " + attr_str
             self.window_canvas.create_text(
                 offset,
                 curr_line * tile_size,
@@ -1059,9 +1060,9 @@ class Menu_Main:
                 anchor="nw",
             )
             curr_line += 1
-        elif itype == itypedef.item_type_opts["LIGHT"]:
-            # VIEW DIST BONUS            
-            text = "VIEW DIST BONUS: " + attr_str
+        elif itype == item_type_opts["LIGHT"]:
+            # VIEW DIST BONUS
+            text = "VIEW DIST BONUS:   " + attr_str
             self.window_canvas.create_text(
                 offset,
                 curr_line * tile_size,
@@ -1071,6 +1072,7 @@ class Menu_Main:
                 tag="itemencyc_attr",
                 anchor="nw",
             )
+            curr_line += 1
         else:
             # All other types will present the same information
             # Damage            
@@ -1138,5 +1140,16 @@ class Menu_Main:
             )
             curr_line += 1
 
+        # Rarity
+        text = "RARITY:            " + str(itypedef.get_rarity())
+        self.window_canvas.create_text(
+            offset,
+            curr_line * tile_size,
+            text=text,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="monstencyc_rrty",
+            anchor="nw",
+        )
         # Return to previous scroll value; I.e., scroll back to where user had it before redrawing
         self.window_canvas.yview_moveto(scroll_val)
