@@ -148,6 +148,7 @@ class Menu_Main:
                 mapsize_w,
                 self.difficulty_setting[self.difficulty],
                 self.monster_type_list,
+                self.item_type_list,
             )
             self.canvas.pack_forget()
 
@@ -513,7 +514,6 @@ class Menu_Main:
                 select_opts_tags[self.home_select_idx], text=new_opt_text
             )
 
-            
             # Little version number at the bottom of the screen
             x = int(width - tile_size * 0.3)
             y = height - tile_size // 2
@@ -526,7 +526,7 @@ class Menu_Main:
                 tag="version",
                 anchor="e",
             )
-            
+
             self.need_full_rerender = False
 
     # Renderer for the main menu's settings page.
@@ -963,7 +963,9 @@ class Menu_Main:
         curr_line = 1
 
         # Header
-        text = f"Item Definition {self.curr_encyc_idx + 1} of {len(self.item_type_list)}"
+        text = (
+            f"Item Definition {self.curr_encyc_idx + 1} of {len(self.item_type_list)}"
+        )
         self.window_canvas.create_text(
             width // 2,
             curr_line * tile_size,
@@ -998,7 +1000,7 @@ class Menu_Main:
             anchor="nw",
         )
         curr_line += 1
-        
+
         # Item Type
         text = "TYPE: " + type_str
         if itypedef.is_artifact():
@@ -1035,7 +1037,7 @@ class Menu_Main:
         # For example, a light only needs light displayed.
         itype = itypedef.get_type()
         if itype == item_type_opts["POTION"]:
-            # Hit Point Restore            
+            # Hit Point Restore
             text = "HP RESTORE:        " + hp_restore_str
             self.window_canvas.create_text(
                 offset,
@@ -1047,8 +1049,8 @@ class Menu_Main:
                 anchor="nw",
             )
             curr_line += 1
-            
-            # MAX HIT POINT BONUS            
+
+            # MAX HIT POINT BONUS
             text = "MAX HP BONUS:      " + attr_str
             self.window_canvas.create_text(
                 offset,
@@ -1075,7 +1077,7 @@ class Menu_Main:
             curr_line += 1
         else:
             # All other types will present the same information
-            # Damage            
+            # Damage
             text = "DAMAGE BONUS:      " + damage_str
             self.window_canvas.create_text(
                 offset,
@@ -1087,7 +1089,7 @@ class Menu_Main:
                 anchor="nw",
             )
             curr_line += 1
-            
+
             # hp restore
             text = "HIT POINT RESTORE: " + hp_restore_str
             self.window_canvas.create_text(
@@ -1100,7 +1102,7 @@ class Menu_Main:
                 anchor="nw",
             )
             curr_line += 1
-            
+
             # speed
             text = "SPEED BONUS:       " + speed_str
             self.window_canvas.create_text(
@@ -1113,7 +1115,7 @@ class Menu_Main:
                 anchor="nw",
             )
             curr_line += 1
-            
+
             # Dodge
             text = "DODGE BONUS:       " + dodge_str
             self.window_canvas.create_text(
@@ -1126,7 +1128,7 @@ class Menu_Main:
                 anchor="nw",
             )
             curr_line += 1
-            
+
             # Defense
             text = "DEFENSE BONUS:     " + defense_str
             self.window_canvas.create_text(

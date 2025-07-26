@@ -61,6 +61,7 @@ class Pyrogue_Game:
 
         # Init lists for monsters as well as the map storing all actor locations
         self.monster_type_list = monster_type_list
+        self.item_type_list = item_type_list
         self.monster_list = []
         self.item_list = []
         self.actor_map = []
@@ -406,7 +407,6 @@ class Pyrogue_Game:
                 self.submenu_canvas.yview_scroll(-1, "units")
 
     # Populates the actor_map with a dungeon size proportionate number of monsters.
-    # Difficulty is a modifier for the spawn rate of monsters in the dungeon.
     def _generate_monsters(self):
         attemptc = 0
         monsterc = 0
@@ -422,7 +422,10 @@ class Pyrogue_Game:
             mtypedef = self.monster_type_list[
                 random.randint(0, len(self.monster_type_list) - 1)
             ]
-            if mtypedef.is_gen_eligible() and random.randint(0, 100) >= mtypedef.rarity:
+            if (
+                mtypedef.is_gen_eligible()
+                and random.randint(0, 100) >= mtypedef.get_rarity()
+            ):
                 # Create monster
                 new_monster = Monster(mtypedef)
                 if monsterc <= min_monsterc or exp_chancetime(
@@ -442,7 +445,7 @@ class Pyrogue_Game:
         print(
             "MONSTERS:",
             min_monsterc,
-            "Min monsters,",
+            "Min items,",
             attemptc,
             "Placement attempts,",
             monsterc,
@@ -450,11 +453,48 @@ class Pyrogue_Game:
         )
 
     # Populates the item_map with a dungeon size proportionate number of items.
-    # Difficulty is a modifier for the spawn rate of items in the dungeon.
     def _generate_items(self):
-        # TODO
-        pass
-    
+        attemptc = 0
+        itemc = 0
+        size_modifier = self.dungeon.width * self.dungeon.height
+        attempt_limit = size_modifier
+        min_itemc = max(1, int(size_modifier // 100))
+        decay_rate = 0.75
+
+        # Generate items; runs until minimum number and attempt limit are met
+        while (itemc < min_itemc) or (attemptc < attempt_limit):
+            # Grab a item type definition
+            itypedef = self.item_type_list[
+                random.randint(0, len(self.item_type_list) - 1)
+            ]
+            if (
+                itypedef.is_gen_eligible()
+                and random.randint(0, 100) >= itypedef.get_rarity()
+            ):
+                # Create Item
+                new_item = Item(itypedef)
+                if itemc <= min_itemc or exp_chancetime(itemc - min_itemc, decay_rate):
+                    if new_item.init_pos(
+                        self.dungeon,
+                        self.item_map,
+                        random.randint(1, self.dungeon.height - 2),
+                        random.randint(1, self.dungeon.width - 2),
+                    ):
+                        # Update gen eligibility of monster type; Newly generated monster True, force reset False
+                        new_item.update_gen_eligible(True, False)
+                        itemc += 1
+                        self.item_list.append(new_item)
+            attemptc += 1
+        print(
+            "ITEMS:",
+            min_itemc,
+            "Min items,",
+            attemptc,
+            "Placement attempts,",
+            itemc,
+            "Placed",
+        )
+
     # Resets the generation eligibility for item/monster type definitions
     def _reset_gen_eligibility(self):
         # Reset monster generation eligibility
@@ -462,6 +502,10 @@ class Pyrogue_Game:
         for monster in self.monster_list:
             # If game exit, force full reset. Otherwise depends on uniqueness and alive/dead
             monster.update_gen_eligible(False, self.game_exit)
+
+        for item in self.item_list:
+            # If game exit, force full reset. Otherwise depends on uniqueness and used/unused
+            item.update_gen_eligible(False, self.game_exit)
 
     # Initializes a new dungeon for the game to use; this also re-generates the monsters and restarts the turnloop.
     def _replace_dungeon(self):
@@ -476,7 +520,11 @@ class Pyrogue_Game:
         self.actor_map = [
             [None] * self.dungeon.width for _ in range(self.dungeon.height)
         ]
+        self.item_map = [
+            [None] * self.dungeon.width for _ in range(self.dungeon.height)
+        ]
         self.monster_list = []
+        self.item_list = []
         self.turn_pq = PriorityQueue()
 
         # Set the player's position in the dungeon
@@ -491,6 +539,9 @@ class Pyrogue_Game:
         # Generate new monsters
         self._generate_monsters()
 
+        # Generate new items
+        self._generate_items()
+
         # Restart the turn loop
         self._start_turnloop()
 
@@ -501,8 +552,11 @@ class Pyrogue_Game:
         self.dungeon = Dungeon(self.mapsize_h, self.mapsize_w)
         self.dungeon.generate_dungeon()
 
-        # Init actor map
+        # Init actor map and item map
         self.actor_map = [
+            [None] * self.dungeon.width for _ in range(self.dungeon.height)
+        ]
+        self.item_map = [
             [None] * self.dungeon.width for _ in range(self.dungeon.height)
         ]
 
@@ -522,6 +576,8 @@ class Pyrogue_Game:
 
         # Generate monsters to populate the dungeon
         self._generate_monsters()
+        # Generate items
+        self._generate_items()
 
     # Wrapper to update top message label. Cyan is the default message color.
     def _update_top_label(self, message: str, font_color: str = "cyan"):
@@ -871,11 +927,15 @@ class Pyrogue_Game:
                     # determine the current render mode to grab char & color
                     if self.curr_render_mode == self.render_modes["standard"]:
                         actor = self.actor_map[row][col]
+                        item = self.item_map[row][col]
                         if self.player.visible_tiles[row][col]:
                             # Tile is visible, just render as normal.
                             if actor:
                                 char = actor.get_char()
                                 color = actor.get_color()
+                            elif item:
+                                char = item.get_char()
+                                color = item.get_color()
                             else:
                                 terrain = self.dungeon.tmap[row][col]
                                 char = terrain_char[terrain]
@@ -887,9 +947,13 @@ class Pyrogue_Game:
                     elif self.curr_render_mode == self.render_modes["x-ray"]:
                         # Ignoring player memory of dungeon; just displaying dungeon
                         actor = self.actor_map[row][col]
+                        item = self.item_map[row][col]
                         if actor:
                             char = actor.get_char()
                             color = actor.get_color()
+                        elif item:
+                            char = item.get_char()
+                            color = item.get_color()
                         else:
                             terrain = self.dungeon.tmap[row][col]
                             char = terrain_char[terrain]

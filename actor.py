@@ -111,6 +111,7 @@ class Item_Typedef:
         self.speed_dice = speed
         self.rarity = rarity
         self.artifact = artifact
+        self.gen_eligible = True
 
     def get_name(self) -> str:
         return self.name
@@ -150,6 +151,9 @@ class Item_Typedef:
 
     def get_rarity(self) -> int:
         return self.rarity
+
+    def is_gen_eligible(self) -> bool:
+        return self.gen_eligible
 
     def is_artifact(self) -> bool:
         return self.artifact
@@ -193,18 +197,97 @@ class Item_Typedef:
 
 # Class to instantiate an item based on it's Item_Typedef definition.
 class Item:
-    def __init_(self, item_typedef: Item_Typedef):
+
+    def __init__(self, item_typedef: Item_Typedef):
         # Remember type definition
         self.typedef = item_typedef
-        
+
+        # Health restore
+        self.hp_restore = self.typedef.hp_dice.roll()
+
         # Remember damage dice pointer (is it a pointer in python?)
         self.damage_dice = self.typedef.damage_dice
-        
-        
-        
-        
-        self.is_unique = self.typedef.artifact
-        
+
+        # Misc Attr value
+        self.attr = self.typedef.attr_dice.roll()
+
+        # Defense bonus
+        self.defense = self.typedef.defense_dice.roll()
+
+        # Dodge Bonus
+        self.dodge = self.typedef.dodge_dice.roll()
+
+        # Speed Bonus
+        self.speed = self.typedef.speed_dice.roll()
+
+        # To make sure one-time bonuses can't be repeatedly applied
+        self.used = False
+
+    # Determines if the item can be at this position.
+    def _valid_pos(self, dungeon: Dungeon, r: int, c: int) -> bool:
+        """
+        This function checks that the row, column coordinate is a valid position for the item to be within the dungeon.
+        Returns True if it is, False otherwise.
+        """
+
+        if dungeon.valid_point(r, c):
+            if dungeon.rmap[r][c] == 0:
+                return True
+        return False
+
+    # This method is to initialize the position of the item within the dungeon, verifying the location as valid.
+    # Returns True on successful placement, False otherwise.
+    def init_pos(self, dungeon: Dungeon, item_map: list, r: int, c: int) -> bool:
+        if (
+            dungeon.valid_point(r, c)
+            and dungeon.rmap[r][c] == 0
+            and item_map[r][c] == None
+        ):
+            self.r = r
+            self.c = c
+            item_map[r][c] = self
+            return True
+        else:
+            return False
+
+    # Returns the single character to represent this item in the dungeon.
+    def get_char(self):
+        return self.typedef.get_symb()
+
+    # Returns a str keyword for a single Tkinter color.
+    def get_color(self):
+        return self.typedef.get_single_color()
+
+    def is_unique(self):
+        return self.typedef.artifact
+
+    # resets generation eligibility of type definition
+    def update_gen_eligible(self, is_new_item: bool, force_reset: bool):
+        """
+        This function updates the generation eligibility of this item's type definition.
+        It is only intended to be called in a few circumstances:
+        A) Initial generation, in which case it will be updated to False if this is an artifact.
+        B) Changing to new dungeon level, in which case the eligibility will be updated based on uniqueness.
+        C) Game over, in which case it will be force updated back to True.
+
+        Calling this method in any other situation will likely produce unintended behavior.
+
+        The first parameter, is_new_item, is a boolean if this is the first call after creating the item.
+            This should be false anytime except immediately following the creation of a item instance.
+        The second parameter, force_rest, indicates that the game is over and eligibility should be automatically reset to True.
+        """
+        if force_reset:
+            # Force reset to True
+            self.typedef.gen_eligible = True
+        elif self.typedef.artifact:
+            if is_new_item:
+                # Newly generated item, so set eligibility to False so there aren't duplicates.
+                self.typedef.gen_eligible = False
+            elif not self.used and not is_new_item:
+                # still unused, and not the initial generation.
+                # This will reset to True for a new dungeon (presumably why this was called)
+                self.typedef.gen_eligible = True
+
 
 # Class to store monster type definitions, which instantiated monsters will be based on.
 class Monster_Typedef:
@@ -690,10 +773,10 @@ class Monster(Actor):
     def get_score_val(self) -> int:
         return self.typedef.rarity
 
-    # resets gneration eligibility of type definition
+    # resets generation eligibility of type definition
     def update_gen_eligible(self, is_new_mon: bool, force_reset: bool):
         """
-        This function updates the generation eligibility of this monsters type definition.
+        This function updates the generation eligibility of this monster's type definition.
         It is only intended to be called in a few circumstances:
         A) Initial generation, in which case it will be updated to False if this is a unique monster.
         B) Changing to new dungeon level, in which case the eligibility will be updated based on uniqueness and then if alive/dead.
