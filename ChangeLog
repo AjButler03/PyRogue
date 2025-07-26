@@ -4,6 +4,7 @@ v0.07 ==========================================================================
     - Implemented Item Encyclopedia for most item types
 07/25/2025
     - Items now randomly generate in the dungeon, but aren't currently interactable
+    - Starting on player inventory and equipment slots
 v0.06 ===========================================================================================================================
 07/10/2025
     - Implemented fog of war using recursive shadowcasting

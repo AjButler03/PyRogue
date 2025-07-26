@@ -168,7 +168,7 @@ class Pyrogue_Game:
     # High-level event handler for keyboard input. Will call different handlers based on current input mode, enabling / disabling those modes as necessary.
     def _on_key_press(self, event):
         key = event.keysym
-        print(f"GAME KEY INPUT: {key}")
+        # print(f"GAME KEY INPUT: {key}")
 
         # Check the current input mode and call the appropriate input handler
         if self.curr_input_mode == self.input_modes["player_turn"]:

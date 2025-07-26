@@ -222,6 +222,10 @@ class Item:
 
         # To make sure one-time bonuses can't be repeatedly applied
         self.used = False
+        
+        # Placeholder for position information
+        self.r = 0
+        self.c = 0
 
     # Determines if the item can be at this position.
     def _valid_pos(self, dungeon: Dungeon, r: int, c: int) -> bool:
@@ -517,39 +521,21 @@ class Player(Actor):
 
         # Player's memory of dungeon
         self.tmem = []
+
         # To keep track of if a given tile is currently 'visible' to the player; either true/false.
         self.visible_tiles = []
 
-    # Player specific implementation for initializing position in dungeon
-    def init_pos(self, dungeon: Dungeon, actor_map: list, r: int, c: int) -> bool:
-        # Clear the player's memory of the dungeon.
-        self.tmem = [
-            [Dungeon.Terrain.debug] * dungeon.width for _ in range(dungeon.height)
-        ]
-
-        if (
-            dungeon.valid_point(r, c)
-            and dungeon.rmap[r][c] == 0
-            and actor_map[r][c] == None
-        ):
-            self.r = r
-            self.c = c
-            actor_map[r][c] = self
-
-            # Initialize the player's memory of the dungeon
-            self._update_terrain_memory(dungeon)
-
-            return True
-        else:
-            return False
-
-    # Returns the character representation of the actor.
-    def get_char(self) -> str:
-        return "@"
-
-    # Returns a color for the character of the actor.
-    def get_color(self) -> str:
-        return "gold"
+        # Player inventory / equipment slots
+        self.inventory_size = 10  # Carry slot limit
+        self.inventory = [None for _ in range(self.inventory_size)]
+        self.weapon = None
+        self.ranged = None
+        self.offhand = None
+        self.armor = None
+        self.amulet = None
+        self.light = None
+        self.ring_r = None
+        self.ring_l = None
 
     # Gets the correct information for an octant, or part of the scan circle for player visually scanning dungeon.
     def _get_octant_transform(self, octant):
@@ -683,7 +669,56 @@ class Player(Actor):
         self.c = c
         # Update the player's knowledge of the dungeon.
         self._update_terrain_memory(dungeon)
+    
+    # Player specific implementation for initializing position in dungeon
+    def init_pos(self, dungeon: Dungeon, actor_map: list, r: int, c: int) -> bool:
+        # Clear the player's memory of the dungeon.
+        self.tmem = [
+            [Dungeon.Terrain.debug] * dungeon.width for _ in range(dungeon.height)
+        ]
 
+        if (
+            dungeon.valid_point(r, c)
+            and dungeon.rmap[r][c] == 0
+            and actor_map[r][c] == None
+        ):
+            self.r = r
+            self.c = c
+            actor_map[r][c] = self
+
+            # Initialize the player's memory of the dungeon
+            self._update_terrain_memory(dungeon)
+
+            return True
+        else:
+            return False
+
+    # Returns the character representation of the player.
+    def get_char(self) -> str:
+        return "@"
+
+    # Returns a color for the character of the actor.
+    def get_color(self) -> str:
+        return "gold"
+
+    # Attempts to pickup an item from the floor, placing in inventory.
+    # Returns True/False on success/failure.
+    def pickup_item(self, dungeon: Dungeon, item_map: list, r: int, c: int) -> bool:
+        # First check that (r, c) is a valid position within the dungeon
+        if dungeon.valid_point(r, c):
+            # Now check that there is an item present
+            item = item_map[r][c]
+            if item != None:
+                # Check that there is room in the player carry slots
+                # Fill first available slot, if there is one
+                for slot in self.inventory:
+                    if slot == None:
+                        slot = item
+                        item_map[r][c] = None
+                        # Future note for me: Will likely need to figure something out for artifacts
+
+        return False
+    
     # Turn handler for the player.
     def handle_turn(self, dungeon: Dungeon, actor_map: list, player, move: int):
         """
