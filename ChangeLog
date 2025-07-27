@@ -5,6 +5,9 @@ v0.07 ==========================================================================
 07/25/2025
     - Items now randomly generate in the dungeon, but aren't currently interactable
     - Starting on player inventory and equipment slots
+07/26/2025
+    - Items can now be 'picked up'; They are not usable/equip-able yet.
+    - Basic inventory menu for displaying stored items
 v0.06 ===========================================================================================================================
 07/10/2025
     - Implemented fog of war using recursive shadowcasting

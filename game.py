@@ -138,6 +138,7 @@ class Pyrogue_Game:
             "player_turn": 1,
             "menu_exit": 2,
             "menu_monster_list": 3,
+            "menu_inventory": 4,
         }
         self.curr_input_mode = self.input_modes["player_turn"]
 
@@ -192,7 +193,9 @@ class Pyrogue_Game:
         elif self.curr_input_mode == self.input_modes["menu_monster_list"]:
             # Calling the monster list input handler
             self._handle_mlist_input(key)
-
+        elif self.curr_input_mode == self.input_modes["menu_inventory"]:
+            # Calling the inventory menu input handler
+            self._handle_inventory_input(key)
         # Any input after end of game returns control to main menu
         if self.game_over:
             self._end_game()
@@ -263,6 +266,15 @@ class Pyrogue_Game:
                 self.need_full_rerender = True
                 self._render_frame(self.scrsize_h, self.scrsize_w)
                 return False  # Turn not over
+            elif key == "i":
+                # Enter the player inventory menu
+                self.curr_input_mode = self.input_modes["menu_inventory"]
+                self.curr_submenu = self.display_submenus["menu_inventory"]
+                self.need_submenu_rerender = True
+                self._render_inventory()
+                self._update_top_label("PAUSED")
+                print("GAME: Player inventory sub-menu activated")
+                return False  # Turn not over
             elif key == "m":
                 # Enter the monster list menu
                 self.curr_input_mode = self.input_modes["menu_monster_list"]
@@ -272,6 +284,20 @@ class Pyrogue_Game:
                 self._update_top_label("PAUSED")
                 print("GAME: Monster list sub-menu activated")
                 return False  # Turn not over
+            elif key == "p":
+                # Attempt to pickup item
+                r, c = self.player.get_pos()
+                success, item = self.player.pickup_item(
+                    self.dungeon, self.item_map, r, c
+                )
+                if success:
+                    if item.is_unique():
+                        text = "You picked up " + item.get_name()
+                    else:
+                        text = "You picked up a " + item.get_name()
+                else:
+                    text = "You are unable to pick up item"
+                self._update_top_label(text)
             elif key == "z":
                 # Rotate through distance map displays
                 if self.curr_render_mode == self.render_modes["standard"]:
@@ -405,6 +431,17 @@ class Pyrogue_Game:
             # Scroll up, but only if possible (scroll_val > 0/0)
             if scroll_val > 0.0:
                 self.submenu_canvas.yview_scroll(-1, "units")
+
+    # Handles input for the inventory submenu
+    def _handle_inventory_input(self, key):
+        if key == "Escape" or key == "i":
+            # Return to player input
+            self.curr_input_mode = self.input_modes["player_turn"]
+            self.curr_submenu = self.display_submenus["none"]
+            self.submenu_canvas.destroy()
+            self.need_full_rerender = True
+            print("GAME: Player inventory sub-menu closed")
+            self._update_top_label("")
 
     # Populates the actor_map with a dungeon size proportionate number of monsters.
     def _generate_monsters(self):
@@ -808,6 +845,113 @@ class Pyrogue_Game:
                 anchor="nw",
             )
             i += 1
+
+        # Return to previous scroll value; I.e., scroll back to where user had it before redrawing
+        self.submenu_canvas.yview_moveto(scroll_val)
+
+    # Handles creating/rendering the player inventory menu.
+    def _render_inventory(self):
+
+        lines = []
+        curr_line = 0
+        max_line_width = 0
+
+        lines.append("Inventory Slots")
+
+        # Create lines first; longest line will determine menu width
+        inventory = self.player.get_inventory_slots()
+        # Ideally isize is the same as player.get_inventory_size().
+        # In reality, this will print any extra items, enabling easier error checking.
+        isize = len(inventory)
+        print(isize)
+        for i in range(isize):
+            item = inventory[i]
+            line = ""
+
+            if item != None:
+                # Grab item name
+                line = f"{i+1:2d}: {item.get_name()} "
+            else:
+                line = f"{i+1:2d}: --- EMPTY --- "
+
+            # Check if line length is longer than previous maximum
+            length = len(line)
+            if length > max_line_width:
+                max_line_width = length
+
+            lines.append(line)
+
+        # Number of inventory slots + menu header
+        line_count = len(lines)
+        ideal_height = int((line_count + 1) * self.tile_size)
+        max_height = (self.mapsize_h - 5) * self.tile_size
+        visible_menu_height = min(ideal_height, max_height)
+
+        # Not quite the whole screen width
+        menu_width = min(
+            self.tile_size * (self.mapsize_w - 3),
+            (self.tile_size // 1.85) * max_line_width,
+        )
+
+        # Attempt to grab current y scroll value to return to it
+        try:
+            scroll_val = self.submenu_canvas.yview()[0]
+        except (tk.TclError, IndexError, AttributeError):
+            scroll_val = 0.0  # Revert to zero
+
+        # Determine if full canvas redraw needed
+        if self.need_submenu_rerender:
+            if self.submenu_canvas:
+                self.submenu_canvas.destroy()
+
+            self.submenu_canvas = tk.Canvas(
+                self.canvas,
+                height=visible_menu_height,
+                width=menu_width,
+                bg="black",
+                highlightthickness=self.tile_size // 6,
+                yscrollincrement=self.tile_size,
+            )
+
+            self.canvas.create_window(
+                self.scrsize_w // 2,
+                (self.tile_size * self.mapsize_h // 2),
+                height=visible_menu_height,
+                width=menu_width,
+                window=self.submenu_canvas,
+                anchor="center",
+            )
+
+            # Init canvas' ability to scroll
+            self.submenu_canvas.config(
+                scrollregion=(0, 0, menu_width, ideal_height - self.tile_size)
+            )
+
+        # Draw menu header
+        offset = self.tile_size // 2
+        self.submenu_canvas.create_text(
+            menu_width // 2,
+            int(offset * 1.5),
+            text=lines[curr_line],
+            fill="red",
+            font=(self.def_font, self.font_size),
+            tag="inventory_header",
+            anchor="center",
+        )
+        curr_line += 1
+
+        # Draw remaining lines
+        while curr_line < line_count:
+            self.submenu_canvas.create_text(
+                offset,
+                offset + (self.tile_size * (curr_line)),
+                text=lines[curr_line],
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag=f"inventory_slot_{curr_line}",
+                anchor="nw",
+            )
+            curr_line += 1
 
         # Return to previous scroll value; I.e., scroll back to where user had it before redrawing
         self.submenu_canvas.yview_moveto(scroll_val)

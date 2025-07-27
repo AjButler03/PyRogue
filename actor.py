@@ -222,7 +222,7 @@ class Item:
 
         # To make sure one-time bonuses can't be repeatedly applied
         self.used = False
-        
+
         # Placeholder for position information
         self.r = 0
         self.c = 0
@@ -257,6 +257,9 @@ class Item:
     # Returns the single character to represent this item in the dungeon.
     def get_char(self):
         return self.typedef.get_symb()
+
+    def get_name(self):
+        return self.typedef.get_name()
 
     # Returns a str keyword for a single Tkinter color.
     def get_color(self):
@@ -511,7 +514,7 @@ class Player(Actor):
         self.speed = 10
         # Define the player as alive
         self.alive = True
-        self.hp = 200
+        self.hp = 9999
 
         # Base damage for the player, assuming that it has no other weapons
         # This is heavily buffed until weapons are implemented.
@@ -669,7 +672,7 @@ class Player(Actor):
         self.c = c
         # Update the player's knowledge of the dungeon.
         self._update_terrain_memory(dungeon)
-    
+
     # Player specific implementation for initializing position in dungeon
     def init_pos(self, dungeon: Dungeon, actor_map: list, r: int, c: int) -> bool:
         # Clear the player's memory of the dungeon.
@@ -701,6 +704,14 @@ class Player(Actor):
     def get_color(self) -> str:
         return "gold"
 
+    # Returns the player's inventory size
+    def get_inventory_size(self) -> int:
+        return self.inventory_size
+
+    # Returns the player's inventory list.
+    def get_inventory_slots(self) -> list:
+        return self.inventory
+
     # Attempts to pickup an item from the floor, placing in inventory.
     # Returns True/False on success/failure.
     def pickup_item(self, dungeon: Dungeon, item_map: list, r: int, c: int) -> bool:
@@ -711,14 +722,16 @@ class Player(Actor):
             if item != None:
                 # Check that there is room in the player carry slots
                 # Fill first available slot, if there is one
-                for slot in self.inventory:
+                for slot_idx in range(self.inventory_size):
+                    slot = self.inventory[slot_idx]
                     if slot == None:
-                        slot = item
+                        self.inventory[slot_idx] = item
                         item_map[r][c] = None
+                        return True, item
                         # Future note for me: Will likely need to figure something out for artifacts
 
-        return False
-    
+        return False, None
+
     # Turn handler for the player.
     def handle_turn(self, dungeon: Dungeon, actor_map: list, player, move: int):
         """
