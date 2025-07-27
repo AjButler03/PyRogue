@@ -1,24 +1,68 @@
 PYROGUE ITEM DESCRIPTION FILE
 
+A couple of notes: any lines not contained between "BEGIN ITEM" and "END" will be ignored. So, comments like this are possible.
+Items will have all of the fields listed below. Playing around will give you a good idea of how these are defined and work within the dungeon.
+Probably the most initially confusing aspect will be dice, and how they are defined in this file.
+Dice act to randomize the aspects of items, and are expressed like 10+2d6, i.e., {base value}+{number of dice / dice rolls}d{Sides to die}.
+
+Other note: COLOR can be specified as multiple colors, which will be randomly looped between. They just need to be any valid Tkinter color keyword.
+
+I have also attempted to group the different item types into their own categories.
+
+
+============================== WEAPON definitions
+
 BEGIN ITEM
-NAME a NERF(R) dagger
+NAME Dagger
 TYPE WEAPON
-COLOR magenta
+COLOR gray
+DODGE 0+0d1
+DAM 5+1d5
+DEF 2+0d1
 HIT 0+0d1
-DAM 0+0d1
-ATTR 0+0d1
-DODGE 10+0d1
-DEF 0+0d1
-SPEED 0+0d1
+SPEED 5+0d1
 DESC
-This is a totally wicked looking dagger.  It's got awesome barbs on the back
-of the blade, a compass on the hilt, and myriad other embellishments that
-serve no functional purpose.  You could totally be a deadly assassin with a
-sweet blade like this.  Since it's so light, it won't encumber you.  It's
-made out of polyurethane foam.
+A simple belt dagger.
+It can't do too much, but it's better than your bare hands.
 .
-RRTY 90
+ATTR 0+0d1
+RRTY 10
 ART FALSE
+END
+
+BEGIN ITEM
+NAME Iron Sword
+TYPE WEAPON
+COLOR white
+DODGE 0+0d1
+DAM 10+1d10
+DEF 10+0d1
+HIT 5+0d1
+SPEED 5+0d1
+DESC
+Your basic sword.
+Nothing special, but it should get the job done.
+.
+ATTR 0+0d1
+RRTY 10
+ART FALSE
+END
+
+BEGIN ITEM
+NAME Sting
+TYPE WEAPON
+COLOR blue
+DODGE 0+0d1
+DAM 10+15d30
+DEF 10+0d1
+HIT 10+0d1
+SPEED 5+0d1
+DESC
+A magical, elven blade, it glows blue when orcs are near.
+.
+ATTR 10+0d1
+RRTY 80
+ART TRUE
 END
 
 BEGIN ITEM
@@ -40,6 +84,133 @@ ART TRUE
 END
 
 BEGIN ITEM
+NAME Mjolnir
+TYPE WEAPON
+COLOR green
+DODGE 10+10d10
+DAM 10+500d10
+DEF 100+0d1
+HIT 100+0d1
+SPEED 10+0d1
+DESC
+The hammer of Thor, one of the most fearsome and powerful weapons in
+existence, capable of leveling mountains.
+.
+ATTR 10+0d1
+RRTY 50
+ART TRUE
+END
+
+============================== RANGED definitions
+
+BEGIN ITEM
+NAME the Halo 1 pistol
+TYPE RANGED
+COLOR gray
+DODGE 15+0d1
+DAM 100+10d500
+DEF 25+0d1
+HIT 75+0d1
+SPEED 10+0d1
+DESC
+Two for the shields, one for the head.
+Piss your friends off today!
+.
+ATTR 1+0d1
+RRTY 75
+ART TRUE
+END
+
+BEGIN ITEM
+NAME Battle Rifle
+TYPE RANGED
+COLOR white
+DODGE 5+0d1
+DAM 15+3d10
+DEF 10+0d1
+HIT 15+0d1
+SPEED 0+0d1
+DESC
+Standard UNSC issue.
+.
+ATTR 1+0d1
+RRTY 50
+ART FALSE
+END
+
+BEGIN ITEM
+NAME Minecraft Bow
+TYPE RANGED
+COLOR cyan
+DODGE 2+0d1
+DAM 20+1d10
+DEF 5+0d1
+HIT 2+0d1
+SPEED 0+0d1
+DESC
+This thing is already enchanted and everything. You just have to use it.
+.
+ATTR 1+0d1
+RRTY 25
+ART FALSE
+END
+
+BEGIN ITEM
+NAME Anti-Material Rifle (AMR)
+TYPE RANGED
+COLOR red
+DODGE 0+0d1
+DAM 250+15d750
+DEF 25+0d1
+HIT 75+0d1
+SPEED 0+0d1
+DESC
+They told you the game was rigged from the start; so you responded with this.
+.
+ATTR 1+0d1
+RRTY 95
+ART TRUE
+END
+
+============================== OFFHAND definitions
+
+BEGIN ITEM
+NAME Wooden Shield
+DESC
+What appears to be a training shield left behind long ago.
+It won't block a whole lot, but it's better than nothing.
+.
+TYPE OFFHAND
+HIT 0+0d1
+DAM 0+0d1
+DODGE 5+3d3
+ATTR 0+0d1
+DEF 5+3d3
+SPEED 0+0d1
+COLOR gray
+RRTY 20
+ART FALSE
+END
+
+BEGIN ITEM
+NAME Knight's shield
+DESC
+An iron shield you found on the remains of a knight. 
+It's still in great condition, although it didn't save its previous owner.
+.
+TYPE OFFHAND
+HIT 0+0d1
+DAM 0+0d1
+DODGE 10+5d5
+ATTR 0+0d1
+DEF 20+5d5
+SPEED 0+0d1
+COLOR white
+RRTY 40
+ART FALSE
+END
+
+BEGIN ITEM
 NAME the Aegis
 DESC
 A very high-quality shield.  Nobody knows what it looks like, except for
@@ -58,81 +229,81 @@ RRTY 30
 ART TRUE
 END
 
+============================== ARMOR definitions
+
 BEGIN ITEM
-NAME the One Ring
-TYPE RING
-COLOR yellow
-DODGE 50+6d8
-DEF 50+6d8
-ATTR 0+0d1
-HIT 10+2d5
-DAM 10+12d55
-SPEED 25+5d5
+NAME Fatigues
 DESC
-The One Ring to rule them all... and in the darkness bind them.  Created by
-Sauron as a tool in his quest to dominate Middle Earth.  It draws the dark
-sorcerer's eye upon its wearer.
+Durable and simple.
 .
-RRTY 3
-ART TRUE
-END
-
-
-BEGIN ITEM
-NAME a torch
-TYPE LIGHT
-COLOR white
-DODGE 0+0d1
-DAM 0+0d1
-DEF 0+0d1
+TYPE ARMOR
 HIT 0+0d1
+DAM 0+0d1
+DODGE 0+1d3
+ATTR 0+0d1
+DEF 3+1d3
 SPEED 0+0d1
-DESC
-A short wooden stick topped with an oil-soaked cloth, perfect for lighting
-your way through the dungeon.
-.
-ATTR 0+1d3
-RRTY 100
+COLOR gray
+RRTY 10
 ART FALSE
 END
 
 BEGIN ITEM
-NAME a Wicked Lasers(R) Torch
-TYPE LIGHT
-COLOR white
-DODGE 0+0d1
-DAM 0+0d1
-DEF 0+0d1
-HIT 0+0d1
-SPEED 0+0d1
+NAME Kevlar vest
 DESC
-From the makers of the world's most refined lasers, comes the ultimate in
-handheld flashlights. The Flashtorch is a compact, portable searchlight that
-is capable of producing an incredible 4100 lumens of intense white light. Use
-this power to guide your way home, light a fire, or even fry an egg!
+Seems offly new to be in this dungeon.
+However it got here, you just apreciate the protection.
 .
-ATTR 200+0d1
+TYPE ARMOR
+HIT 0+0d1
+DAM 0+0d1
+DODGE 5+1d3
+ATTR 0+0d1
+DEF 10+1d8
+SPEED 5+0d1
+COLOR gray
 RRTY 30
 ART FALSE
 END
 
 BEGIN ITEM
-NAME the Moon Stick
-TYPE OFFHAND
-COLOR magenta
-DODGE 10+0d1
-DAM 25+0d1
-DEF 100+0d1
-HIT 0+0d1
-SPEED 0+0d1
+NAME Knight's armor
 DESC
-Sailor Moon's Moon Stick.  Maybe you can use it to do Moon Princess Halation?
-But she's probably looking for it.
+An intact suit of armor you find on the corpse of a knight.
+It definitely won't make you faster, but you'll be able to tank some hits.
 .
-ATTR 200+0d1
-RRTY 25
-ART TRUE
+TYPE ARMOR
+HIT 0+0d1
+DAM 0+0d1
+DODGE 3+1d3
+ATTR 0+0d1
+DEF 25+2d20
+SPEED 0+0d1
+COLOR white
+RRTY 50
+ART FALSE
 END
+
+BEGIN ITEM
+NAME HEV Mk. V Suit
+DESC
+The previous wearer should have worked at Aperature; 
+because they are not, in fact, still alive.
+.
+TYPE ARMOR
+HIT 0+0d1
+DAM 0+0d1
+DODGE 10+3d20
+ATTR 0+0d1
+DEF 75+3d20
+SPEED 10+2d20
+COLOR orange
+RRTY 75
+ART FALSE
+END
+
+
+============================== RING definitions
 
 BEGIN ITEM
 NAME a ring of speed
@@ -169,37 +340,57 @@ ART FALSE
 END
 
 BEGIN ITEM
-NAME Mjolnir
-TYPE WEAPON
-COLOR green
-DODGE 10+10d10
-DAM 10+500d10
-DEF 100+0d1
-HIT 100+0d1
-SPEED 10+0d1
+NAME the One Ring
+TYPE RING
+COLOR yellow
+DODGE 50+6d8
+DEF 50+6d8
+ATTR 0+0d1
+HIT 10+2d5
+DAM 10+12d55
+SPEED 25+5d5
 DESC
-The hammer of Thor, one of the most fearsome and powerful weapons in
-existence, capable of leveling mountains.
+The One Ring to rule them all... and in the darkness bind them.  Created by
+Sauron as a tool in his quest to dominate Middle Earth.  It draws the dark
+sorcerer's eye upon its wearer.
 .
-ATTR 10+0d1
-RRTY 50
+RRTY 3
 ART TRUE
 END
 
+============================== AMULET definitions
+
 BEGIN ITEM
-NAME Sting
-TYPE WEAPON
-COLOR blue
-DODGE 0+0d1
-DAM 10+15d30
-DEF 10+0d1
-HIT 10+0d1
-SPEED 5+0d1
+NAME Amulet of speed
+TYPE AMULET
+COLOR red
+DODGE 10+5d20
+DAM 0+0d1
+DEF 0+0d1
+HIT 0+0d1
+SPEED 25+5d20
 DESC
-A magical, elven blade, it glows blue when orcs are near.
+A stylish chain with a big stone that will make you more nimble.
 .
-ATTR 10+0d1
-RRTY 80
+ATTR 0+0d1
+RRTY 50
+ART FALSE
+END
+
+BEGIN ITEM
+NAME Amulet of damage
+TYPE AMULET
+COLOR cyan
+DODGE 0+0d1
+DAM 10+3d6
+DEF 0+0d1
+HIT 0+0d1
+SPEED 0+0d1
+DESC
+A stylish chain with a big stone that will make you more lethal.
+.
+ATTR 0+0d1
+RRTY 50
 ART TRUE
 END
 
@@ -223,57 +414,115 @@ RRTY 80
 ART TRUE
 END
 
+============================== LIGHT definitions
+
 BEGIN ITEM
-NAME Amulet of damage
-TYPE AMULET
-COLOR red
+NAME torch
+TYPE LIGHT
+COLOR white
 DODGE 0+0d1
-DAM 10+3d6
+DAM 0+0d1
 DEF 0+0d1
 HIT 0+0d1
 SPEED 0+0d1
 DESC
-A 56 carat diamond was originally owned by Louis XVI and cut into a heart
-shape after the French Revolution.  Last known whereabouts: Bottom of the
-Atlantic Ocean (thanks, Rose).  Little did she know, it's imbued with
-fantastic magical powers!
+A short wooden stick topped with an oil-soaked cloth, perfect for lighting
+your way through the dungeon.
 .
-ATTR 0+0d1
-RRTY 80
-ART TRUE
+ATTR 0+1d3
+RRTY 100
+ART FALSE
 END
 
 BEGIN ITEM
-NAME the Halo 1 pistol
-TYPE WEAPON
-COLOR gray
-DODGE 15+0d1
-DAM 100+10d500
-DEF 25+0d1
-HIT 75+0d1
-SPEED 10+0d1
-DESC
-Two for the shields, one for the head.
-Piss your friends off today!
-.
-ATTR 1+0d1
-RRTY 75
-ART TRUE
-END
-
-BEGIN ITEM
-NAME Battle Rifle
-TYPE RANGED
-COLOR gray
-DODGE 5+0d1
-DAM 15+3d10
-DEF 10+0d1
-HIT 15+0d1
+NAME Wicked Lasers(R) Flashlight
+TYPE LIGHT
+COLOR yellow
+DODGE 0+0d1
+DAM 0+0d1
+DEF 0+0d1
+HIT 0+0d1
 SPEED 0+0d1
 DESC
-Standard UNSC issue.
+From the makers of the world's most refined lasers, comes the ultimate in
+handheld flashlights. The Flashtorch is a compact, portable searchlight that
+is capable of producing an incredible 4100 lumens of intense white light. Use
+this power to guide your way home, light a fire, or even fry an egg!
 .
-ATTR 1+0d1
-RRTY 50
+ATTR 3+3d5
+RRTY 30
 ART FALSE
+END
+
+BEGIN ITEM
+NAME a Modern Car LED Headlight
+TYPE LIGHT
+COLOR orange
+DODGE 0+0d1
+DAM 0+0d1
+DEF 0+0d1
+HIT 0+0d1
+SPEED 0+0d1
+DESC
+Does a fantastic job lighting up your surroundings.
+As a bonus, it probably blinds everyone around you!
+.
+ATTR 10+3d10
+RRTY 95
+ART FALSE
+END
+
+============================== POTION definitions
+
+BEGIN ITEM
+NAME Potion of healing
+TYPE POTION
+COLOR red
+DODGE 0+0d1
+DAM 0+0d1
+DEF 0+0d1
+HIT 5+1d20
+SPEED 0+0d1
+DESC
+A potion that will heal your wounds, restoring you to former glory.
+Restores hitpoints for specified amount, or up to hit point capacity.
+.
+ATTR 0+0d1
+RRTY 25
+ART FALSE
+END
+
+BEGIN ITEM
+NAME Potion of fortitude
+TYPE POTION
+COLOR cyan
+DODGE 0+0d1
+DAM 0+0d1
+DEF 0+3d20
+HIT 5+1d20
+SPEED 0+0d1
+DESC
+A potion that heals your wounds, but also earns you advanced endurance.
+Restores hit points and increases hit point capacity.
+.
+ATTR 5+1d20
+RRTY 75
+ART FALSE
+END
+
+BEGIN ITEM
+NAME God Potion
+TYPE POTION
+COLOR gold
+DODGE 500+0d1
+DAM 0+0d1
+DEF 500+0d1
+HIT 500+0d1
+SPEED 500+0d1
+DESC
+Does this need explanation?
+.
+ATTR 500+0d1
+RRTY 99
+ART True
 END

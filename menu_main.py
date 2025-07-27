@@ -1038,7 +1038,7 @@ class Menu_Main:
         itype = itypedef.get_type()
         if itype == item_type_opts["POTION"]:
             # Hit Point Restore
-            text = "HP RESTORE:        " + hp_restore_str
+            text = "HITPOINT RESTORE:  " + hp_restore_str
             self.window_canvas.create_text(
                 offset,
                 curr_line * tile_size,
@@ -1051,7 +1051,7 @@ class Menu_Main:
             curr_line += 1
 
             # MAX HIT POINT BONUS
-            text = "MAX HP BONUS:      " + attr_str
+            text = "HP CAP BONUS:      " + attr_str
             self.window_canvas.create_text(
                 offset,
                 curr_line * tile_size,
@@ -1059,6 +1059,45 @@ class Menu_Main:
                 fill="white",
                 font=(self.def_font, self.font_size),
                 tag="itemencyc_hp_b",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # speed
+            text = "SPEED BONUS:       " + speed_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_spd",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # Dodge
+            text = "DODGE BONUS:       " + dodge_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_dodge",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # Defense
+            text = "DEFENSE BONUS:     " + defense_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_def",
                 anchor="nw",
             )
             curr_line += 1

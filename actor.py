@@ -141,7 +141,7 @@ class Item_Typedef:
         return str(self.attr_dice)
 
     def get_defense_str(self) -> str:
-        return str(self.damage_dice)
+        return str(self.defense_dice)
 
     def get_dodge_str(self) -> str:
         return str(self.dodge_dice)

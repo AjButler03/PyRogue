@@ -1,7 +1,12 @@
 PYROGUE MONSTER DESCRIPTION FILE
 
-Note 1: The color fields in this file will be parsed as keystrings for the Python Tkinter library's color options.
-Note 2: Multiple colors can be specified; the game will randomly rotate between them.
+A couple of notes: any lines not contained between "BEGIN MONSTER" and "END" will be ignored. So, comments like this are possible.
+Monsters will have all of the fields listed below. Playing around will give you a good idea of how these are defined and work within the dungeon.
+
+Probably the most initially confusing aspect will be dice, and how they are defined in this file.
+Dice act to randomize the aspects of monsters, and are expressed like 10+2d6, i.e., {base value}+{number of dice / dice rolls}d{Sides to die}.
+
+Other note: COLOR can be specified as multiple colors, which will be randomly looped between. They just need to be any valid Tkinter color keyword.
 
 BEGIN MONSTER
 NAME Junior Barbarian
