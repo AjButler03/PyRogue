@@ -10,6 +10,9 @@ v0.07 ==========================================================================
     - Basic inventory menu for displaying stored items
 07/27/2025
     - Changed information displayed for potions in item encyclopedia
+07/28/2025
+    - Can now select between inventory slots; will be able to equip/use items by selection
+    - Starting on equipment menu
 v0.06 ===========================================================================================================================
 07/10/2025
     - Implemented fog of war using recursive shadowcasting

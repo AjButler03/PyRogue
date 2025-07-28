@@ -271,6 +271,7 @@ class Pyrogue_Game:
                 self.curr_input_mode = self.input_modes["menu_inventory"]
                 self.curr_submenu = self.display_submenus["menu_inventory"]
                 self.need_submenu_rerender = True
+                self.submenu_select_idx = 0
                 self._render_inventory()
                 self._update_top_label("PAUSED")
                 print("GAME: Player inventory sub-menu activated")
@@ -442,6 +443,22 @@ class Pyrogue_Game:
             self.need_full_rerender = True
             print("GAME: Player inventory sub-menu closed")
             self._update_top_label("")
+        elif key == "j" or key == "Down" or key == "2":
+            # Move selection down
+            if self.submenu_select_idx < self.player.get_inventory_size() - 1:
+                self.submenu_select_idx += 1
+            else:
+                self.submenu_select_idx = 0
+            self.need_submenu_rerender = True
+            self._render_inventory()
+        elif key == "k" or key == "Up" or key == "8":
+            # Move selection up
+            if self.submenu_select_idx >= 1:
+                self.submenu_select_idx -= 1
+            else:
+                self.submenu_select_idx = self.player.get_inventory_size() - 1
+            self.need_submenu_rerender = True
+            self._render_inventory()
 
     # Populates the actor_map with a dungeon size proportionate number of monsters.
     def _generate_monsters(self):
@@ -853,17 +870,17 @@ class Pyrogue_Game:
     def _render_inventory(self):
 
         lines = []
-        curr_line = 0
-        max_line_width = 0
-
+        line_colors = []
         lines.append("Inventory Slots")
+        line_colors.append("red")
+        curr_line = 0
+        max_line_width = 22  # Minimum based on "00: --- EMPTY --- <-- "
 
         # Create lines first; longest line will determine menu width
         inventory = self.player.get_inventory_slots()
         # Ideally isize is the same as player.get_inventory_size().
         # In reality, this will print any extra items, enabling easier error checking.
         isize = len(inventory)
-        print(isize)
         for i in range(isize):
             item = inventory[i]
             line = ""
@@ -871,15 +888,98 @@ class Pyrogue_Game:
             if item != None:
                 # Grab item name
                 line = f"{i+1:2d}: {item.get_name()} "
+
+                # Check if line length is longer than previous maximum
+                length = len(line) + 3
+                if length > max_line_width:
+                    max_line_width = length
+
+                # Add arrow and gold color if current select IDX
+                if self.submenu_select_idx == i:
+                    line = line + "<-- "
+                    line_colors.append("gold")
+                else:
+                    line_colors.append("white")
             else:
                 line = f"{i+1:2d}: --- EMPTY --- "
+                line_colors.append("gray")
 
-            # Check if line length is longer than previous maximum
-            length = len(line)
-            if length > max_line_width:
-                max_line_width = length
-
+                # Add arrow if current select IDX
+                if self.submenu_select_idx == i:
+                    line = line + "<-- "
             lines.append(line)
+
+        # Number of inventory slots + menu header
+        line_count = len(lines)
+        ideal_height = int((line_count + 1) * self.tile_size)
+        max_height = (self.mapsize_h - 5) * self.tile_size
+        visible_menu_height = min(ideal_height, max_height)
+
+        # Not quite the whole screen width
+        menu_width = min(
+            self.tile_size * (self.mapsize_w - 3),
+            (self.tile_size // 1.85) * max_line_width,
+        )
+
+        # Determine if full canvas redraw needed
+        if self.need_submenu_rerender:
+            if self.submenu_canvas:
+                self.submenu_canvas.destroy()
+
+            self.submenu_canvas = tk.Canvas(
+                self.canvas,
+                height=visible_menu_height,
+                width=menu_width,
+                bg="black",
+                highlightthickness=self.tile_size // 6,
+                yscrollincrement=self.tile_size,
+            )
+
+            self.canvas.create_window(
+                self.scrsize_w // 2,
+                (self.tile_size * self.mapsize_h // 2),
+                height=visible_menu_height,
+                width=menu_width,
+                window=self.submenu_canvas,
+                anchor="center",
+            )
+
+        # Draw menu header
+        offset = self.tile_size // 2
+        self.submenu_canvas.create_text(
+            menu_width // 2,
+            int(offset * 1.5),
+            text=lines[curr_line],
+            fill="red",
+            font=(self.def_font, self.font_size),
+            tag="inventory_header",
+            anchor="center",
+        )
+        curr_line += 1
+
+        # Draw remaining lines
+        while curr_line < line_count:
+            self.submenu_canvas.create_text(
+                offset,
+                offset + (self.tile_size * (curr_line)),
+                text=lines[curr_line],
+                fill=line_colors[curr_line],
+                font=(self.def_font, self.font_size),
+                tag=f"inventory_slot_{curr_line}",
+                anchor="nw",
+            )
+            curr_line += 1
+
+    # Handles creating/rendering the player equipment menu.
+    def _render_equipment(self):
+        return
+        lines = []
+        curr_line = 0
+        max_line_width = 0
+
+        lines.append("Equipment Slots")
+
+        # Create lines first; longest line will determine menu width
 
         # Number of inventory slots + menu header
         line_count = len(lines)
@@ -955,6 +1055,7 @@ class Pyrogue_Game:
 
         # Return to previous scroll value; I.e., scroll back to where user had it before redrawing
         self.submenu_canvas.yview_moveto(scroll_val)
+        pass
 
     # Renders the dungeon to the screen canvas.
     def _render_frame(self, height, width):
