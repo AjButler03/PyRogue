@@ -139,6 +139,7 @@ class Pyrogue_Game:
             "menu_exit": 2,
             "menu_monster_list": 3,
             "menu_inventory": 4,
+            "menu_equipment": 5,
         }
         self.curr_input_mode = self.input_modes["player_turn"]
 
@@ -196,6 +197,9 @@ class Pyrogue_Game:
         elif self.curr_input_mode == self.input_modes["menu_inventory"]:
             # Calling the inventory menu input handler
             self._handle_inventory_input(key)
+        elif self.curr_input_mode == self.input_modes["menu_equipment"]:
+            # Calling the equipment menu input handler
+            self._handle_equipment_input(key)
         # Any input after end of game returns control to main menu
         if self.game_over:
             self._end_game()
@@ -253,6 +257,16 @@ class Pyrogue_Game:
                 else:
                     message = "You can't escape from here; no staircase"
                     self._update_top_label(message)
+            elif key == "e":
+                # Enter the player equipment menu
+                self.curr_input_mode = self.input_modes["menu_equipment"]
+                self.curr_submenu = self.display_submenus["menu_equipment"]
+                self.need_submenu_rerender = True
+                self.submenu_select_idx = 0
+                self._render_equipment()
+                self._update_top_label("PAUSED")
+                print("GAME: Player equipment sub-menu activated")
+                return False  # Turn not over
             elif key == "f":
                 # Toggle fog of war
                 if self.curr_render_mode == self.render_modes["standard"]:
@@ -459,6 +473,33 @@ class Pyrogue_Game:
                 self.submenu_select_idx = self.player.get_inventory_size() - 1
             self.need_submenu_rerender = True
             self._render_inventory()
+
+    # Handles input for the equipment submenu
+    def _handle_equipment_input(self, key):
+        if key == "Escape" or key == "i":
+            # Return to player input
+            self.curr_input_mode = self.input_modes["player_turn"]
+            self.curr_submenu = self.display_submenus["none"]
+            self.submenu_canvas.destroy()
+            self.need_full_rerender = True
+            print("GAME: Player equipment sub-menu closed")
+            self._update_top_label("")
+        elif key == "j" or key == "Down" or key == "2":
+            # Move selection down
+            if self.submenu_select_idx < 7:
+                self.submenu_select_idx += 1
+            else:
+                self.submenu_select_idx = 0
+            self.need_submenu_rerender = True
+            self._render_equipment()
+        elif key == "k" or key == "Up" or key == "8":
+            # Move selection up
+            if self.submenu_select_idx >= 1:
+                self.submenu_select_idx -= 1
+            else:
+                self.submenu_select_idx = 7
+            self.need_submenu_rerender = True
+            self._render_equipment()
 
     # Populates the actor_map with a dungeon size proportionate number of monsters.
     def _generate_monsters(self):
@@ -698,7 +739,7 @@ class Pyrogue_Game:
         )
         self.canvas.create_window(
             self.scrsize_w // 2,
-            (self.tile_size * self.mapsize_h // 2),
+            (self.tile_size * self.mapsize_h // 2) + self.tile_size,
             height=menu_height,
             width=menu_width,
             window=self.submenu_canvas,
@@ -779,7 +820,7 @@ class Pyrogue_Game:
 
         # Number of monsters + menu header
         ideal_height = int((len(self.monster_list) + 2) * self.tile_size)
-        max_height = (self.mapsize_h - 5) * self.tile_size
+        max_height = (self.mapsize_h - 3) * self.tile_size
         visible_menu_height = min(ideal_height, max_height)
 
         # Not quite the whole screen width
@@ -810,7 +851,7 @@ class Pyrogue_Game:
 
             self.canvas.create_window(
                 self.scrsize_w // 2,
-                (self.tile_size * self.mapsize_h // 2),
+                (self.tile_size * self.mapsize_h // 2) + self.tile_size,
                 height=visible_menu_height,
                 width=menu_width,
                 window=self.submenu_canvas,
@@ -912,7 +953,7 @@ class Pyrogue_Game:
         # Number of inventory slots + menu header
         line_count = len(lines)
         ideal_height = int((line_count + 1) * self.tile_size)
-        max_height = (self.mapsize_h - 5) * self.tile_size
+        max_height = (self.mapsize_h - 3) * self.tile_size
         visible_menu_height = min(ideal_height, max_height)
 
         # Not quite the whole screen width
@@ -937,7 +978,7 @@ class Pyrogue_Game:
 
             self.canvas.create_window(
                 self.scrsize_w // 2,
-                (self.tile_size * self.mapsize_h // 2),
+                (self.tile_size * self.mapsize_h // 2) + self.tile_size,
                 height=visible_menu_height,
                 width=menu_width,
                 window=self.submenu_canvas,
@@ -972,19 +1013,68 @@ class Pyrogue_Game:
 
     # Handles creating/rendering the player equipment menu.
     def _render_equipment(self):
-        return
         lines = []
-        curr_line = 0
-        max_line_width = 0
-
+        line_colors = []
         lines.append("Equipment Slots")
+        line_colors.append("red")
+        curr_line = 0
+        max_line_width = 21  # Minimum based on "RING RIGHT: None <-- "
 
-        # Create lines first; longest line will determine menu width
+        start_str = {
+            0: "WEAPON: ",
+            1: "RANGED: ",
+            2: "OFFHAND: ",
+            3: "ARMOR: ",
+            4: "AMULET: ",
+            5: "RING LEFT: ",
+            6: "RING RIGHT: ",
+            7: "LIGHT: ",
+        }
 
-        # Number of inventory slots + menu header
+        equipped_items = {
+            0: self.player.get_weapon(),
+            1: self.player.get_ranged(),
+            2: self.player.get_offhand(),
+            3: self.player.get_armor(),
+            4: self.player.get_amulet(),
+            5: self.player.get_ring_l(),
+            6: self.player.get_ring_r(),
+            7: self.player.get_light(),
+        }
+
+        # Create lines first; longest line will determine menu width. 8 equipment slots.
+        for i in range(8):
+            item = equipped_items[i]
+            line = ""
+
+            if item != None:
+                # Grab item name
+                line = f"{start_str[i]}{item.get_name()} "
+
+                # Check if line length is longer than previous maximum
+                length = len(line) + 3
+                if length > max_line_width:
+                    max_line_width = length
+
+                # Add arrow and gold color if current select IDX
+                if self.submenu_select_idx == i:
+                    line = line + "<-- "
+                    line_colors.append("gold")
+                else:
+                    line_colors.append("white")
+            else:
+                line = f"{start_str[i]}None "
+                line_colors.append("gray")
+
+                # Add arrow if current select IDX
+                if self.submenu_select_idx == i:
+                    line = line + "<-- "
+            lines.append(line)
+
+        # Number of equipment slots + menu header
         line_count = len(lines)
         ideal_height = int((line_count + 1) * self.tile_size)
-        max_height = (self.mapsize_h - 5) * self.tile_size
+        max_height = (self.mapsize_h - 3) * self.tile_size
         visible_menu_height = min(ideal_height, max_height)
 
         # Not quite the whole screen width
@@ -992,12 +1082,6 @@ class Pyrogue_Game:
             self.tile_size * (self.mapsize_w - 3),
             (self.tile_size // 1.85) * max_line_width,
         )
-
-        # Attempt to grab current y scroll value to return to it
-        try:
-            scroll_val = self.submenu_canvas.yview()[0]
-        except (tk.TclError, IndexError, AttributeError):
-            scroll_val = 0.0  # Revert to zero
 
         # Determine if full canvas redraw needed
         if self.need_submenu_rerender:
@@ -1015,16 +1099,11 @@ class Pyrogue_Game:
 
             self.canvas.create_window(
                 self.scrsize_w // 2,
-                (self.tile_size * self.mapsize_h // 2),
+                (self.tile_size * self.mapsize_h // 2) + self.tile_size,
                 height=visible_menu_height,
                 width=menu_width,
                 window=self.submenu_canvas,
                 anchor="center",
-            )
-
-            # Init canvas' ability to scroll
-            self.submenu_canvas.config(
-                scrollregion=(0, 0, menu_width, ideal_height - self.tile_size)
             )
 
         # Draw menu header
@@ -1035,7 +1114,7 @@ class Pyrogue_Game:
             text=lines[curr_line],
             fill="red",
             font=(self.def_font, self.font_size),
-            tag="inventory_header",
+            tag="equip_header",
             anchor="center",
         )
         curr_line += 1
@@ -1048,14 +1127,10 @@ class Pyrogue_Game:
                 text=lines[curr_line],
                 fill="white",
                 font=(self.def_font, self.font_size),
-                tag=f"inventory_slot_{curr_line}",
+                tag=f"equip_slot_{curr_line}",
                 anchor="nw",
             )
             curr_line += 1
-
-        # Return to previous scroll value; I.e., scroll back to where user had it before redrawing
-        self.submenu_canvas.yview_moveto(scroll_val)
-        pass
 
     # Renders the dungeon to the screen canvas.
     def _render_frame(self, height, width):

@@ -712,6 +712,30 @@ class Player(Actor):
     def get_inventory_slots(self) -> list:
         return self.inventory
 
+    def get_weapon(self):
+        return self.weapon
+
+    def get_ranged(self):
+        return self.ranged
+
+    def get_offhand(self):
+        return self.offhand
+
+    def get_armor(self):
+        return self.armor
+
+    def get_amulet(self):
+        return self.amulet
+
+    def get_ring_l(self):
+        return self.ring_l
+
+    def get_ring_r(self):
+        return self.ring_r
+
+    def get_light(self):
+        return self.light
+
     # Attempts to pickup an item from the floor, placing in inventory.
     # Returns True/False on success/failure.
     def pickup_item(self, dungeon: Dungeon, item_map: list, r: int, c: int) -> bool:

@@ -37,5 +37,5 @@ Descriptions of the attributes that the monsters can have (Those that are implem
     - PASS: Monster can traverse through rock without drilling or creating new path.
 
 Known Issues:
-  - None Known
+  - Item encyclopedia does not scroll correctly when the screen is resized smaller than default.
 
