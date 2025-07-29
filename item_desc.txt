@@ -449,7 +449,7 @@ handheld flashlights. The Flashtorch is a compact, portable searchlight that
 is capable of producing an incredible 4100 lumens of intense white light. Use
 this power to guide your way home, light a fire, or even fry an egg!
 .
-ATTR 3+3d5
+ATTR 1+2d6
 RRTY 30
 ART FALSE
 END
@@ -467,7 +467,7 @@ DESC
 Does a fantastic job lighting up your surroundings.
 As a bonus, it probably blinds everyone around you!
 .
-ATTR 10+3d10
+ATTR 5+3d6
 RRTY 95
 ART FALSE
 END

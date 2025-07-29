@@ -455,8 +455,20 @@ class Pyrogue_Game:
             self.curr_submenu = self.display_submenus["none"]
             self.submenu_canvas.destroy()
             self.need_full_rerender = True
+            self.player.handle_turn(
+                self.dungeon, self.actor_map, self.player, Move(Move.none)
+            )
             print("GAME: Player inventory sub-menu closed")
             self._update_top_label("")
+        elif key == "Return":
+            # Attempt to equip item
+            success, item = self.player.equip_use_item(self.submenu_select_idx)
+            if success:
+                self._update_top_label("You equipped " + item.get_name())
+                self.need_submenu_rerender = True
+                self._render_inventory()
+            else:
+                self._update_top_label("No item to equip")
         elif key == "j" or key == "Down" or key == "2":
             # Move selection down
             if self.submenu_select_idx < self.player.get_inventory_size() - 1:
@@ -1021,14 +1033,14 @@ class Pyrogue_Game:
         max_line_width = 21  # Minimum based on "RING RIGHT: None <-- "
 
         start_str = {
-            0: "WEAPON: ",
-            1: "RANGED: ",
-            2: "OFFHAND: ",
-            3: "ARMOR: ",
-            4: "AMULET: ",
-            5: "RING LEFT: ",
+            0: "WEAPON:     ",
+            1: "RANGED:     ",
+            2: "OFFHAND:    ",
+            3: "ARMOR:      ",
+            4: "AMULET:     ",
+            5: "RING LEFT:  ",
             6: "RING RIGHT: ",
-            7: "LIGHT: ",
+            7: "LIGHT:      ",
         }
 
         equipped_items = {
@@ -1112,7 +1124,7 @@ class Pyrogue_Game:
             menu_width // 2,
             int(offset * 1.5),
             text=lines[curr_line],
-            fill="red",
+            fill=line_colors[curr_line],
             font=(self.def_font, self.font_size),
             tag="equip_header",
             anchor="center",
@@ -1125,7 +1137,7 @@ class Pyrogue_Game:
                 offset,
                 offset + (self.tile_size * (curr_line)),
                 text=lines[curr_line],
-                fill="white",
+                fill=line_colors[curr_line],
                 font=(self.def_font, self.font_size),
                 tag=f"equip_slot_{curr_line}",
                 anchor="nw",

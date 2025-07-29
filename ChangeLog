@@ -14,6 +14,9 @@ v0.07 ==========================================================================
     - Updated exit and monster list submenus to properly center themselves within the dungeon
     - Can now select between inventory slots; will be able to equip/use items by selection
     - Started working on equipment menu
+07/29/2025
+    - Player now deals damage based on equipped items, defaulting to fisticuffs if none equipped
+    - Items can now be equipped; full stat bonus application work in progress
 v0.06 ===========================================================================================================================
 07/10/2025
     - Implemented fog of war using recursive shadowcasting

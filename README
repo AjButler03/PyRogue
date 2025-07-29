@@ -6,22 +6,27 @@ pyrogue.py is the main file, and running it will open a new window with the PyRo
 New features with v0.07:
     - Item Encyclopedia
     - Randomized item generation in dungeon
-    - Displayable item list (opt?)
     - Player inventory + equipment usage
     - Item / Monster inspection feature (opt?)
 
 The game has the following key binds:
 ================================   MOVEMENT   ================================
-  7 or y : Attempt to move PC one cell to the upper left.
-  8 or k : Attempt to move PC one cell up.
-  9 or u : Attempt to move PC one cell to the upper right.
-  4 or h : Attempt to move PC one cell to the left.
+  7 or y : Attempt to move one cell to the upper left.
+  8 or k : Attempt to move one cell up.
+  9 or u : Attempt to move one cell to the upper right.
+  4 or h : Attempt to move one cell to the left.
   5 or space or . : Rest for a turn NPCs still move.
-  6 or l : Attempt to move PC one cell to the right.
-  1 or b : Attempt to move PC one cell to the lower left.
-  2 or j : Attempt to move PC one cell down.
-  3 or n : Attempt to move PC one cell to the lower right.
+  6 or l : Attempt to move one cell to the right.
+  1 or b : Attempt to move one cell to the lower left.
+  2 or j : Attempt to move one cell down.
+  3 or n : Attempt to move one cell to the lower right.
   > or 0 : attempt to escape to new dungeon level using a staircase.
+================================  INVENTORY   ================================
+  e: Opens equipment menu.
+  i: Opens inventory menu.
+  enter: equip/unequip/use item.
+  d: attempts to drop an item from inventory.
+  x: destroys an item from inventory.
 ================================    OTHER     ================================
   f : Toggle fog of war effect. 
   m : opens a submenu to list all present monsters.

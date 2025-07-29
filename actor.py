@@ -261,6 +261,9 @@ class Item:
     def get_name(self):
         return self.typedef.get_name()
 
+    def get_type(self):
+        return self.typedef.get_type()
+
     # Returns a str keyword for a single Tkinter color.
     def get_color(self):
         return self.typedef.get_single_color()
@@ -517,8 +520,7 @@ class Player(Actor):
         self.hp = 9999
 
         # Base damage for the player, assuming that it has no other weapons
-        # This is heavily buffed until weapons are implemented.
-        self.fisticuffs_dice = Dice(50, 5, 50)
+        self.fisticuffs_dice = Dice(0, 2, 3)
 
         self.view_dist = 3  # default 3
 
@@ -756,6 +758,76 @@ class Player(Actor):
 
         return False, None
 
+    # Attempts to equip an item in given inventory slot
+    # Returns a bool for success/failure, and the item equipped
+    def equip_use_item(self, idx: int):
+        item = self.inventory[idx]
+
+        if item == None:
+            return False, None
+
+        # Grab type to check which equip slot it should go into
+        itype = item.get_type()
+        if itype == item_type_opts["WEAPON"]:
+            existing_item = self.weapon
+            self.weapon = item
+            self.inventory[idx] = existing_item
+        elif itype == item_type_opts["RANGED"]:
+            existing_item = self.ranged
+            self.ranged = item
+            self.inventory[idx] = existing_item
+        elif itype == item_type_opts["OFFHAND"]:
+            existing_item = self.offhand
+            self.offhand = item
+            self.inventory[idx] = existing_item
+        elif itype == item_type_opts["ARMOR"]:
+            existing_item = self.armor
+            self.armor = item
+            self.inventory[idx] = existing_item
+        elif itype == item_type_opts["AMULET"]:
+            existing_item = self.amulet
+            self.amulet = item
+            self.inventory[idx] = existing_item
+        elif itype == item_type_opts["RING"]:
+            existing_item = self.ring_l
+            self.ring_l = item
+            self.inventory[idx] = existing_item
+        elif itype == item_type_opts["LIGHT"]:
+            existing_item = self.light
+            self.light = item
+            self.view_dist += self.light.attr
+            self.inventory[idx] = existing_item
+            if existing_item != None:
+                self.view_dist -= existing_item.attr
+
+        return True, item
+
+    # Rolls dice to determine dmg output in melee combat
+    def _dmg_roll_melee(self) -> int:
+        dmg = 0
+        # Roll dice of main weapons/ equipment
+        if self.weapon != None:
+            dmg += self.weapon.damage_dice.roll()
+        # If and when ranged combat is implemented, this will not be rolled here.
+        if self.ranged != None:
+            dmg += self.ranged.damage_dice.roll()
+        if self.offhand != None:
+            dmg += self.offhand.damage_dice.roll()
+
+        # If no damage yet applied, default to fisticuffs dice.
+        if dmg == 0:
+            dmg = self.fisticuffs_dice.roll()
+
+        # Now roll for damage of rings/ amulets; they act as bonuses, so will be applied anywhere damage is applied
+        if self.amulet != None:
+            dmg += self.amulet.damage_dice.roll()
+        if self.ring_l != None:
+            dmg += self.ring_l.damage_dice.roll()
+        if self.ring_r != None:
+            dmg += self.ring_r.damage_dice.roll()
+
+        return dmg
+
     # Turn handler for the player.
     def handle_turn(self, dungeon: Dungeon, actor_map: list, player, move: int):
         """
@@ -765,7 +837,7 @@ class Player(Actor):
         """
 
         if move == Move.none:
-            # No move? Then just return.
+            self._update_terrain_memory(dungeon)
             return True, None, 0
 
         move = Move(move)
@@ -777,7 +849,7 @@ class Player(Actor):
         # Move the PC, removing whatever monster may be there
         a = actor_map[new_r][new_c]
         if not a == None:
-            dmg = self.fisticuffs_dice.roll()
+            dmg = self._dmg_roll_melee()
             new_hp = a.hp - dmg
             if new_hp <= 0:
                 a.hp = 0
