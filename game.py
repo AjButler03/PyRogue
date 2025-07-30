@@ -113,14 +113,17 @@ class Pyrogue_Game:
         # Store what messages and font color should be displayed
         # Cache is to prevent unnecessary updates in render
         self.top_msg_cache = ("", "")
-        self.score_msg_cache = ("", "")
-        self.pinfo_msg_cache = ("", "")
         self.top_msg = "Press any key to start"
+        self.top_msg_color = "gold"
+        self.score_msg_cache = ("", "")
         r, c = self.player.get_pos()
         self.score_msg = f"SCORE: {self.player_score:04d}   POS: (r:{r:0d}, c:{c:0d})"
-        self.pinfo_msg = f"HP: {self.player.get_hp():03d}/{self.player.get_hp_cap():03d}   DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
-        self.top_msg_color = "gold"
         self.score_msg_color = "white"
+        self.hp_msg_cache = ("", "")
+        self.hp_msg = f"{self.player.get_hp():03d}/{self.player.get_hp_cap():03d}"
+        self.hp_msg_color = "#00FF00"
+        self.pinfo_msg_cache = ("", "")
+        self.pinfo_msg = f"HP:            DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
         self.pinfo_msg_color = "white"
 
         # Fields for handling keyboard input
@@ -702,7 +705,23 @@ class Pyrogue_Game:
             self.score_msg_color = "white"
 
             # Player stats (line 2)
-            self.pinfo_msg = f"HP: {self.player.get_hp():03d}/{self.player.get_hp_cap():03d}   DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
+            curr_hp = self.player.get_hp()
+            hp_cap = self.player.get_hp_cap()
+            self.hp_msg = f"{curr_hp:03d}/{hp_cap:03d}"
+            # Determine HP color based on current percentage of health
+            ratio = max(0.0, min(curr_hp / hp_cap, 1.0))
+            
+            if ratio > 0.5:
+                # gradient between green and yellow
+                red = int(255 * (1 - (ratio -0.5) *2))
+                green = 255
+            else:
+                # gradient between yellow and red
+                red = 255
+                green = int(255 * ratio * 2)
+            blue = 0
+            self.hp_msg_color = f"#{red:02X}{green:02X}{blue:02X}"
+            self.pinfo_msg = f"HP:            DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
             self.pinfo_msg_color = "white"
         else:
             # Player score and position (line 1)
@@ -710,17 +729,24 @@ class Pyrogue_Game:
             self.score_msg_color = "gold"
 
             # Player stats (line 2)
+            self.hp_msg = ""
             self.pinfo_msg = ""
-            self.pinfo_msg_color = "white"
 
-        # Update text on canvas
+        # Update score and location
         if (self.score_msg, self.score_msg_color) != self.score_msg_cache:
             self.canvas.itemconfig(
                 "score_msg", text=self.score_msg, fill=self.score_msg_color
             )
             self.score_msg_cache = (self.score_msg, self.score_msg_color)
 
-        # update text on canvas
+        # Update player health section
+        if (self.hp_msg, self.hp_msg_color) != self.hp_msg_cache:
+            self.canvas.itemconfig(
+                "hp_msg", text=self.hp_msg, fill=self.hp_msg_color
+            )
+            self.hp_msg_cache = (self.hp_msg, self.hp_msg_color)
+        
+        # Update other player information
         if (self.pinfo_msg, self.pinfo_msg_color) != self.pinfo_msg_cache:
             self.canvas.itemconfig(
                 "pinfo_msg", text=self.pinfo_msg, fill=self.pinfo_msg_color
@@ -1215,6 +1241,17 @@ class Pyrogue_Game:
 
             # Draw pinfo message label
             y += self.tile_size
+            
+            # Individual section for health for color indication
+            self.canvas.create_text(
+                x + self.tile_size // 2 + (self.tile_size * 3),
+                y + self.tile_size // 2.5,
+                text=self.hp_msg,
+                fill=self.hp_msg_color,
+                font=(self.def_font, self.font_size),
+                tag="hp_msg",
+                anchor="w",
+            )
             self.canvas.create_text(
                 x + self.tile_size // 2,
                 y + self.tile_size // 2.5,
