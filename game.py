@@ -123,7 +123,7 @@ class Pyrogue_Game:
         self.hp_msg = f"{self.player.get_hp():03d}/{self.player.get_hp_cap():03d}"
         self.hp_msg_color = "#00FF00"
         self.pinfo_msg_cache = ("", "")
-        self.pinfo_msg = f"HP:           DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
+        self.pinfo_msg = f"HP:           SPEED: {self.player.get_speed():03d}   DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
         self.pinfo_msg_color = "white"
 
         # Fields for handling keyboard input
@@ -301,10 +301,7 @@ class Pyrogue_Game:
                     self.dungeon, self.item_map, r, c
                 )
                 if success:
-                    if item.is_unique():
-                        text = "You picked up " + item.get_name()
-                    else:
-                        text = "You picked up a " + item.get_name()
+                    text = "You picked up " + item.get_name()
                 else:
                     text = "You are unable to pick up item"
                 self._update_top_label(text)
@@ -340,26 +337,15 @@ class Pyrogue_Game:
             if success:
                 if targ_actor != None:
                     if targ_actor.is_alive():
-                        if targ_actor.is_unique():
-                            message = (
-                                "You dealt "
-                                + str(dmg)
-                                + " dmg to "
-                                + targ_actor.typedef.name
-                            )
-                        else:
-                            message = (
-                                "You dealt "
-                                + str(dmg)
-                                + " dmg to a "
-                                + targ_actor.typedef.name
-                            )
+                        message = (
+                            "You dealt " + str(dmg) + " dmg to " + targ_actor.get_name()
+                        )
                     else:
                         # Print kill message
                         if targ_actor.is_unique():
-                            message = "You killed " + targ_actor.typedef.name
+                            message = "You killed " + targ_actor.get_name()
                         else:
-                            message = "You killed a " + targ_actor.typedef.name
+                            message = "You killed a " + targ_actor.get_name()
                         # Remove monster from map
                         targ_r, targ_c = targ_actor.get_pos()
                         self.actor_map[targ_r][targ_c] = None
@@ -455,6 +441,23 @@ class Pyrogue_Game:
             )
             print("GAME: Player inventory sub-menu closed")
             self._update_top_label("")
+        elif (
+            key == "Right"
+            or key == "l"
+            or key == "6"
+            or key == "Left"
+            or key == "h"
+            or key == "4"
+        ):
+            # Move to player equipment menu
+            self.submenu_select_idx = 0
+            self.curr_input_mode = self.input_modes["menu_equipment"]
+            self.curr_submenu = self.display_submenus["menu_equipment"]
+            self.submenu_canvas.destroy()
+            self.need_submenu_rerender = True
+            print("GAME: Player inventory sub-menu closed")
+            print("GAME: Player equipment sub-menu opened")
+            self._render_equipment()
         elif key == "Return":
             # Attempt to equip item
             success, item = self.player.equip_use_item(self.submenu_select_idx)
@@ -462,6 +465,7 @@ class Pyrogue_Game:
                 self._update_top_label("You equipped " + item.get_name())
                 self.need_submenu_rerender = True
                 self._render_inventory()
+                self._update_hud()
             else:
                 self._update_top_label("No item to equip")
         elif key == "j" or key == "Down" or key == "2":
@@ -480,10 +484,19 @@ class Pyrogue_Game:
                 self.submenu_select_idx = self.player.get_inventory_size() - 1
             self.need_submenu_rerender = True
             self._render_inventory()
+        elif key == "x":
+            # Attempt to destroy an item
+            success, item = self.player.expunge_item(self.submenu_select_idx)
+            if success:
+                self._update_top_label("You destroyed " + item.get_name())
+                self.need_submenu_rerender = True
+                self._render_inventory()
+            else:
+                self._update_top_label("No item to destroy")
 
     # Handles input for the equipment submenu
     def _handle_equipment_input(self, key):
-        if key == "Escape" or key == "i":
+        if key == "Escape" or key == "e":
             # Return to player input
             self.curr_input_mode = self.input_modes["player_turn"]
             self.curr_submenu = self.display_submenus["none"]
@@ -491,6 +504,23 @@ class Pyrogue_Game:
             self.need_full_rerender = True
             print("GAME: Player equipment sub-menu closed")
             self._update_top_label("")
+        elif (
+            key == "Right"
+            or key == "l"
+            or key == "6"
+            or key == "Left"
+            or key == "h"
+            or key == "4"
+        ):
+            # Move to player inventory menu
+            self.submenu_select_idx = 0
+            self.curr_input_mode = self.input_modes["menu_inventory"]
+            self.curr_submenu = self.display_submenus["menu_inventory"]
+            self.submenu_canvas.destroy()
+            self.need_submenu_rerender = True
+            print("GAME: Player equipment sub-menu closed")
+            print("GAME: Player iventory sub-menu opened")
+            self._render_inventory()
         elif key == "j" or key == "Down" or key == "2":
             # Move selection down
             if self.submenu_select_idx < 7:
@@ -721,7 +751,7 @@ class Pyrogue_Game:
                 green = int(255 * ratio * 2)
             blue = 0
             self.hp_msg_color = f"#{red:02X}{green:02X}{blue:02X}"
-            self.pinfo_msg = f"HP:           DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
+            self.pinfo_msg = f"HP:           SPEED: {self.player.get_speed():03d}   DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
             self.pinfo_msg_color = "white"
         else:
             # Player score and position (line 1)
@@ -1464,19 +1494,8 @@ class Pyrogue_Game:
             actor.set_currturn(new_turn)
             self.turn_pq.push(actor, new_turn)
 
-            if isinstance(targ_actor, Player):
-                if actor.is_unique():
-                    message = (
-                        actor.typedef.name + " dealt " + str(dmg) + " damage to you"
-                    )
-                else:
-                    message = (
-                        "a "
-                        + actor.typedef.name
-                        + " dealt "
-                        + str(dmg)
-                        + " damage to you"
-                    )
+            if isinstance(targ_actor, Player) and dmg != 0:
+                message = actor.get_name() + " dealt " + str(dmg) + " damage to you"
 
                 self._update_top_label(message)
                 message = "TURN " + str(actor.get_currturn()) + ": " + message

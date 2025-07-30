@@ -12,6 +12,29 @@ def exp_chancetime(n, decay_rate):
     return random.random() < probability
 
 
+# determines if damage should be dodged, depending on current dodge value.
+# Only approaches ~50%, as to not be completely broken.
+def dodge_chance(dval: int) -> bool:
+    k = 40  # Tweakable, larger k means slower rise in probability
+    probability = 0.5 * dval / (dval + k)
+    roll = random.random()
+    return roll < probability
+
+
+# Determines the amount by which damage is reduced based on current defense value.
+# 0% reduction at 1, 100% at 600 (arbitrary)
+def def_dmg_reduction(base_dmg: int, def_val: int) -> int:
+    full_reduct_val = 600  # Arbitrary value for full reduction
+    if def_val <= 0:
+        return base_dmg  # No reduction
+
+    # Percentage of armor
+    reduct_frac = (def_val) / (full_reduct_val)
+    reduced_dmg = base_dmg * (1.0 - reduct_frac)
+
+    return int(reduced_dmg)
+
+
 # Custom Implementation of a Priority Queue, with decrease-key functionality
 # For full transparancy, this was ChatGPT generated while debugging why heapq wasn't really working.
 class PriorityQueue:

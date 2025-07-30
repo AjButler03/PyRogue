@@ -222,6 +222,8 @@ class Item:
 
         # To make sure one-time bonuses can't be repeatedly applied
         self.used = False
+        # To disable generation on artifact items once they have been picked up (interacted with)
+        self.picked_up = False
 
         # Placeholder for position information
         self.r = 0
@@ -271,6 +273,16 @@ class Item:
     def is_unique(self):
         return self.typedef.artifact
 
+    def set_picked_up(self, bool):
+        self.picked_up = bool
+
+    def get_picked_up_status(self):
+        # Once picked up at all, this should be true. Even after dropping the item.
+        return self.picked_up
+
+    def get_used_status(self):
+        return self.used
+
     # resets generation eligibility of type definition
     def update_gen_eligible(self, is_new_item: bool, force_reset: bool):
         """
@@ -293,8 +305,8 @@ class Item:
             if is_new_item:
                 # Newly generated item, so set eligibility to False so there aren't duplicates.
                 self.typedef.gen_eligible = False
-            elif not self.used and not is_new_item:
-                # still unused, and not the initial generation.
+            elif not self.picked_up and not is_new_item:
+                # has not been interacted with, and not the initial generation.
                 # This will reset to True for a new dungeon (presumably why this was called)
                 self.typedef.gen_eligible = True
 
@@ -706,58 +718,6 @@ class Player(Actor):
         else:
             return False
 
-    # Returns the character representation of the player.
-    def get_char(self) -> str:
-        return "@"
-
-    # Returns a color for the character of the actor.
-    def get_color(self) -> str:
-        return "gold"
-
-    def get_hp(self) -> int:
-        return self.hp
-
-    def get_hp_cap(self) -> int:
-        return self.hp_cap
-
-    def get_defense(self) -> int:
-        return self.defense
-
-    def get_dodge(self) -> int:
-        return self.dodge
-
-    # Returns the player's inventory size
-    def get_inventory_size(self) -> int:
-        return self.inventory_size
-
-    # Returns the player's inventory list.
-    def get_inventory_slots(self) -> list:
-        return self.inventory
-
-    def get_weapon(self):
-        return self.weapon
-
-    def get_ranged(self):
-        return self.ranged
-
-    def get_offhand(self):
-        return self.offhand
-
-    def get_armor(self):
-        return self.armor
-
-    def get_amulet(self):
-        return self.amulet
-
-    def get_ring_l(self):
-        return self.ring_l
-
-    def get_ring_r(self):
-        return self.ring_r
-
-    def get_light(self):
-        return self.light
-
     # Attempts to pickup an item from the floor, placing in inventory.
     # Returns True/False on success/failure.
     def pickup_item(self, dungeon: Dungeon, item_map: list, r: int, c: int) -> bool:
@@ -772,6 +732,7 @@ class Player(Actor):
                     slot = self.inventory[slot_idx]
                     if slot == None:
                         self.inventory[slot_idx] = item
+                        item.picked_up = True
                         item_map[r][c] = None
                         return True, item
                         # Future note for me: Will likely need to figure something out for artifacts
@@ -787,7 +748,9 @@ class Player(Actor):
             return False, None
 
         # Grab type to check which equip slot it should go into
+        # This could be written a bit more cleanly; I might come back to it.
         itype = item.get_type()
+        existing_item = None
         if itype == item_type_opts["WEAPON"]:
             existing_item = self.weapon
             self.weapon = item
@@ -815,10 +778,32 @@ class Player(Actor):
         elif itype == item_type_opts["LIGHT"]:
             existing_item = self.light
             self.light = item
-            self.view_dist += self.light.attr
             self.inventory[idx] = existing_item
+
+        # Now add bonuses; what is applied depends on item type
+        if itype == item_type_opts["LIGHT"]:
+            self.view_dist += item.attr
+            # Remove bonus if existing light
             if existing_item != None:
                 self.view_dist -= existing_item.attr
+        elif itype == item_type_opts["POTION"]:
+            # Just using and destroying potion
+            # Ignoring for now
+            pass
+        else:
+            # just add regular speed, defense, dodge and hp restore bonus
+            if not item.used:
+                new_hp = self.hp + item.hp_restore
+                self.hp = min(new_hp, self.hp_cap)
+                self.speed += item.speed
+                self.defense += item.defense
+                self.dodge += item.defense
+                item.used = True
+
+                if existing_item != None:
+                    self.speed -= existing_item.speed
+                    self.defense -= existing_item.defense
+                    self.dodge -= existing_item.dodge
 
         return True, item
 
@@ -884,6 +869,71 @@ class Player(Actor):
 
         # For combat dialog
         return True, a, dmg
+
+    # Returns the character representation of the player.
+    def get_char(self) -> str:
+        return "@"
+
+    # Returns a color for the character of the actor.
+    def get_color(self) -> str:
+        return "gold"
+
+    def get_hp_cap(self) -> int:
+        return self.hp_cap
+
+    def get_defense(self) -> int:
+        return self.defense
+
+    def get_dodge(self) -> int:
+        return self.dodge
+
+    # Returns the player's inventory size
+    def get_inventory_size(self) -> int:
+        return self.inventory_size
+
+    # Returns the player's inventory list.
+    def get_inventory_slots(self) -> list:
+        return self.inventory
+
+    # Returns what is inside a given inventory slot.
+    def get_inventory_item(self, idx: int):
+        if idx >= self.inventory_size:
+            return False, None
+        else:
+            return True, self.inventory[idx]
+
+    def expunge_item(self, idx: int):
+        item = None
+        if idx >= self.inventory_size:
+            return False, item
+        else:
+            item = self.inventory[idx]
+            self.inventory[idx] = None
+            return True, item
+
+    def get_weapon(self):
+        return self.weapon
+
+    def get_ranged(self):
+        return self.ranged
+
+    def get_offhand(self):
+        return self.offhand
+
+    def get_armor(self):
+        return self.armor
+
+    def get_amulet(self):
+        return self.amulet
+
+    def get_ring_l(self):
+        return self.ring_l
+
+    def get_ring_r(self):
+        return self.ring_r
+
+    def get_light(self):
+        return self.light
 
 
 # This is the class for monsters and their turn/movement methods.

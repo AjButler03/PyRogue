@@ -20,6 +20,7 @@ v0.07 ==========================================================================
 07/30/2025
     - Updated HUD to reflect new player stats (HP cap, defense, and dodge)
     - Color of HP HUD element now reflects current HP percentage
+    - Working on applying speed, defense, and dodge bonuses for equipped items
 v0.06 ===========================================================================================================================
 07/10/2025
     - Implemented fog of war using recursive shadowcasting
