@@ -176,7 +176,9 @@ class Pyrogue_Game:
                 print("GAME: Player turn completed")
 
                 # Requeue player
-                new_turn = self.player.get_currturn() + self.player.get_speed()
+                new_turn = self.player.get_currturn() + (
+                    1000 // self.player.get_speed()
+                )
                 self.turn_pq.push(self.player, new_turn)
                 self.player.set_currturn(new_turn)
                 self.root.after(10, self._next_turn)
@@ -233,16 +235,7 @@ class Pyrogue_Game:
                     # replace the dungeon, re-generating monsters and restarting the turn loop
                     self._replace_dungeon()
                     pc_r, pc_c = self.player.get_pos()
-                    pinfo_msg = (
-                        "HEALTH: "
-                        + str(self.player.hp)
-                        + "   POS: (R:"
-                        + str(pc_r)
-                        + ", C:"
-                        + str(pc_c)
-                        + ")"
-                    )
-                    self._update_pinfo_label(pinfo_msg)
+                    self._update_hud()
                     message = "You escaped to a new level of the dungeon"
                     self._update_top_label(message, "gold")
 
@@ -1473,7 +1466,10 @@ class Pyrogue_Game:
         player_turn = isinstance(actor, Player)
 
         if actor.is_alive():
-            print("TURN", actor.get_currturn(), "for", actor.get_char())
+            r, c = actor.get_pos()
+            print(
+                f"TURN {actor.get_currturn()} for {actor.get_name()} at (r:{r:0d}, c: {c:0d}) with speed {actor.get_speed()}"
+            )
 
             if player_turn:
                 # Await player input to call its turn handeler
@@ -1490,7 +1486,7 @@ class Pyrogue_Game:
                 )
 
             # Re-queue monster
-            new_turn = actor.get_currturn() + actor.get_speed()
+            new_turn = actor.get_currturn() + (1000 // actor.get_speed())
             actor.set_currturn(new_turn)
             self.turn_pq.push(actor, new_turn)
 

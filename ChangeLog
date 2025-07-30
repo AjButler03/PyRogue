@@ -21,6 +21,7 @@ v0.07 ==========================================================================
     - Updated HUD to reflect new player stats (HP cap, defense, and dodge)
     - Color of HP HUD element now reflects current HP percentage
     - Working on applying speed, defense, and dodge bonuses for equipped items
+    - Fixed issue where increased speed actually resulted in fewer turns
 v0.06 ===========================================================================================================================
 07/10/2025
     - Implemented fog of war using recursive shadowcasting

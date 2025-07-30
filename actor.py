@@ -3,7 +3,7 @@ import abc
 import copy
 from enum import Enum
 from dungeon import *
-from utility import Dice
+from utility import *
 
 # This file contains the class information for 'actors' - Monsters, the player, and the various items.
 
@@ -874,6 +874,9 @@ class Player(Actor):
     def get_char(self) -> str:
         return "@"
 
+    def get_name(self) -> str:
+        return "=== PLAYER ==="
+
     # Returns a color for the character of the actor.
     def get_color(self) -> str:
         return "gold"
@@ -1105,15 +1108,20 @@ class Monster(Actor):
         a = actor_map[dest_r][dest_c]
 
         if isinstance(a, Player):
-            dam = self.typedef.damage_dice.roll()
-            new_hp = a.get_hp() - dam
-            if new_hp <= 0:
-                a.hp = 0
-                a.kill()
-                actor_map[dest_r][dest_c] = None
+            if not dodge_chance(a.dodge):
+                # Player was unable to dodge attack
+                # Roll for initial damage, then calculate defense reduction
+                dam = def_dmg_reduction(self.typedef.damage_dice.roll(), a.defense)
+                new_hp = a.get_hp() - dam
+                if new_hp <= 0:
+                    a.hp = 0
+                    a.kill()
+                    actor_map[dest_r][dest_c] = None
+                else:
+                    a.hp = new_hp
+                return dam
             else:
-                a.hp = new_hp
-            return dam
+                return 0  # player dodged attack
 
         # Attempt to displace monster
         delta_r = [-1, -1, -1, 0, 0, 1, 1, 1]
