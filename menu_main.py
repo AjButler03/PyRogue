@@ -59,7 +59,7 @@ class Menu_Main:
             height=self.scrsize_h,
             width=self.scrsize_w,
             bd=0,
-            highlightthickness=5,
+            highlightthickness=0,
         )
         self.canvas.pack(fill=tk.BOTH, expand=True, side="top")
 

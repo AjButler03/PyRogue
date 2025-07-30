@@ -79,7 +79,7 @@ class Pyrogue_Game:
             height=scrsize_h,
             width=scrsize_w,
             bd=0,
-            highlightthickness=5,
+            highlightthickness=0,
         )
 
         self.canvas.pack(fill=tk.BOTH, expand=True, side="top")
@@ -123,7 +123,7 @@ class Pyrogue_Game:
         self.hp_msg = f"{self.player.get_hp():03d}/{self.player.get_hp_cap():03d}"
         self.hp_msg_color = "#00FF00"
         self.pinfo_msg_cache = ("", "")
-        self.pinfo_msg = f"HP:            DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
+        self.pinfo_msg = f"HP:           DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
         self.pinfo_msg_color = "white"
 
         # Fields for handling keyboard input
@@ -196,7 +196,7 @@ class Pyrogue_Game:
             # Calling the equipment menu input handler
             self._handle_equipment_input(key)
         # Any input after end of game returns control to main menu
-        if self.game_over:
+        if self.game_over and (key == "Return" or key == "Escape"):
             self._end_game()
 
     # Handles input for player turn. Returns True on completion of turn, false if turn is still ongoing.
@@ -710,10 +710,10 @@ class Pyrogue_Game:
             self.hp_msg = f"{curr_hp:03d}/{hp_cap:03d}"
             # Determine HP color based on current percentage of health
             ratio = max(0.0, min(curr_hp / hp_cap, 1.0))
-            
+
             if ratio > 0.5:
                 # gradient between green and yellow
-                red = int(255 * (1 - (ratio -0.5) *2))
+                red = int(255 * (1 - (ratio - 0.5) * 2))
                 green = 255
             else:
                 # gradient between yellow and red
@@ -721,16 +721,16 @@ class Pyrogue_Game:
                 green = int(255 * ratio * 2)
             blue = 0
             self.hp_msg_color = f"#{red:02X}{green:02X}{blue:02X}"
-            self.pinfo_msg = f"HP:            DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
+            self.pinfo_msg = f"HP:           DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
             self.pinfo_msg_color = "white"
         else:
             # Player score and position (line 1)
-            self.score_msg = f"SCORE: {self.player_score:04d}"
-            self.score_msg_color = "gold"
+            self.score_msg = f"FINAL SCORE: {self.player_score:04d}"
+            self.score_msg_color = "#00FF00"
 
             # Player stats (line 2)
             self.hp_msg = ""
-            self.pinfo_msg = ""
+            self.pinfo_msg = "Press esc to exit"
 
         # Update score and location
         if (self.score_msg, self.score_msg_color) != self.score_msg_cache:
@@ -741,11 +741,9 @@ class Pyrogue_Game:
 
         # Update player health section
         if (self.hp_msg, self.hp_msg_color) != self.hp_msg_cache:
-            self.canvas.itemconfig(
-                "hp_msg", text=self.hp_msg, fill=self.hp_msg_color
-            )
+            self.canvas.itemconfig("hp_msg", text=self.hp_msg, fill=self.hp_msg_color)
             self.hp_msg_cache = (self.hp_msg, self.hp_msg_color)
-        
+
         # Update other player information
         if (self.pinfo_msg, self.pinfo_msg_color) != self.pinfo_msg_cache:
             self.canvas.itemconfig(
@@ -1241,10 +1239,10 @@ class Pyrogue_Game:
 
             # Draw pinfo message label
             y += self.tile_size
-            
+
             # Individual section for health for color indication
             self.canvas.create_text(
-                x + self.tile_size // 2 + (self.tile_size * 3),
+                x + self.tile_size // 2 + (self.tile_size * 2),
                 y + self.tile_size // 2.5,
                 text=self.hp_msg,
                 fill=self.hp_msg_color,
