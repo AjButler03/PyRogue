@@ -517,12 +517,20 @@ class Player(Actor):
         self.speed = 10
         # Define the player as alive
         self.alive = True
-        self.hp = 9999
+
+        # Initial HP cap of 200, and hp set to that maximum
+        self.hp = 200
+        self.hp_cap = 200
+
+        # Initial defense and dodge of 10
+        self.defense = 10
+        self.dodge = 10
+
+        # Initial view distance of 3
+        self.view_dist = 3
 
         # Base damage for the player, assuming that it has no other weapons
         self.fisticuffs_dice = Dice(0, 2, 3)
-
-        self.view_dist = 3  # default 3
 
         # Player's memory of dungeon
         self.tmem = []
@@ -705,6 +713,18 @@ class Player(Actor):
     # Returns a color for the character of the actor.
     def get_color(self) -> str:
         return "gold"
+
+    def get_hp(self) -> int:
+        return self.hp
+
+    def get_hp_cap(self) -> int:
+        return self.hp_cap
+
+    def get_defense(self) -> int:
+        return self.defense
+
+    def get_dodge(self) -> int:
+        return self.dodge
 
     # Returns the player's inventory size
     def get_inventory_size(self) -> int:

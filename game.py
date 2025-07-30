@@ -116,17 +116,9 @@ class Pyrogue_Game:
         self.score_msg_cache = ("", "")
         self.pinfo_msg_cache = ("", "")
         self.top_msg = "Press any key to start"
-        self.score_msg = "SCORE: 0"
-        pc_r, pc_c = self.player.get_pos()
-        self.pinfo_msg = (
-            "HEALTH: "
-            + str(self.player.hp)
-            + "   POS: (R:"
-            + str(pc_r)
-            + ", C:"
-            + str(pc_c)
-            + ")"
-        )
+        r, c = self.player.get_pos()
+        self.score_msg = f"SCORE: {self.player_score:04d}   POS: (r:{r:0d}, c:{c:0d})"
+        self.pinfo_msg = f"HP: {self.player.get_hp():03d}/{self.player.get_hp_cap():03d}   DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
         self.top_msg_color = "gold"
         self.score_msg_color = "white"
         self.pinfo_msg_color = "white"
@@ -699,10 +691,27 @@ class Pyrogue_Game:
             )
             self.top_msg_cache = (self.top_msg, self.top_msg_color)
 
-    # Wrapper to update the bottom label for score. White is default message color.
-    def _update_score_label(self, message: str, font_color: str = "white"):
-        self.score_msg = message
-        self.score_msg_color = font_color
+    # Updates the player's hud (the two layers of text at the bottom of the screen)
+    def _update_hud(self):
+        r, c = self.player.get_pos()
+        if not self.game_over:
+            # Player score and position (line 1)
+            self.score_msg = (
+                f"SCORE: {self.player_score:04d}   POS: (r:{r:0d}, c:{c:0d})"
+            )
+            self.score_msg_color = "white"
+
+            # Player stats (line 2)
+            self.pinfo_msg = f"HP: {self.player.get_hp():03d}/{self.player.get_hp_cap():03d}   DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
+            self.pinfo_msg_color = "white"
+        else:
+            # Player score and position (line 1)
+            self.score_msg = f"SCORE: {self.player_score:04d}"
+            self.score_msg_color = "gold"
+
+            # Player stats (line 2)
+            self.pinfo_msg = ""
+            self.pinfo_msg_color = "white"
 
         # Update text on canvas
         if (self.score_msg, self.score_msg_color) != self.score_msg_cache:
@@ -710,11 +719,6 @@ class Pyrogue_Game:
                 "score_msg", text=self.score_msg, fill=self.score_msg_color
             )
             self.score_msg_cache = (self.score_msg, self.score_msg_color)
-
-    # Wrapper to update bottom label for player info. White is default message color.
-    def _update_pinfo_label(self, message: str, font_color: str = "white"):
-        self.pinfo_msg = message
-        self.pinfo_msg_color = font_color
 
         # update text on canvas
         if (self.pinfo_msg, self.pinfo_msg_color) != self.pinfo_msg_cache:
@@ -1232,9 +1236,8 @@ class Pyrogue_Game:
                 tag="dungeon_border",
             )
 
-        if self.curr_submenu == self.display_submenus["menu_exit"]:
-            self._render_exit_menu()
-        elif self.curr_submenu == self.display_submenus["menu_monster_list"]:
+        # To loop through monster symbol colors in submenu
+        if self.curr_submenu == self.display_submenus["menu_monster_list"]:
             self._render_monster_list()
 
         self.need_full_rerender = False
@@ -1253,7 +1256,7 @@ class Pyrogue_Game:
                     y = row * self.tile_size + y_offset
 
                     # default
-                    char = "!"
+                    char = "#"
                     color = "gray15"
 
                     # determine the current render mode to grab char & color
@@ -1381,15 +1384,11 @@ class Pyrogue_Game:
 
         # Game over check
         if len(self.turn_pq) < 2 or not self.player.is_alive():
-            score_msg = "SCORE: " + str(self.player_score)
-            self._update_score_label(score_msg, "gold")
-
             # Game has ended; if player is alive, then player won. Otherwise, the monsters won.
             if self.player.is_alive():
                 message = "You have defeated all monsters; Game Over"
                 self._update_top_label(message, "gold")
             else:
-                self._update_pinfo_label("Player Location: N/A")
                 message = "You have been defeated; Game Over"
                 self._update_top_label(message, "red")
             print(message)
@@ -1399,6 +1398,7 @@ class Pyrogue_Game:
             self.need_full_rerender = True
             self.game_over = True
             self.root.after(200, self._next_turn)
+            self._update_hud()
             return
 
         self._render_frame(self.scrsize_h, self.scrsize_w)
@@ -1415,19 +1415,7 @@ class Pyrogue_Game:
                 # Essentially 'pauses' the turnloop until keyboard input results in end of player turn
                 if self.curr_input_mode != self.input_modes["player_turn"]:
                     # Update bottom messages for player location and score
-                    pc_r, pc_c = self.player.get_pos()
-                    pinfo_msg = (
-                        "HEALTH: "
-                        + str(self.player.hp)
-                        + "   POS: (R:"
-                        + str(pc_r)
-                        + ", C:"
-                        + str(pc_c)
-                        + ")"
-                    )
-                    score_msg = "SCORE: " + str(self.player_score)
-                    self._update_pinfo_label(pinfo_msg)
-                    self._update_score_label(score_msg)
+                    self._update_hud()
                     self.curr_input_mode = self.input_modes["player_turn"]
                     return
             else:

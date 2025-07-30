@@ -17,6 +17,8 @@ v0.07 ==========================================================================
 07/29/2025
     - Player now deals damage based on equipped items, defaulting to fisticuffs if none equipped
     - Items can now be equipped; full stat bonus application work in progress
+07/30/2025
+    - Updated HUD to reflect new player stats (HP cap, defense, and dodge)
 v0.06 ===========================================================================================================================
 07/10/2025
     - Implemented fog of war using recursive shadowcasting
