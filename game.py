@@ -514,6 +514,26 @@ class Pyrogue_Game:
             print("GAME: Player equipment sub-menu closed")
             print("GAME: Player iventory sub-menu opened")
             self._render_inventory()
+        elif key == "Return":
+            key_str = {
+                0: "weapon",
+                1: "ranged",
+                2: "offhand",
+                3: "armor",
+                4: "amulet",
+                5: "ring_l",
+                6: "ring_r",
+                7: "light",
+            }
+            success, item = self.player.unequip_item(key_str[self.submenu_select_idx])
+            if success:
+                self._update_top_label(f"{item.get_name()} returned to inventory")
+                self.need_submenu_rerender = True
+                self._render_equipment()
+                self._update_hud()
+            else:
+                # I will need to figure something out in case there just isn't an item to unequip.
+                self._update_top_label("No room in inventory to unequip item")
         elif key == "j" or key == "Down" or key == "2":
             # Move selection down
             if self.submenu_select_idx < 7:
@@ -549,7 +569,7 @@ class Pyrogue_Game:
             ]
             if (
                 mtypedef.is_gen_eligible()
-                and random.randint(0, 100) >= mtypedef.get_rarity()
+                and random.randint(1, 101) >= mtypedef.get_rarity()
             ):
                 # Create monster
                 new_monster = Monster(mtypedef)
@@ -594,7 +614,7 @@ class Pyrogue_Game:
             ]
             if (
                 itypedef.is_gen_eligible()
-                and random.randint(0, 100) >= itypedef.get_rarity()
+                and random.randint(1, 101) >= itypedef.get_rarity()
             ):
                 # Create Item
                 new_item = Item(itypedef)

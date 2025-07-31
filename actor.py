@@ -553,14 +553,16 @@ class Player(Actor):
         # Player inventory / equipment slots
         self.inventory_size = 10  # Carry slot limit
         self.inventory = [None for _ in range(self.inventory_size)]
-        self.weapon = None
-        self.ranged = None
-        self.offhand = None
-        self.armor = None
-        self.amulet = None
-        self.light = None
-        self.ring_r = None
-        self.ring_l = None
+        self.equip_slots = {
+            "weapon": None,
+            "ranged": None,
+            "offhand": None,
+            "armor": None,
+            "amulet": None,
+            "light": None,
+            "ring_l": None,
+            "ring_r": None,
+        }
 
     # Gets the correct information for an octant, or part of the scan circle for player visually scanning dungeon.
     def _get_octant_transform(self, octant):
@@ -726,110 +728,125 @@ class Player(Actor):
             # Now check that there is an item present
             item = item_map[r][c]
             if item != None:
-                # Check that there is room in the player carry slots
-                # Fill first available slot, if there is one
-                for slot_idx in range(self.inventory_size):
-                    slot = self.inventory[slot_idx]
-                    if slot == None:
-                        self.inventory[slot_idx] = item
-                        item.picked_up = True
-                        item_map[r][c] = None
-                        return True, item
-                        # Future note for me: Will likely need to figure something out for artifacts
-
+                if self._place_in_inventory(item):
+                    item_map[r][c] = None
+                    return True, item
         return False, None
+
+    # Attempts to place an item into inventory
+    def _place_in_inventory(self, item: Item):
+        # Check that there is room in the player carry slots
+        # Fill first available slot, if there is one
+        for slot_idx in range(self.inventory_size):
+            slot = self.inventory[slot_idx]
+            if slot == None:
+                self.inventory[slot_idx] = item
+                item.picked_up = True
+                return True  # Successfully placed into inventory
+        return False  # Failed to find room; cannot place into inventory
 
     # Attempts to equip an item in given inventory slot
     # Returns a bool for success/failure, and the item equipped
     def equip_use_item(self, idx: int):
         item = self.inventory[idx]
+        self.inventory[idx] = None
 
         if item == None:
             return False, None
 
         # Grab type to check which equip slot it should go into
-        # This could be written a bit more cleanly; I might come back to it.
+        # Unequipping whatever might be there first
         itype = item.get_type()
-        existing_item = None
         if itype == item_type_opts["WEAPON"]:
-            existing_item = self.weapon
-            self.weapon = item
-            self.inventory[idx] = existing_item
+            self.unequip_item("weapon")
+            self.equip_slots["weapon"] = item
         elif itype == item_type_opts["RANGED"]:
-            existing_item = self.ranged
-            self.ranged = item
-            self.inventory[idx] = existing_item
+            self.unequip_item("ranged")
+            self.equip_slots["ranged"] = item
         elif itype == item_type_opts["OFFHAND"]:
-            existing_item = self.offhand
-            self.offhand = item
-            self.inventory[idx] = existing_item
+            self.unequip_item("offhand")
+            self.equip_slots["offhand"] = item
         elif itype == item_type_opts["ARMOR"]:
-            existing_item = self.armor
-            self.armor = item
-            self.inventory[idx] = existing_item
+            self.unequip_item("armor")
+            self.equip_slots["armor"] = item
         elif itype == item_type_opts["AMULET"]:
-            existing_item = self.amulet
-            self.amulet = item
-            self.inventory[idx] = existing_item
+            self.unequip_item("amulet")
+            self.equip_slots["amulet"] = item
         elif itype == item_type_opts["RING"]:
-            existing_item = self.ring_l
-            self.ring_l = item
-            self.inventory[idx] = existing_item
+            # Rotate rings. Inventory -> L -> R -> inventory
+            self.unequip_item("ring_r")
+            self.equip_slots["ring_r"] = self.equip_slots["ring_l"]
+            self.equip_slots["ring_l"] = item
         elif itype == item_type_opts["LIGHT"]:
-            existing_item = self.light
+            self.unequip_item("light")
             self.light = item
-            self.inventory[idx] = existing_item
 
         # Now add bonuses; what is applied depends on item type
         if itype == item_type_opts["LIGHT"]:
             self.view_dist += item.attr
-            # Remove bonus if existing light
-            if existing_item != None:
-                self.view_dist -= existing_item.attr
         elif itype == item_type_opts["POTION"]:
-            # Just using and destroying potion
-            # Ignoring for now
-            pass
+            # Use and then destroy potion
+            self.hp_cap += item.attr
+            new_hp = self.hp + item.hp_restore
+            self.hp = min(new_hp, self.hp_cap)
+            self.speed += item.speed
+            self.defense += item.defense
+            self.dodge += item.defense
+            self.inventory[idx] = None
         else:
-            # just add regular speed, defense, dodge and hp restore bonus
+            # regular bonuses; speed, defense, dodge and hp restore
             if not item.used:
+                # Only add hp_restore on first equip
                 new_hp = self.hp + item.hp_restore
                 self.hp = min(new_hp, self.hp_cap)
-                self.speed += item.speed
-                self.defense += item.defense
-                self.dodge += item.defense
                 item.used = True
-
-                if existing_item != None:
-                    self.speed -= existing_item.speed
-                    self.defense -= existing_item.defense
-                    self.dodge -= existing_item.dodge
+            self.speed += item.speed
+            self.defense += item.defense
+            self.dodge += item.dodge
 
         return True, item
+
+    # Unequips an item in a given slot, using keystring to indicate which slot.
+    def unequip_item(self, key_str: str):
+        item = self.equip_slots[key_str]
+        if item != None:
+            if self._place_in_inventory(item):
+                self.speed -= item.speed
+                self.defense -= item.defense
+                self.dodge -= item.dodge
+                self.equip_slots[key_str] = None
+                return True, item
+        return False, None
 
     # Rolls dice to determine dmg output in melee combat
     def _dmg_roll_melee(self) -> int:
         dmg = 0
         # Roll dice of main weapons/ equipment
-        if self.weapon != None:
-            dmg += self.weapon.damage_dice.roll()
+        item = self.equip_slots["weapon"]
+        if item != None:
+            dmg += item.damage_dice.roll()
         # If and when ranged combat is implemented, this will not be rolled here.
-        if self.ranged != None:
-            dmg += self.ranged.damage_dice.roll()
-        if self.offhand != None:
-            dmg += self.offhand.damage_dice.roll()
+        item = self.equip_slots["ranged"]
+        if item != None:
+            dmg += item.damage_dice.roll()
+        item = self.equip_slots["offhand"]
+        if item != None:
+            dmg += item.damage_dice.roll()
 
         # If no damage yet applied, default to fisticuffs dice.
         if dmg == 0:
             dmg = self.fisticuffs_dice.roll()
 
         # Now roll for damage of rings/ amulets; they act as bonuses, so will be applied anywhere damage is applied
-        if self.amulet != None:
-            dmg += self.amulet.damage_dice.roll()
-        if self.ring_l != None:
-            dmg += self.ring_l.damage_dice.roll()
-        if self.ring_r != None:
-            dmg += self.ring_r.damage_dice.roll()
+        item = self.equip_slots["amulet"]
+        if item != None:
+            dmg += item.damage_dice.roll()
+        item = self.equip_slots["ring_l"]
+        if item != None:
+            dmg += item.damage_dice.roll()
+        item = self.equip_slots["ring_r"]
+        if item != None:
+            dmg += item.damage_dice.roll()
 
         return dmg
 
@@ -915,28 +932,28 @@ class Player(Actor):
             return True, item
 
     def get_weapon(self):
-        return self.weapon
+        return self.equip_slots["weapon"]
 
     def get_ranged(self):
-        return self.ranged
+        return self.equip_slots["ranged"]
 
     def get_offhand(self):
-        return self.offhand
+        return self.equip_slots["offhand"]
 
     def get_armor(self):
-        return self.armor
+        return self.equip_slots["armor"]
 
     def get_amulet(self):
-        return self.amulet
+        return self.equip_slots["amulet"]
 
     def get_ring_l(self):
-        return self.ring_l
+        return self.equip_slots["ring_l"]
 
     def get_ring_r(self):
-        return self.ring_r
+        return self.equip_slots["ring_r"]
 
     def get_light(self):
-        return self.light
+        return self.equip_slots["light"]
 
 
 # This is the class for monsters and their turn/movement methods.

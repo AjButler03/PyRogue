@@ -9,6 +9,50 @@ Dice act to randomize the aspects of monsters, and are expressed like 10+2d6, i.
 Other note: COLOR can be specified as multiple colors, which will be randomly looped between. They just need to be any valid Tkinter color keyword.
 
 BEGIN MONSTER
+NAME a Zombie
+SYMB z
+COLOR green
+DESC
+Brrraaiinnss...
+.
+SPEED 2+1d3
+DAM 1+1d4
+HP 12+2d6
+ABIL ERRATIC
+RRTY 10
+END
+
+BEGIN MONSTER
+NAME a Skeleton
+SYMB s
+COLOR white
+DESC
+This appears to be a walking human skeleton.
+How it's up and moving without any muscles, you have no idea.
+.
+SPEED 2+1d3
+DAM 0+1d4
+HP 5+2d6
+ABIL SMART
+RRTY 10
+END
+
+BEGIN MONSTER
+NAME a Group of Spiders
+SYMB s
+COLOR gray
+DESC
+A traveling group of 8-legged monstrosities of nature.
+If you have fire, then buring it with fire is probably preferable.
+.
+SPEED 5+1d3
+DAM 0+2d6
+HP 10+2d6
+ABIL TUNNEL
+RRTY 10
+END
+
+BEGIN MONSTER
 NAME Junior Barbarian
 SYMB p
 COLOR yellow
@@ -23,7 +67,7 @@ SPEED 7+1d4
 DAM 0+1d4
 HP 12+2d6
 ABIL SMART
-RRTY 100
+RRTY 15
 END
 
 BEGIN MONSTER
@@ -42,7 +86,7 @@ ABIL SMART PASS
 DAM 30+5d9
 HP 2999+1d1001
 SPEED 10+10d2
-RRTY 10
+RRTY 75
 END
 
 BEGIN MONSTER
@@ -61,7 +105,7 @@ SPEED 20+0d1
 ABIL SMART TELE UNIQ
 HP 100+0d1
 DAM 10+2d20
-RRTY 10
+RRTY 45
 END
 
 BEGIN MONSTER
@@ -78,7 +122,7 @@ SPEED 4+2d3
 DAM 25+3d6
 HP 500+2d500
 ABIL SMART TUNNEL
-RRTY 20
+RRTY 55
 END
 
 BEGIN MONSTER
@@ -92,7 +136,7 @@ DAM 0+1d4
 HP 20+0d1
 SPEED 7+1d3
 ABIL TUNNEL ERRATIC
-RRTY 50
+RRTY 45
 END
 
 BEGIN MONSTER
@@ -151,7 +195,7 @@ ABIL UNIQ ERRATIC DESTROY TUNNEL BOSS
 SPEED 10+0d1
 HP 6666+0d666
 DAM 0+1d4
-RRTY 10
+RRTY 75
 END
 
 BEGIN MONSTER
@@ -169,7 +213,7 @@ careful!  It packs a powerful punch!
 "Whose horse is that?"
 "Peeetaah, the horse is here."
 .
-RRTY 25
+RRTY 45
 END
 
 BEGIN MONSTER
@@ -236,7 +280,7 @@ NAME The Don
 DESC
 He was better as an annoying TV personality.
 .
-RRTY 20
+RRTY 75
 END
 
 BEGIN MONSTER
@@ -334,5 +378,5 @@ DESC
 Beware his blade the crimson carver, and bask in his armor of red- 
 For he is the harbinger of Dr. Pepper, and you'll soon be dead.
 .
-RRTY 50
+RRTY 75
 END
