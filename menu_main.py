@@ -21,7 +21,7 @@ class Menu_Main:
     }
 
     # Pre-defined difficulty settings
-    difficulty_setting = {0: 0.05, 1: 0.25, 2: 0.4, 3: 0.65, 4: 1.3, 5: 2.5}
+    difficulty_setting = {0: 0.05, 1: 0.25, 2: 0.5, 3: 0.75, 4: 1.5, 5: 2.5}
 
     # Menu_Main constructor.
     def __init__(self, root, scrsize_h: int, scrsize_w: int):

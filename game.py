@@ -150,6 +150,12 @@ class Pyrogue_Game:
         self._start_turnloop()
         print("=== GAME START ===")
 
+    # Nerfs speed value so that it doesn't become too overpowered.
+    def _speed_nerf(self, base_speed: int) -> int:
+        # I don't know how best to do this, so i'm just capping the speed for the player.
+        # Anything higher than that seems a little too OP, since it brings every other monster to a standstill.
+        return min(base_speed, 50)
+
     # Event handeler for screen resizing.
     def _on_win_resize(self, event):
         # Save the event for redrawing
@@ -177,7 +183,7 @@ class Pyrogue_Game:
 
                 # Requeue player
                 new_turn = self.player.get_currturn() + (
-                    1000 // self.player.get_speed()
+                    1000 // self._speed_nerf(self.player.get_speed())
                 )
                 self.turn_pq.push(self.player, new_turn)
                 self.player.set_currturn(new_turn)
@@ -335,10 +341,7 @@ class Pyrogue_Game:
                         )
                     else:
                         # Print kill message
-                        if targ_actor.is_unique():
-                            message = "You killed " + targ_actor.get_name()
-                        else:
-                            message = "You killed a " + targ_actor.get_name()
+                        message = "You killed " + targ_actor.get_name()
                         # Remove monster from map
                         targ_r, targ_c = targ_actor.get_pos()
                         self.actor_map[targ_r][targ_c] = None
@@ -525,14 +528,15 @@ class Pyrogue_Game:
                 6: "ring_r",
                 7: "light",
             }
-            success, item = self.player.unequip_item(key_str[self.submenu_select_idx])
+            success, inventory_problem, item = self.player.unequip_item(
+                key_str[self.submenu_select_idx]
+            )
             if success:
                 self._update_top_label(f"{item.get_name()} returned to inventory")
                 self.need_submenu_rerender = True
                 self._render_equipment()
                 self._update_hud()
-            else:
-                # I will need to figure something out in case there just isn't an item to unequip.
+            elif inventory_problem:
                 self._update_top_label("No room in inventory to unequip item")
         elif key == "j" or key == "Down" or key == "2":
             # Move selection down
@@ -764,7 +768,7 @@ class Pyrogue_Game:
                 green = int(255 * ratio * 2)
             blue = 0
             self.hp_msg_color = f"#{red:02X}{green:02X}{blue:02X}"
-            self.pinfo_msg = f"HP:           SPEED: {self.player.get_speed():03d}   DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
+            self.pinfo_msg = f"HP:           SPEED: {self._speed_nerf(self.player.get_speed()):03d}   DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
             self.pinfo_msg_color = "white"
         else:
             # Player score and position (line 1)
@@ -1461,14 +1465,10 @@ class Pyrogue_Game:
             return
 
         # Game over check
-        if len(self.turn_pq) < 2 or not self.player.is_alive():
-            # Game has ended; if player is alive, then player won. Otherwise, the monsters won.
-            if self.player.is_alive():
-                message = "You have defeated all monsters; Game Over"
-                self._update_top_label(message, "gold")
-            else:
-                message = "You have been defeated; Game Over"
-                self._update_top_label(message, "red")
+        if not self.player.is_alive():
+            # You were defeated; game over
+            message = "You have been defeated; Game Over"
+            self._update_top_label(message, "red")
             print(message)
             self.msg_log.append(message)
             print("=== GAME OVER ===")

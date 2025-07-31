@@ -505,8 +505,8 @@ DESC
 A potion that heals your wounds, but also earns you advanced endurance.
 Restores hit points and increases hit point capacity.
 .
-ATTR 5+1d20
-RRTY 75
+ATTR 10+1d20
+RRTY 50
 ART FALSE
 END
 
@@ -523,6 +523,6 @@ DESC
 Does this need explanation?
 .
 ATTR 500+0d1
-RRTY 99
+RRTY 100
 ART True
 END

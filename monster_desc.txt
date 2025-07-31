@@ -53,6 +53,34 @@ RRTY 10
 END
 
 BEGIN MONSTER
+NAME a cave rat
+SYMB r
+COLOR red
+DESC
+The little lad is pretty fast, but it can't do much to you.
+.
+SPEED 10+1d3
+DAM 0+2d3
+HP 1+2d6
+ABIL ERRATIC
+RRTY 10
+END
+
+BEGIN MONSTER
+NAME a feral cat
+SYMB c
+COLOR orange
+DESC
+It would be cute, if it weren't howling in anger.
+.
+SPEED 10+1d3
+DAM 2+2d6
+HP 5+2d6
+ABIL ERRATIC SMART
+RRTY 10
+END
+
+BEGIN MONSTER
 NAME Junior Barbarian
 SYMB p
 COLOR yellow
@@ -270,60 +298,6 @@ RRTY 100
 END
 
 BEGIN MONSTER
-SYMB D
-COLOR red yellow orange
-SPEED 25+0d1
-ABIL PICKUP TELE UNIQ
-HP 20000+0d1
-DAM 0+1d4
-NAME The Don
-DESC
-He was better as an annoying TV personality.
-.
-RRTY 75
-END
-
-BEGIN MONSTER
-SYMB A
-COLOR orange
-SPEED 5+0d1
-ABIL SMART TELE BOSS UNIQ
-HP 99999+0d1
-DAM 0+0d1
-NAME Andrew Butler
-DESC
-This guy doesn't seem to have any energy left in him. It's as if he has
-spent many hours in this dungeon; you can't fathom as to why.
-He doesn't appear to pose any sort of threat.
-
-                              \\\\\\\
-                            \\\\\\\\\\\\
-                          \\\\\\\\\\\\\\\
-  -----------,-|           |C>   // )\\\\|
-           ,','|          /       ,'/////|
----------,','  |         (,         /////
-         ||    |           |          ''|
-         ||    |            \____      _|
-         ||    |______           \____/ \
-         ||    |     ,|         _/_____/ \
-         ||  ,'    ,' |        /          |
-         ||,'    ,'   |       |         \  |
-_________|/    ,'     |      /           | |
-_____________,'      ,',_____|      |    | |
-             |     ,','      |      |    | |
-             |   ,','    ____|_____/    /  |
-             | ,','  __/ |             /   |
-_____________|','   ///_/-------------/   |
-              |===========,'
-			  
-That said, he seems to know more about how this place works than any
-other creature you've seen in here. Perhaps that is for the best, 
-given how poorly built this dungeon is.
-.
-RRTY 95
-END
-
-BEGIN MONSTER
 SYMB J
 COLOR deeppink1
 SPEED 100+0d1
@@ -354,22 +328,21 @@ END
 BEGIN MONSTER
 SYMB S
 COLOR lawngreen
-SPEED 15+0d1
+SPEED 25+3d20
 ABIL UNIQ
-HP 2000+0d1
+HP 1000+0d1
 DAM 0+1d5
 NAME The Sauce Man
 DESC
 With his mighty Prego, he smites thee.
 .
-RRTY 50
+RRTY 65
 END
-
 
 BEGIN MONSTER
 SYMB P
 COLOR maroon
-SPEED 10+0d1
+SPEED 15+3d10
 ABIL UNIQ SMART
 HP 2500+0d1
 DAM 0+2d4

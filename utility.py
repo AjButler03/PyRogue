@@ -23,7 +23,7 @@ def dodge_chance(dval: int) -> bool:
 
 # Determines the amount by which damage is reduced based on current defense value.
 def def_dmg_reduction(base_dmg: int, def_val: int) -> int:
-    full_reduct_val = 600  # Arbitrary value for full reduction
+    full_reduct_val = 2500  # Arbitrary value for full reduction
     if def_val <= 0:
         return base_dmg  # No reduction
     elif def_val >= full_reduct_val:

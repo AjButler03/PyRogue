@@ -779,7 +779,7 @@ class Player(Actor):
             self.equip_slots["ring_l"] = item
         elif itype == item_type_opts["LIGHT"]:
             self.unequip_item("light")
-            self.light = item
+            self.equip_slots["light"] = item
 
         # Now add bonuses; what is applied depends on item type
         if itype == item_type_opts["LIGHT"]:
@@ -807,6 +807,7 @@ class Player(Actor):
         return True, item
 
     # Unequips an item in a given slot, using keystring to indicate which slot.
+    # Returns bool for general success, bool for inventory problem, and then the item.
     def unequip_item(self, key_str: str):
         item = self.equip_slots[key_str]
         if item != None:
@@ -815,8 +816,10 @@ class Player(Actor):
                 self.defense -= item.defense
                 self.dodge -= item.dodge
                 self.equip_slots[key_str] = None
-                return True, item
-        return False, None
+                return True, False, item
+            else:
+                return False, True, item
+        return False, False, item
 
     # Rolls dice to determine dmg output in melee combat
     def _dmg_roll_melee(self) -> int:
@@ -928,8 +931,11 @@ class Player(Actor):
             return False, item
         else:
             item = self.inventory[idx]
-            self.inventory[idx] = None
-            return True, item
+            if item != None:
+                self.inventory[idx] = None
+                return True, item
+            else:
+                return False, item
 
     def get_weapon(self):
         return self.equip_slots["weapon"]
@@ -1005,8 +1011,14 @@ class Monster(Actor):
 
     # Returns the score value for defeating this monster.
     def get_score_val(self) -> int:
-        return self.typedef.rarity
-
+        base_val = self.typedef.rarity
+        if self.typedef.is_unique:
+            base_val *= 2
+        if has_attribute(self.attributes, ATTR_BOSS_______):
+            base_val *= 5
+            
+        return base_val
+    
     # resets generation eligibility of type definition
     def update_gen_eligible(self, is_new_mon: bool, force_reset: bool):
         """
