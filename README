@@ -7,7 +7,6 @@ New features with v0.07:
     - Item Encyclopedia
     - Randomized item generation in dungeon
     - Player inventory + equipment usage
-    - Item / Monster inspection feature (opt?)
 
 The game has the following key binds:
 ================================   MOVEMENT   ================================
@@ -24,12 +23,12 @@ The game has the following key binds:
 ================================  INVENTORY   ================================
   e: Opens equipment menu.
   i: Opens inventory menu.
-  enter: equip/unequip/use item.
-  d: attempts to drop an item from inventory.
-  x: destroys an item from inventory.
+  enter: Equip/unequip/use item.
+  d: Attempts to drop an item from inventory.
+  x: Attempts to destroy an item from inventory.
 ================================    OTHER     ================================
   f : Toggle fog of war effect. 
-  m : opens a submenu to list all present monsters.
+  m : Opens a submenu to list all present monsters.
   z : Cycles through standard / walking map / tunnelmap render modes.
   esc : Opens / closes pause menu.
 

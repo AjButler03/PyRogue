@@ -23,8 +23,9 @@ v0.07 ==========================================================================
     - implemented speed, defense, and dodge bonuses for equipped items
     - Fixed issue where increased speed actually resulted in fewer turns
 07/31/2025
-    - Removed original win condition; currently there is none
+    - Removed original win condition; now need to kill a monster marked as a boss
     - Small gameplay tweaks to speed and scoring
+    - Can now drop items from inventory
 v0.06 ===========================================================================================================================
 07/10/2025
     - Implemented fog of war using recursive shadowcasting

@@ -131,8 +131,8 @@ SYMB B
 COLOR red magenta
 SPEED 20+0d1
 ABIL SMART TELE UNIQ
-HP 100+0d1
-DAM 10+2d20
+HP 500+0d1
+DAM 15+2d20
 RRTY 45
 END
 
@@ -144,10 +144,10 @@ Titan is a force to be reckoned with. A mighty oak club is his weapon of
 choice, but you are all too aware it would take no more than a flick of
 the wrist for him to shatter every bone in your body.
 .
-SYMB M
+SYMB T
 COLOR green blue
 SPEED 4+2d3
-DAM 25+3d6
+DAM 25+4d10
 HP 500+2d500
 ABIL SMART TUNNEL
 RRTY 55

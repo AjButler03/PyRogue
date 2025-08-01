@@ -530,9 +530,9 @@ class Player(Actor):
         # Define the player as alive
         self.alive = True
 
-        # Initial HP cap of 200, and hp set to that maximum
-        self.hp = 200
-        self.hp_cap = 200
+        # Initial HP cap, and hp set to that maximum
+        self.hp_cap = 100
+        self.hp = self.hp_cap
 
         # Initial defense and dodge of 10
         self.defense = 10
@@ -812,9 +812,13 @@ class Player(Actor):
         item = self.equip_slots[key_str]
         if item != None:
             if self._place_in_inventory(item):
-                self.speed -= item.speed
-                self.defense -= item.defense
-                self.dodge -= item.dodge
+                itype = item.get_type()
+                if itype == item_type_opts["LIGHT"]:
+                    self.view_dist -= item.attr
+                else:
+                    self.speed -= item.speed
+                    self.defense -= item.defense
+                    self.dodge -= item.dodge
                 self.equip_slots[key_str] = None
                 return True, False, item
             else:
@@ -925,6 +929,7 @@ class Player(Actor):
         else:
             return True, self.inventory[idx]
 
+    # Attempts to delete an item from inventory.
     def expunge_item(self, idx: int):
         item = None
         if idx >= self.inventory_size:
@@ -936,6 +941,26 @@ class Player(Actor):
                 return True, item
             else:
                 return False, item
+
+    # Attempts to drop an item from inventory into the dungeon.
+    def drop_item(self, idx: int, item_list: list, item_map: list):
+        item = None
+        if idx >= self.inventory_size:
+            return False, item
+        else:
+            item = self.inventory[idx]
+            if item != None:
+                # Now need to check if dropping the item is possible at current location
+                existing_item = item_map[self.r][self.c]
+                if existing_item == None:
+                    # Possible to drop item, since there is not an item in place already.
+                    # Add the item to the game's item_list, if necessary.
+                    if item not in item_list:
+                        item_list.append(item)
+                    self.inventory[idx] = None
+                    item_map[self.r][self.c] = item
+                    return True, item
+        return False, item
 
     def get_weapon(self):
         return self.equip_slots["weapon"]
@@ -1009,6 +1034,9 @@ class Monster(Actor):
         """
         return self.typedef.is_unique
 
+    def is_boss(self) -> bool:
+        return has_attribute(self.attributes, ATTR_BOSS_______)
+
     # Returns the score value for defeating this monster.
     def get_score_val(self) -> int:
         base_val = self.typedef.rarity
@@ -1016,9 +1044,9 @@ class Monster(Actor):
             base_val *= 2
         if has_attribute(self.attributes, ATTR_BOSS_______):
             base_val *= 5
-            
+
         return base_val
-    
+
     # resets generation eligibility of type definition
     def update_gen_eligible(self, is_new_mon: bool, force_reset: bool):
         """

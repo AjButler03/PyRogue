@@ -524,5 +524,5 @@ Does this need explanation?
 .
 ATTR 500+0d1
 RRTY 100
-ART True
+ART TRUE
 END

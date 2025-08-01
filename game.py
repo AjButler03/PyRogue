@@ -480,6 +480,17 @@ class Pyrogue_Game:
                 self.submenu_select_idx = self.player.get_inventory_size() - 1
             self.need_submenu_rerender = True
             self._render_inventory()
+        elif key == "d":
+            success, item = self.player.drop_item(
+                self.submenu_select_idx, self.item_list, self.item_map
+            )
+            if success:
+                msg = f"You dropped {item.get_name()}"
+            elif item != None:
+                msg = f"Cannot drop; item already on floor"
+            else:
+                msg = f"No item to drop"
+            self._update_top_label(msg)
         elif key == "x":
             # Attempt to destroy an item
             success, item = self.player.expunge_item(self.submenu_select_idx)
@@ -498,6 +509,9 @@ class Pyrogue_Game:
             self.curr_submenu = self.display_submenus["none"]
             self.submenu_canvas.destroy()
             self.need_full_rerender = True
+            self.player.handle_turn(
+                self.dungeon, self.actor_map, self.player, Move(Move.none)
+            )
             print("GAME: Player equipment sub-menu closed")
             self._update_top_label("")
         elif (
@@ -536,6 +550,7 @@ class Pyrogue_Game:
                 self.need_submenu_rerender = True
                 self._render_equipment()
                 self._update_hud()
+
             elif inventory_problem:
                 self._update_top_label("No room in inventory to unequip item")
         elif key == "j" or key == "Down" or key == "2":
@@ -1516,6 +1531,18 @@ class Pyrogue_Game:
                 self._update_top_label(message)
                 message = "TURN " + str(actor.get_currturn()) + ": " + message
                 self.msg_log.append(message)
+        elif actor.is_boss():
+            # Killed a boss monster; Game ends
+            message = f"{actor.get_name()} (BOSS) defeated; Game Over"
+            self._update_top_label(message, "gold")
+            print(message)
+            self.msg_log.append(message)
+            print("=== GAME OVER ===")
+            self.curr_render_mode = self.render_modes["x-ray"]
+            self.need_full_rerender = True
+            self.game_over = True
+            self.root.after(200, self._next_turn)
+            self._update_hud()
 
         # Wait 1ms before running next turn
         self.root.after(1, self._next_turn)
