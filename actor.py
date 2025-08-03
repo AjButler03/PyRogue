@@ -1039,11 +1039,11 @@ class Monster(Actor):
 
     # Returns the score value for defeating this monster.
     def get_score_val(self) -> int:
-        base_val = self.typedef.rarity
+        base_val = self.typedef.rarity * 10
         if self.typedef.is_unique:
-            base_val *= 2
-        if has_attribute(self.attributes, ATTR_BOSS_______):
             base_val *= 5
+        if has_attribute(self.attributes, ATTR_BOSS_______):
+            base_val *= 10
 
         return base_val
 

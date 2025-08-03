@@ -301,9 +301,9 @@ BEGIN MONSTER
 SYMB J
 COLOR deeppink1
 SPEED 100+0d1
-ABIL SMART TELE BOSS UNIQ
+ABIL SMART TELE UNIQ
 HP 99999+0d1
-DAM 0+0d1
+DAM 1+0d1
 NAME Jadyn Sheppard
 DESC
 She just wants attention, if only to yap about dinosaurs.

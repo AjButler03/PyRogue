@@ -117,7 +117,7 @@ class Pyrogue_Game:
         self.top_msg_color = "gold"
         self.score_msg_cache = ("", "")
         r, c = self.player.get_pos()
-        self.score_msg = f"SCORE: {self.player_score:04d}   POS: (r:{r:0d}, c:{c:0d})"
+        self.score_msg = f"SCORE: {self.player_score:06d}   POS: (r:{r:0d}, c:{c:0d})"
         self.score_msg_color = "white"
         self.hp_msg_cache = ("", "")
         self.hp_msg = f"{self.player.get_hp():03d}/{self.player.get_hp_cap():03d}"
@@ -345,7 +345,9 @@ class Pyrogue_Game:
                         # Remove monster from map
                         targ_r, targ_c = targ_actor.get_pos()
                         self.actor_map[targ_r][targ_c] = None
-                        self.player_score += targ_actor.get_score_val()
+                        self.player_score += int(
+                            targ_actor.get_score_val() * self.difficulty
+                        )
 
                     self._update_top_label(message)
                     message = "TURN " + str(self.player.get_currturn()) + ": " + message
@@ -486,6 +488,8 @@ class Pyrogue_Game:
             )
             if success:
                 msg = f"You dropped {item.get_name()}"
+                self.need_submenu_rerender = True
+                self._render_inventory()
             elif item != None:
                 msg = f"Cannot drop; item already on floor"
             else:
@@ -673,8 +677,14 @@ class Pyrogue_Game:
 
     # Initializes a new dungeon for the game to use; this also re-generates the monsters and restarts the turnloop.
     def _replace_dungeon(self):
+
         # Reset monster generation eligibility
         self._reset_gen_eligibility()
+
+        # Ramp difficulty by 35%
+        self.difficulty *= 1.35
+
+        print(f"GAME: New dungeon level with difficulty {self.difficulty}")
 
         # Init the dungeon itself
         self.dungeon = Dungeon(self.mapsize_h, self.mapsize_w)
@@ -762,7 +772,7 @@ class Pyrogue_Game:
         if not self.game_over:
             # Player score and position (line 1)
             self.score_msg = (
-                f"SCORE: {self.player_score:04d}   POS: (r:{r:0d}, c:{c:0d})"
+                f"SCORE: {self.player_score:06d}   POS: (r:{r:0d}, c:{c:0d})"
             )
             self.score_msg_color = "white"
 
@@ -787,7 +797,7 @@ class Pyrogue_Game:
             self.pinfo_msg_color = "white"
         else:
             # Player score and position (line 1)
-            self.score_msg = f"FINAL SCORE: {self.player_score:04d}"
+            self.score_msg = f"FINAL SCORE: {self.player_score:06d}"
             self.score_msg_color = "#00FF00"
 
             # Player stats (line 2)
@@ -970,7 +980,7 @@ class Pyrogue_Game:
         self.submenu_canvas.create_text(
             menu_width // 2,
             int(offset * 1.5),
-            text="Monster List",
+            text=f"Monsters ({len(self.monster_list)} listed)",
             fill="red",
             font=(self.def_font, self.font_size),
             tag="mlist_header",

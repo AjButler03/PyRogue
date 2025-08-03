@@ -21,7 +21,7 @@ class Menu_Main:
     }
 
     # Pre-defined difficulty settings
-    difficulty_setting = {0: 0.05, 1: 0.25, 2: 0.5, 3: 0.75, 4: 1.5, 5: 2.5}
+    difficulty_setting = {0: 0.1, 1: 0.25, 2: 0.5, 3: 0.75, 4: 1, 5: 1.25}
 
     # Menu_Main constructor.
     def __init__(self, root, scrsize_h: int, scrsize_w: int):
@@ -415,7 +415,7 @@ class Menu_Main:
         y_offset = tile_size
 
         if self.need_full_rerender:
-            version_str = "Andrew Butler v0.07 08/2025"
+            version_str = "Andrew Butler v0.08 08/2025"
 
             # This is a series of string lines that form the PyRogue ASCII art text.
             # It's a little garbled here because of excape character \.

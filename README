@@ -1,12 +1,13 @@
-PyRogue v0.07 By Andrew Butler, Summer 2025
+PyRogue v0.08 By Andrew Butler, Summer 2025
 Built to run using Python 3.12
 
 pyrogue.py is the main file, and running it will open a new window with the PyRogue main menu.
 
-New features with v0.07:
-    - Item Encyclopedia
-    - Randomized item generation in dungeon
-    - Player inventory + equipment usage
+New features with v0.08:
+    - Manual page
+    - Inspection of monster and item instances within dungeon
+    - Difficulty score multiplier
+    - Increased difficulty as game progresses
 
 The game has the following key binds:
 ================================   MOVEMENT   ================================
