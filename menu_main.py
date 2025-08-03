@@ -7,9 +7,6 @@ from parsedesc import *
 
 # The Menu_Main class handles the main menu, it's sub-menus, and the main menu's control.
 class Menu_Main:
-    # This class has some duplicate code from Pyrogue_game.
-    # this is un-ideal, but I want main menu rendering / control to be separate from the game itself to keep things 'simpler'.
-
     # Pre-defined dungeon sizes
     dungeon_size_setting = {
         0: (15, 30),
@@ -753,7 +750,7 @@ class Menu_Main:
                 height=height,
                 width=width,
                 bg="black",
-                highlightthickness=5,
+                highlightthickness=0,
                 yscrollincrement=tile_size,
             )
 
@@ -941,7 +938,7 @@ class Menu_Main:
                 height=height,
                 width=width,
                 bg="black",
-                highlightthickness=5,
+                highlightthickness=0,
                 yscrollincrement=tile_size,
             )
 

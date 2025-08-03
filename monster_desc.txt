@@ -8,6 +8,8 @@ Dice act to randomize the aspects of monsters, and are expressed like 10+2d6, i.
 
 Other note: COLOR can be specified as multiple colors, which will be randomly looped between. They just need to be any valid Tkinter color keyword.
 
+========================= EASY MONSTERS
+
 BEGIN MONSTER
 NAME a Zombie
 SYMB z
@@ -99,23 +101,109 @@ RRTY 15
 END
 
 BEGIN MONSTER
-NAME Amazon Lich Queen
+SYMB c
+COLOR red
+SPEED 40+0d1
+ABIL PICKUP TELE SMART
+HP 200+0d1
+DAM 0+0d1
+NAME River Crab
 DESC
-She was a powerful Amazon warrior in life.  Death at the hands of the undead
-hordes was followed by her resurrection through dark, necromantic arts.  Her
-power in life didn't approach her undead glory.  Clad in night-black robes
-that don't move in the wind, her incorporeal form commands the power of death
-over life.  You may just be her next victim.  You fear for your soul as you
-quake before her malevolent majesty.
+It's a fresh-water crustacean that just wants everybody to get along.
 .
-SYMB p
-COLOR white red magenta
-ABIL SMART PASS
-DAM 30+5d9
-HP 2999+1d1001
-SPEED 10+10d2
+RRTY 35
+END
+
+BEGIN MONSTER
+SYMB G
+COLOR cyan
+NAME Casper the Friendly Ghost
+DESC
+Casper, the friendly ghost, 
+The friendliest ghost you know. 
+Though grown-ups might 
+Look at him with fright, 
+The children all love him so. 
+
+He always says hello, 
+and he's really glad to meetcha. 
+Wherever he may go, 
+He's kind to every living creature. 
+
+Grown-ups don't understand 
+Why children love him the most. 
+But kids all know 
+That he loves them so, 
+Casper the friendly ghost.
+.
+ABIL TELE PASS UNIQ
+SPEED 7+1d5
+HP 19+1d11
+DAM 0+1d2
+RRTY 40
+END
+
+BEGIN MONSTER
+NAME Slime
+DESC
+Eww...  It's slimy.
+.
+SYMB s
+COLOR GREEN WHITE CYAN MAGENTA RED YELLOW BLUE
+DAM 3+2d6
+HP 20+0d1
+SPEED 7+1d3
+ABIL TUNNEL ERRATIC
+RRTY 45
+END
+
+========================= MODERATE DIFFICULTY
+
+BEGIN MONSTER
+SYMB R
+COLOR red orange yellow green blue violet
+SPEED 5+5d2
+ABIL SMART ERRATIC
+HP 100+0d1
+DAM 5+3d6
+NAME RoyGeeBiv
+DESC
+Pretty, in a tacky sort of way.
+It must have escaped from a nearby gaming computer.
+.
+RRTY 50
+END
+
+BEGIN MONSTER
+SYMB Z
+COLOR lawngreen green
+SPEED 25+3d20
+ABIL ERRATIC SMART
+HP 1000+0d1
+DAM 10+3d6
+NAME Undead Knight
+DESC
+You've seen the remains of many knights in here, many of which
+suffered pretty gruesome deaths. This seems much, much worse.
+.
+RRTY 65
+END
+
+BEGIN MONSTER
+SYMB P
+COLOR maroon
+SPEED 15+3d10
+ABIL UNIQ SMART
+HP 2500+0d1
+DAM 15+1d20
+NAME Sir Pepper
+DESC
+Beware his blade the crimson carver, and bask in his armor of red- 
+For he is the harbinger of Dr. Pepper, and you'll soon be dead.
+.
 RRTY 75
 END
+
 
 BEGIN MONSTER
 NAME Durin's Bane
@@ -154,81 +242,8 @@ RRTY 55
 END
 
 BEGIN MONSTER
-NAME Slime
-DESC
-Eww...  It's slimy.
-.
-SYMB s
-COLOR GREEN WHITE CYAN MAGENTA RED YELLOW BLUE
-DAM 0+1d4
-HP 20+0d1
-SPEED 7+1d3
-ABIL TUNNEL ERRATIC
-RRTY 45
-END
-
-BEGIN MONSTER
-SYMB G
-COLOR cyan
-NAME Casper the Friendly Ghost
-DESC
-Casper, the friendly ghost, 
-The friendliest ghost you know. 
-Though grown-ups might 
-Look at him with fright, 
-The children all love him so. 
-
-He always says hello, 
-and he's really glad to meetcha. 
-Wherever he may go, 
-He's kind to every living creature. 
-
-Grown-ups don't understand 
-Why children love him the most. 
-But kids all know 
-That he loves them so, 
-Casper the friendly ghost.
-.
-ABIL TELE PASS UNIQ
-SPEED 7+1d5
-HP 19+1d11
-DAM 0+1d2
-RRTY 40
-END
-
-BEGIN MONSTER
-SYMB G
-COLOR green
-NAME Slimer
-DESC
-Better call Venkman.  He's covered with ectoplasm, and he wants to eat all
-your food.
-.
-ABIL TELE PASS ERRATIC UNIQ
-SPEED 7+1d5
-HP 19+1d11
-DAM 0+1d2
-RRTY 80
-END
-
-BEGIN MONSTER
-SYMB M
-COLOR white yellow gold gray
-NAME The Milkman
-DESC
-Got Milk? No?
-Then you better be ready.
-.
-ABIL UNIQ ERRATIC DESTROY TUNNEL BOSS
-SPEED 10+0d1
-HP 6666+0d666
-DAM 0+1d4
-RRTY 75
-END
-
-BEGIN MONSTER
-SYMB h
-COLOR yellow
+SYMB H
+COLOR yellow white
 SPEED 6+1d10
 ABIL DESTROY TELE ERRATIC
 HP 200+0d1
@@ -241,58 +256,78 @@ careful!  It packs a powerful punch!
 "Whose horse is that?"
 "Peeetaah, the horse is here."
 .
-RRTY 45
-END
-
-BEGIN MONSTER
-SYMB c
-COLOR red
-SPEED 40+0d1
-ABIL PICKUP TELE SMART
-HP 200+0d1
-DAM 0+0d1
-NAME River Crab
-DESC
-It's a fresh-water crustacean that just wants everybody to get along.
-.
-RRTY 35
-END
-
-BEGIN MONSTER
-SYMB R
-COLOR red orange yellow green blue violet
-SPEED 5+5d2
-ABIL SMART ERRATIC
-HP 100+0d1
-DAM 2+5d3
-NAME RoyGeeBiv
-DESC
-Pretty, in a tacky sort of way.
-It must have escaped from a nearby gaming computer.
-.
 RRTY 50
 END
 
+=========================  DIFFICULT MONSTERS
+
+
+BEGIN MONSTER
+NAME Amazon Lich Queen
+DESC
+She was a powerful Amazon warrior in life.  Death at the hands of the undead
+hordes was followed by her resurrection through dark, necromantic arts.  Her
+power in life didn't approach her undead glory.  Clad in night-black robes
+that don't move in the wind, her incorporeal form commands the power of death
+over life.  You may just be her next victim.  You fear for your soul as you
+quake before her malevolent majesty.
+.
+SYMB p
+COLOR white red magenta
+ABIL SMART PASS
+DAM 30+5d9
+HP 2999+1d1001
+SPEED 10+10d2
+RRTY 75
+END
+
+BEGIN MONSTER
+SYMB M
+COLOR yellow gold red maroon
+NAME The Milkman
+DESC
+Once a simple milk provider, turned ravenous murdering machine.
+
+His business was injustly shut down by Big Milk, and he vowed
+to take revenge - and after a long, bloody fued, he got it.
+
+Don't underestimate him, or you will suffer the same fate as Big Milk.
+.
+ABIL UNIQ ERRATIC DESTROY TUNNEL BOSS
+SPEED 15+0d1
+HP 6666+1d666
+DAM 25+2d20
+RRTY 75
+END
+
+BEGIN MONSTER
+NAME Death
+DESC
+He's here for someone; and he seems to be following you.
+You should probably keep moving.
+.
+SYMB D
+COLOR gray maroon
+ABIL PASS TELE UNIQ BOSS
+DAM 500+10d20
+HP 99999+0d1
+SPEED 5+0d1
+RRTY 95
+END
+
+========================= FUN / EASTER EGG MONSTERS
+
 BEGIN MONSTER
 SYMB P
-COLOR yellow
+COLOR burlywood1
 SPEED 5+0d1
-ABIL ERRATIC
-HP 10+0d1
-DAM 1+0d1
-NAME Overhead Projector
+ABIL SMART TELEPATHIC
+HP 999999+0d1
+DAM 0+0d1
+NAME Piper the Dog
 DESC
-Some really old skool tech that might go over your head.  It's kind of like 
-Powerpoint, but without computers.  You've probably never seen one before 
-(unless you 1) are old; or 2) have taken a music class).  If you get attacked
-by one of these, make sure to block high.
-
-                                       >
-                                        \
-                                         |
-                                     |---|
-                                     |___|
-
+A good girl, off on her own adventure.
+2014 - 2024
 .
 RRTY 100
 END
@@ -302,8 +337,8 @@ SYMB J
 COLOR deeppink1
 SPEED 100+0d1
 ABIL SMART TELE UNIQ
-HP 99999+0d1
-DAM 1+0d1
+HP 999999+0d1
+DAM 0+0d1
 NAME Jadyn Sheppard
 DESC
 She just wants attention, if only to yap about dinosaurs.
@@ -322,34 +357,5 @@ She just wants attention, if only to yap about dinosaurs.
                               <"_V_">        <"_V_">
 
 .
-RRTY 95
-END
-
-BEGIN MONSTER
-SYMB S
-COLOR lawngreen
-SPEED 25+3d20
-ABIL UNIQ
-HP 1000+0d1
-DAM 0+1d5
-NAME The Sauce Man
-DESC
-With his mighty Prego, he smites thee.
-.
-RRTY 65
-END
-
-BEGIN MONSTER
-SYMB P
-COLOR maroon
-SPEED 15+3d10
-ABIL UNIQ SMART
-HP 2500+0d1
-DAM 0+2d4
-NAME Sir Pepper
-DESC
-Beware his blade the crimson carver, and bask in his armor of red- 
-For he is the harbinger of Dr. Pepper, and you'll soon be dead.
-.
-RRTY 75
+RRTY 100
 END

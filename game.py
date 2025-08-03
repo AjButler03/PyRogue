@@ -117,7 +117,7 @@ class Pyrogue_Game:
         self.top_msg_color = "gold"
         self.score_msg_cache = ("", "")
         r, c = self.player.get_pos()
-        self.score_msg = f"SCORE: {self.player_score:06d}   POS: (r:{r:0d}, c:{c:0d})"
+        self.score_msg = f"SCORE: {self.player_score:06d}   MODIFIER: {self.difficulty:.2f}   POS: (R:{r:0d}, C:{c:0d})"
         self.score_msg_color = "white"
         self.hp_msg_cache = ("", "")
         self.hp_msg = f"{self.player.get_hp():03d}/{self.player.get_hp_cap():03d}"
@@ -355,7 +355,6 @@ class Pyrogue_Game:
                 else:
                     # Just a plain successful move; reset message
                     self._update_top_label("")
-                    self.player_score += 1
                 return success
             else:
                 message = "You can't move there"
@@ -460,7 +459,11 @@ class Pyrogue_Game:
             # Attempt to equip item
             success, item = self.player.equip_use_item(self.submenu_select_idx)
             if success:
-                self._update_top_label("You equipped " + item.get_name())
+                # Check for message phrasing
+                if item.get_type() == item_type_opts["POTION"]:
+                    self._update_top_label("You used " + item.get_name())
+                else:
+                    self._update_top_label("You equipped " + item.get_name())
                 self.need_submenu_rerender = True
                 self._render_inventory()
                 self._update_hud()
@@ -772,7 +775,7 @@ class Pyrogue_Game:
         if not self.game_over:
             # Player score and position (line 1)
             self.score_msg = (
-                f"SCORE: {self.player_score:06d}   POS: (r:{r:0d}, c:{c:0d})"
+                f"SCORE: {self.player_score:06d}   MODIFIER: {self.difficulty:.2f}   POS: (R:{r:0d}, C:{c:0d})"
             )
             self.score_msg_color = "white"
 

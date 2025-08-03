@@ -35,7 +35,7 @@ NAME an Iron Sword
 TYPE WEAPON
 COLOR white
 DODGE 0+0d1
-DAM 10+1d10
+DAM 10+1d20
 DEF 10+0d1
 HIT 5+0d1
 SPEED 5+0d1
@@ -44,7 +44,7 @@ Your basic sword.
 Nothing special, but it should get the job done.
 .
 ATTR 0+0d1
-RRTY 10
+RRTY 15
 ART FALSE
 END
 
@@ -61,7 +61,7 @@ DESC
 A magical, elven blade, it glows blue when orcs are near.
 .
 ATTR 10+0d1
-RRTY 80
+RRTY 20
 ART TRUE
 END
 
@@ -79,7 +79,7 @@ DAM 314+15d92
 DODGE 0+0d1
 DEF 0+0d1
 SPEED 20+0d5
-RRTY 10
+RRTY 50
 ART TRUE
 END
 
@@ -97,20 +97,55 @@ The hammer of Thor, one of the most fearsome and powerful weapons in
 existence, capable of leveling mountains.
 .
 ATTR 10+0d1
-RRTY 50
+RRTY 75
 ART TRUE
 END
 
 ============================== RANGED definitions
 
 BEGIN ITEM
-NAME the Halo 1 pistol
+NAME a Crossbow
 TYPE RANGED
 COLOR gray
+DODGE 2+0d1
+DAM 15+1d10
+DEF 5+0d1
+HIT 2+0d1
+SPEED 0+0d1
+DESC
+A really old crossbow, which luckily still seems to work.
+With some good aim, this will be pretty useful.
+.
+ATTR 1+0d1
+RRTY 25
+ART FALSE
+END
+
+BEGIN ITEM
+NAME a Hand Gun
+TYPE RANGED
+COLOR white
+DODGE 5+0d1
+DAM 15+3d10
+DEF 10+0d1
+HIT 15+0d1
+SPEED 0+0d1
+DESC
+A basic hand held boom stick. It will come in handy to keep your distance.
+.
+ATTR 1+0d1
+RRTY 50
+ART FALSE
+END
+
+BEGIN ITEM
+NAME the Halo 1 pistol
+TYPE RANGED
+COLOR yellow
 DODGE 15+0d1
 DAM 100+10d500
 DEF 25+0d1
-HIT 75+0d1
+HIT 10+2d20
 SPEED 10+0d1
 DESC
 Two for the shields, one for the head.
@@ -122,47 +157,13 @@ ART TRUE
 END
 
 BEGIN ITEM
-NAME Battle Rifle
-TYPE RANGED
-COLOR white
-DODGE 5+0d1
-DAM 15+3d10
-DEF 10+0d1
-HIT 15+0d1
-SPEED 0+0d1
-DESC
-Standard UNSC issue.
-.
-ATTR 1+0d1
-RRTY 50
-ART FALSE
-END
-
-BEGIN ITEM
-NAME a Minecraft Bow
-TYPE RANGED
-COLOR cyan
-DODGE 2+0d1
-DAM 20+1d10
-DEF 5+0d1
-HIT 2+0d1
-SPEED 0+0d1
-DESC
-This thing is already enchanted and everything. You just have to use it.
-.
-ATTR 1+0d1
-RRTY 25
-ART FALSE
-END
-
-BEGIN ITEM
 NAME an Anti-Material Rifle (AMR)
 TYPE RANGED
 COLOR red
 DODGE 0+0d1
-DAM 250+15d750
+DAM 250+10d750
 DEF 25+0d1
-HIT 75+0d1
+HIT 10+2d20
 SPEED 0+0d1
 DESC
 They told you the game was rigged from the start; so you responded with this.
@@ -199,7 +200,7 @@ An iron shield you found on the remains of a knight.
 It's still in great condition, although it didn't save its previous owner.
 .
 TYPE OFFHAND
-HIT 0+0d1
+HIT 0+1d5
 DAM 0+0d1
 DODGE 10+5d5
 ATTR 0+0d1
@@ -218,11 +219,11 @@ maybe--now--you, but you're not telling.  The back side is inscribed with the
 words: "If found, please return to Zeus, Mount Olympus".
 .
 TYPE OFFHAND
-HIT 0+0d1
+HIT 0+1d20
 DAM 0+0d1
-DODGE 20+2d8
+DODGE 10+5d6
 ATTR 0+0d1
-DEF 20+3d8
+DEF 30+3d8
 SPEED 10+0d1
 COLOR yellow
 RRTY 30
@@ -273,7 +274,7 @@ An intact suit of armor you find on the corpse of a knight.
 It definitely won't make you faster, but you'll be able to tank some hits.
 .
 TYPE ARMOR
-HIT 0+0d1
+HIT 0+1d5
 DAM 0+0d1
 DODGE 3+1d3
 ATTR 0+0d1
@@ -291,7 +292,7 @@ The previous wearer should have worked at Aperature;
 because they are not, in fact, still alive.
 .
 TYPE ARMOR
-HIT 0+0d1
+HIT 5+2d20
 DAM 0+0d1
 DODGE 10+3d20
 ATTR 0+0d1
@@ -306,16 +307,16 @@ END
 ============================== RING definitions
 
 BEGIN ITEM
-NAME a ring of speed
+NAME a ring of unbreaking
 TYPE RING
-COLOR red
-DODGE 0+0d1
+COLOR cyan
+DODGE 10+2d20
 DAM 0+0d1
-DEF 0+0d1
+DEF 10+2d20
 HIT 0+0d1
-SPEED 0+1d40
+SPEED 0+1d20
 DESC
-Not only is it stylish, but it will let you move faster.
+Not only is it stylish, but it will help you survive.
 .
 ATTR 0+0d1
 RRTY 80
@@ -325,7 +326,7 @@ END
 BEGIN ITEM
 NAME a ring of damage
 TYPE RING
-COLOR cyan
+COLOR red
 DODGE 0+0d1
 DAM 25+10d50
 DEF 0+0d1
@@ -361,16 +362,16 @@ END
 ============================== AMULET definitions
 
 BEGIN ITEM
-NAME an Amulet of speed
+NAME an Amulet of shielding
 TYPE AMULET
-COLOR red
-DODGE 10+5d20
+COLOR cyan
+DODGE 10+2d20
 DAM 0+0d1
-DEF 0+0d1
+DEF 20+3d20
 HIT 0+0d1
-SPEED 25+5d20
+SPEED 0+1d20
 DESC
-A stylish chain with a big stone that will make you more nimble.
+A stylish chain with a big stone that will make you tougher.
 .
 ATTR 0+0d1
 RRTY 50
@@ -380,7 +381,7 @@ END
 BEGIN ITEM
 NAME an Amulet of damage
 TYPE AMULET
-COLOR cyan
+COLOR red
 DODGE 0+0d1
 DAM 10+3d6
 DEF 0+0d1
@@ -391,7 +392,7 @@ A stylish chain with a big stone that will make you more lethal.
 .
 ATTR 0+0d1
 RRTY 50
-ART TRUE
+ART FALSE
 END
 
 BEGIN ITEM
@@ -429,13 +430,13 @@ DESC
 A short wooden stick topped with an oil-soaked cloth, perfect for lighting
 your way through the dungeon.
 .
-ATTR 0+1d3
-RRTY 100
+ATTR 0+1d2
+RRTY 30
 ART FALSE
 END
 
 BEGIN ITEM
-NAME a Wicked Lasers(R) Flashlight
+NAME a Battery Powered Flashlight
 TYPE LIGHT
 COLOR yellow
 DODGE 0+0d1
@@ -444,20 +445,17 @@ DEF 0+0d1
 HIT 0+0d1
 SPEED 0+0d1
 DESC
-From the makers of the world's most refined lasers, comes the ultimate in
-handheld flashlights. The Flashtorch is a compact, portable searchlight that
-is capable of producing an incredible 4100 lumens of intense white light. Use
-this power to guide your way home, light a fire, or even fry an egg!
+This will be very helpful, allowing you to pierce deep into the shadows.
 .
-ATTR 1+2d6
-RRTY 30
+ATTR 1+1d3
+RRTY 50
 ART FALSE
 END
 
 BEGIN ITEM
 NAME a Modern Car LED Headlight
 TYPE LIGHT
-COLOR orange
+COLOR cyan
 DODGE 0+0d1
 DAM 0+0d1
 DEF 0+0d1
@@ -465,10 +463,10 @@ HIT 0+0d1
 SPEED 0+0d1
 DESC
 Does a fantastic job lighting up your surroundings.
-As a bonus, it probably blinds everyone around you!
+You could also use it to blind drivers, but there aren't many cars around.
 .
-ATTR 5+3d6
-RRTY 95
+ATTR 3+1d5
+RRTY 85
 ART FALSE
 END
 
@@ -481,7 +479,7 @@ COLOR red
 DODGE 0+0d1
 DAM 0+0d1
 DEF 0+0d1
-HIT 5+1d20
+HIT 10+1d20
 SPEED 0+0d1
 DESC
 A potion that will heal your wounds, restoring you to former glory.
@@ -489,6 +487,24 @@ Restores hitpoints for specified amount, or up to hit point capacity.
 .
 ATTR 0+0d1
 RRTY 25
+ART FALSE
+END
+
+BEGIN ITEM
+NAME a Health Pack
+TYPE POTION
+COLOR maroon
+DODGE 0+0d1
+DAM 0+0d1
+DEF 0+0d1
+HIT 20+2d20
+SPEED 0+0d1
+DESC
+An emergency triage kit that will heal significant injuries.
+You'd better keep this for a rainy day.
+.
+ATTR 0+0d1
+RRTY 65
 ART FALSE
 END
 
