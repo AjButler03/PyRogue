@@ -321,12 +321,11 @@ BEGIN MONSTER
 SYMB P
 COLOR burlywood1
 SPEED 5+0d1
-ABIL SMART TELEPATHIC
+ABIL SMART UNIQ
 HP 999999+0d1
 DAM 0+0d1
 NAME Piper the Dog
 DESC
-A good girl, off on her own adventure.
 2014 - 2024
 .
 RRTY 100

@@ -3,6 +3,8 @@ v0.08 ==========================================================================
     - Escaping to new levels now ramps difficulty by 35% per escape
     - Difficulty now acts as a score modifier
     - Small submenu visual changes/fixes
+08/05/2025
+    - Implemented manual page text parser (read pages from txt file, better than hardcoding text)
 v0.07 ===========================================================================================================================
 07/23/2025
     - Slightly modified item definition parser to better define item types with error handling

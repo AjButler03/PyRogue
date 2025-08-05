@@ -2,7 +2,7 @@ import re
 from utility import Dice
 from actor import *
 
-# This file will read monster_desc.txt and object_desc.txt to populate lists of monster descriptions and item descriptions, respectively.
+# This file reads manual.txt,  monster_desc.txt, and item_desc.txt to get the manual pages, monster definitions, and item definitions, respectively.
 
 
 # Takes a string in the format {base}+{num}d{sides} and creates a dice object.
@@ -15,8 +15,66 @@ def dice_from_str(str: str):
     return True, Dice(base, num, sides)
 
 
+# Simple text parser for the manual page. Will just read whatever is typed up in manual.txt, storing that text to be displayed in the manual page.
+def parse_manual_text(man_pages: list) -> bool:
+    # Attempt to open file
+    try:
+        with open("manual.txt", "r") as file:
+            file_lines = file.readlines()
+            curr_line = 0
+            print("PARSEDESC: manual.txt opened... ", end="")
+    except FileNotFoundError:
+        # File wasn't found, return False for failure
+        print("PARSEDESC: manual.txt not found")
+        return False
+
+    # Start reading the lines, first checking that the file header matches
+    line = file_lines[curr_line]
+    line = line.strip()
+    pages_found = 0
+    if line == "PYROGUE MANUAL PAGES TEXT FILE":
+        print("file header matches")
+        # Header match; read text for all pages
+        curr_line += 1
+        line_count = len(file_lines)
+        print("PARSEDESC: manual.txt read with", line_count, "lines")
+        while curr_line < line_count:
+            line = file_lines[curr_line].strip()
+            # Check for the beginning of a page
+            if line == "BEGIN PAGE":
+                page = []  # Store lines of page
+                # Now just copy all lines until "END PAGE"
+                curr_line += 1
+                line = file_lines[curr_line]
+                while line.strip() != "END PAGE":
+                    # Make sure that we don't read past end of file
+                    if curr_line >= line_count:
+                        # Did not find termination ".", so the file is not formatted correctly. Return False.
+                        print(
+                            "PARSEDESC: Manual page",
+                            pages_found + 1,
+                            "does not terminate correctly",
+                        )
+                        return False
+                    else:
+                        # add line to page, read next line
+                        page.append(line)
+                        curr_line += 1
+                        line = file_lines[curr_line]
+                # End of page found, so append page to page list.
+                man_pages.append(page)
+                pages_found += 1
+            curr_line += 1
+        # If here without any error, then parsed successfully.
+        print("PARSEDESC: Found", pages_found, "manual pages")
+        return True
+    else:
+        print("header mismatch")
+        return False
+
+
 # Method to parse monster descriptions. Returns True on success, False on failure.
-def parse_monster_typedefs(monster_type_list) -> bool:
+def parse_monster_typedefs(monster_type_list: list) -> bool:
     # Attempt to open file
     try:
         with open("monster_desc.txt", "r") as file:
@@ -233,7 +291,7 @@ def parse_monster_typedefs(monster_type_list) -> bool:
 
 
 # Method to parse item descriptions. Returns True on success, False on failure.
-def parse_item_typedefs(item_type_list) -> bool:
+def parse_item_typedefs(item_type_list: list) -> bool:
     # Attempt to open file
     try:
         with open("item_desc.txt", "r") as file:
@@ -274,14 +332,14 @@ def parse_item_typedefs(item_type_list) -> bool:
                         type_key = line[5:].strip()
                         if type_key not in item_type_opts:
                             print(
-                                    "PARSEDESC: Item definition",
-                                    types_found + 1,
-                                    "is unknown type \""+ type_key + "\"",
-                                )
+                                "PARSEDESC: Item definition",
+                                types_found + 1,
+                                'is unknown type "' + type_key + '"',
+                            )
                             return False
                         else:
                             itype = item_type_opts[type_key]
-                        
+
                     elif line.startswith("DESC"):
                         # Parse text description field; read until "." found
                         curr_line += 1
@@ -495,7 +553,7 @@ def parse_item_typedefs(item_type_list) -> bool:
 
 
 # FOR TESTING PURPOSES
-def print_monst_defs(monster_type_list):
+def print_monst_defs(monster_type_list: list):
     num = 1
     for mdef in monster_type_list:
         print("MONSTER TYPE DEFINITION", num)
@@ -504,7 +562,7 @@ def print_monst_defs(monster_type_list):
 
 
 # FOR TESTING PURPOSES
-def print_item_defs(item_type_list):
+def print_item_defs(item_type_list: list):
     num = 1
     for idef in item_type_list:
         print("ITEM TYPE DEFINITION", num)

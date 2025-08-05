@@ -37,15 +37,20 @@ class Menu_Main:
         self.difficulty = 2
         self.dungeon_size = 2
 
-        # Parse monster descriptions
+        # Run file parsing operations
+        self.man_pages = []
         self.monster_type_list = []
         self.item_type_list = []
-        mparse_success = parse_monster_typedefs(self.monster_type_list)
-        iparse_success = parse_item_typedefs(self.item_type_list)
-        if not mparse_success:
+        man_parse_success = parse_manual_text(self.man_pages)
+        monparse_success = parse_monster_typedefs(self.monster_type_list)
+        iteparse_success = parse_item_typedefs(self.item_type_list)
+        if not monparse_success:
+            print("MENU: Manual pages text parser failed. Quitting")
+            exit(0)
+        if not monparse_success:
             print("MENU: Monster type definition parser failed. Quitting")
             exit(0)
-        if not iparse_success:
+        if not iteparse_success:
             print("MENU: Item type definition parser failed. Quitting")
             exit(0)
 
