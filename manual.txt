@@ -7,23 +7,87 @@ Multiple pages can be defined with BEGIN PAGE and END PAGE, allowing users to mo
 Pages will have limited width of ~80 characters to keep things uniform between the pages, but unlimited length.
 
 BEGIN PAGE
-Introduction
-Welcome the player, introduce them to the goal and main mechanics.
-Wish them luck.
+ _       __     __                        
+| |     / /__  / /________  ____ ___  ___ 
+| | /| / / _ \/ / ___/ __ \/ __ `__ \/ _ \
+| |/ |/ /  __/ / /__/ /_/ / / / / / /  __/
+|__/|__/\___/_/\___/\____/_/ /_/ /_/\___/ 
+                                          
+Welcome to PyRogue.
+
+This is a rogue-like dungeon crawling game, where your goal is to stay alive.
+If you do that well enough, you might defeat the dungeon boss, securing victory.
+
+But don't get ahead of yourself - the dungeon is dark, and filled with plenty
+of monsters that want to end you. You can't win with just your bare hands.
+
+You need to scavange for weapons and equipment, which will be scattered around.
+You are capable of carrying 10 items in inventory, and have specific equip slots.
+They are WEAPON, RANGED, OFFHAND, ARMOR, AMULET, RING LEFT, RING RIGHT, and LIGHT.
+
+LIGHT items will allow you to pierce the darkness of the dungeon better; the
+others can boost the damage you deal, reduce the damage you take, and even make 
+you faster and more nimble. Unfortunately, your body limits how fast you can go- 
+you are only human, after all.
+
+Be sure to keep an eye on your surroundings, understand the enemies to avoid, 
+and the items to make a run for. Your success is up to you.
+
+Good luck.
 END PAGE
 
 BEGIN PAGE
-Monsters
+    __  ___                 __                
+   /  |/  /___  ____  _____/ /____  __________
+  / /|_/ / __ \/ __ \/ ___/ __/ _ \/ ___/ ___/
+ / /  / / /_/ / / / (__  ) /_/  __/ /  (__  ) 
+/_/  /_/\____/_/ /_/____/\__/\___/_/  /____/  
+                                              
 Describe monsters and their potential abilities.
 END PAGE
 
 
 BEGIN PAGE
-Items
+    ______                     
+   /  _/ /____  ____ ___  _____
+   / // __/ _ \/ __ `__ \/ ___/
+ _/ // /_/  __/ / / / / (__  ) 
+/___/\__/\___/_/ /_/ /_/____/  
+                               
 Describe the different item types, their purpose, and bonuses.
 Inventory space/ management.
 END PAGE
 
 BEGIN PAGE
-Controls
+   ______            __             __    
+  / ____/___  ____  / /__________  / /____
+ / /   / __ \/ __ \/ __/ ___/ __ \/ / ___/
+/ /___/ /_/ / / / / /_/ /  / /_/ / (__  ) 
+\____/\____/_/ /_/\__/_/   \____/_/____/  
+                                          
+                            
+===== MOVEMENT =====
+  7 or y : Attempt to move one cell to the upper left.
+  8 or k : Attempt to move one cell up.
+  9 or u : Attempt to move one cell to the upper right.
+  4 or h : Attempt to move one cell to the left.
+  5 or space or . : Rest for a turn NPCs still move.
+  6 or l : Attempt to move one cell to the right.
+  1 or b : Attempt to move one cell to the lower left.
+  2 or j : Attempt to move one cell down.
+  3 or n : Attempt to move one cell to the lower right.
+  > or 0 : attempt to escape to new dungeon level using a staircase.
+===== INVENTORY =====
+  p: Picks up an item, placing into inventory.
+  e: Opens equipment menu.
+  i: Opens inventory menu.
+  enter: Equip/unequip/use item.
+  d: Attempts to drop an item from inventory.
+  x: Attempts to destroy an item from inventory.
+===== OTHER =====
+  f : Toggle fog of war effect. 
+  m : Opens a submenu to list all present monsters.
+  z : Cycles through standard / walking map / tunnelmap render modes.
+  esc : Opens / closes pause menu.
+
 END PAGE

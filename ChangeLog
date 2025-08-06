@@ -5,6 +5,8 @@ v0.08 ==========================================================================
     - Small submenu visual changes/fixes
 08/05/2025
     - Implemented manual page text parser (read pages from txt file, better than hardcoding text)
+08/06/2025
+    - Manual pages are now accessible from main menu; They just need typed up.
 v0.07 ===========================================================================================================================
 07/23/2025
     - Slightly modified item definition parser to better define item types with error handling

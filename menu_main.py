@@ -90,6 +90,7 @@ class Menu_Main:
         self.setting_select_row = 0
         self.setting_select_col = 0
         self.curr_encyc_idx = 0
+        self.curr_man_idx = 0
         self.window_canvas = None
 
         # Some things that help handle dynamic screen resizing
@@ -184,7 +185,11 @@ class Menu_Main:
                 self.setting_select_row = 0
                 self._render_settings(self.scrsize_h, self.scrsize_w)
             elif self.home_select_idx == self.home_select_opts["manual"]:
-                pass  # Later problem
+                # Manual pages page (what is the correct phrasing for this? a page of pages?)
+                self.curr_man_idx = 0
+                self.curr_mode = self.menu_modes["manual"]
+                self.need_full_rerender = True
+                self._render_manual(self.scrsize_h, self.scrsize_w)
             elif self.home_select_idx == self.home_select_opts["monstencyc"]:
                 # Monster encyclopedia page
                 self.curr_encyc_idx = 0
@@ -277,7 +282,40 @@ class Menu_Main:
 
     # Input event handler for the manual page
     def _manual_input_handler(self, key):
-        pass
+        if key == "Escape":
+            # Head back to main menu
+            self.window_canvas.destroy()
+            self.curr_mode = self.menu_modes["home"]
+            self.need_full_rerender = True
+            self._render_home(self.scrsize_h, self.scrsize_w)
+        elif key == "Right" or key == "l" or key == "6":
+            # Cycle right in the list of pages
+            if self.curr_man_idx >= len(self.man_pages) - 1:
+                self.curr_man_idx = 0
+            else:
+                self.curr_man_idx += 1
+            self.need_full_rerender = True
+            self._render_manual(self.scrsize_h, self.scrsize_w)
+        elif key == "Left" or key == "h" or key == "4":
+            # Cycle left in the list of pages
+            if self.curr_man_idx <= 0:
+                self.curr_man_idx = len(self.man_pages) - 1
+            else:
+                self.curr_man_idx -= 1
+            self.need_full_rerender = True
+            self._render_manual(self.scrsize_h, self.scrsize_w)
+        elif key == "j" or key == "Down" or key == "2":
+            # Scroll down
+            self.window_canvas.yview_scroll(1, "units")
+        elif key == "k" or key == "Up" or key == "8":
+            # Attempt to grab current y scroll value to return to it
+            try:
+                scroll_val = self.window_canvas.yview()[0]
+            except (tk.TclError, IndexError, AttributeError):
+                scroll_val = 0.0  # Revert to zero
+            # Scroll up, but only if resulting yview is 0.0 or more
+            if scroll_val > 0.0:
+                self.window_canvas.yview_scroll(-1, "units")
 
     # Input event handler for the monster encyclopedia page
     def _monstencyc_input_handler(self, key):
@@ -392,7 +430,8 @@ class Menu_Main:
                 print("MENU: Rendered settings")
                 self._render_settings(self.scrsize_h, self.scrsize_w)
             elif self.curr_mode == self.menu_modes["manual"]:
-                pass  # Later problem
+                print(f"MENU: Rendered manual page {self.curr_man_idx + 1}")
+                self._render_manual(self.scrsize_h, self.scrsize_w)
             elif self.curr_mode == self.menu_modes["monstencyc"]:
                 print("MENU: Rendered Monster Encyclopedia")
                 self._render_monstencyc(self.scrsize_h, self.scrsize_w)
@@ -467,7 +506,7 @@ class Menu_Main:
             select_opts_colors = {
                 0: "gold",
                 1: "gold",
-                2: "gray",
+                2: "gold",
                 3: "gold",
                 4: "gold",
                 5: "gold",
@@ -537,7 +576,7 @@ class Menu_Main:
         # If it works, it works. I'm not going to claim that this bit in specific is the most clean, though.
 
         # Arbitrary bounds to determine how big the screen text should be
-        settings_scr_charcol = 18  # width
+        settings_scr_charcol = 26  # width
         settings_scr_charrow = 15  # height
 
         # Decide how big in pixels elements should be based on screen size
@@ -578,7 +617,7 @@ class Menu_Main:
                 4: "ascii_ln5",
             }
 
-            ascii_color = "red"
+            ascii_color = "white"
 
             size_opts = {
                 0: "Tiny       (15x30)",
@@ -701,6 +740,86 @@ class Menu_Main:
                 tag="setting_select_arrow",
                 anchor="w",
             )
+
+    # Renderer for the main menu's manual pages.
+    def _render_manual(self, height, width):
+        # Arbitrary bounds to determine how big the screen text should be
+        # Height is irrelevant; the menu can/will scroll
+        manual_scr_charcol = 45  # arbitrary; doesn't cut off provided desc line lengths
+
+        # Decide how big in pixels elements should be based on screen size
+        tile_size = width // manual_scr_charcol
+        self.font_size = int(tile_size / 1.5)
+
+        curr_page = self.man_pages[self.curr_man_idx]
+        line_count = len(curr_page)
+        full_height = (line_count + 2) * tile_size
+
+        # Attempt to grab current y scroll value to return to it
+        try:
+            scroll_val = self.window_canvas.yview()[0]
+        except (tk.TclError, IndexError, AttributeError):
+            scroll_val = 0.0  # Revert to zero
+
+        # Determine if full canvas redraw needed
+        if self.need_full_rerender:
+            if self.window_canvas:
+                self.window_canvas.destroy()
+
+            self.window_canvas = tk.Canvas(
+                self.canvas,
+                height=height,
+                width=width,
+                bg="black",
+                highlightthickness=0,
+                yscrollincrement=tile_size,
+            )
+
+            self.canvas.create_window(
+                0,
+                0,
+                height=height,
+                width=width,
+                window=self.window_canvas,
+                anchor="nw",
+            )
+
+            # Init canvas' ability to scroll
+            scroll_h = max(full_height, self.scrsize_h)
+            self.window_canvas.config(scrollregion=(0, 0, self.scrsize_w, full_height))
+
+        # Now draw lines of page onto canvas
+        offset = tile_size
+        curr_line = 1
+
+        # Header
+        text = f"Manual page {self.curr_man_idx + 1} of {len(self.man_pages)}"
+        self.window_canvas.create_text(
+            width // 2,
+            curr_line * tile_size,
+            text=text,
+            fill="red",
+            font=(self.def_font, self.font_size),
+            tag="manual_header",
+            anchor="center",
+        )
+        curr_line += 1
+
+        # Now draw individual lines
+        for line in curr_page:
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=line,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag=f"manual_{curr_line}",
+                anchor="nw",
+            )
+            curr_line += 1
+
+        # Return to previous scroll value; I.e., scroll back to where user had it before redrawing
+        self.window_canvas.yview_moveto(scroll_val)
 
     # Attempts to repeatedly render every few hundred milliseconds
     # This rotates monster/item colors on screen
