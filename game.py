@@ -129,13 +129,17 @@ class Pyrogue_Game:
         # Fields for handling keyboard input
         self.root.bind("<Key>", self._on_key_press)
         self.input_modes = {
-            "none": 0,
-            "player_turn": 1,
-            "menu_exit": 2,
-            "menu_monster_list": 3,
-            "menu_inventory": 4,
-            "menu_equipment": 5,
+            "none": 0,  # No input should be taken
+            "player_turn": 1,  # Main player input for their turn
+            "menu_exit": 2,  # Input for exit/pause menu
+            "menu_monster_list": 3,  # Input for monster list menu
+            "menu_inventory": 4,  # Input for inventory (carry slots) menu
+            "menu_equipment": 5,  # Input for equipment menu
+            "targeting": 6,  # Input for targeting mode (ranged attacks, teleport, item/monster inspection)
         }
+        # Targeted position information for when using targeting mode
+        self.target_r = 0
+        self.target_c = 0
         self.curr_input_mode = self.input_modes["player_turn"]
 
         # To store important game msgs; combat, new dungeon, game start, etc
@@ -203,6 +207,9 @@ class Pyrogue_Game:
         elif self.curr_input_mode == self.input_modes["menu_equipment"]:
             # Calling the equipment menu input handler
             self._handle_equipment_input(key)
+        elif self.curr_input_mode == self.input_modes["targeting"]:
+            # Calling the targeting mode input handler
+            self._handle_targeting_input(key)
         # Any input after end of game returns control to main menu
         if self.game_over and (key == "Return" or key == "Escape"):
             self._end_game()
@@ -304,6 +311,12 @@ class Pyrogue_Game:
                 else:
                     text = "You are unable to pick up item"
                 self._update_top_label(text)
+            elif key == "t":
+                # Enter targeting mode; This will allow the user to inspect items & monsters,
+                # teleport, and potentially (if I implement it) to use ranged weapons from a distance.
+                self.curr_input_mode = self.input_modes["targeting"]
+                self.target_r, self.target_c = self.player.get_pos()
+                self._update_top_label("Targeting mode activated")
             elif key == "z":
                 # Rotate through distance map displays
                 if self.curr_render_mode == self.render_modes["standard"]:
@@ -433,6 +446,7 @@ class Pyrogue_Game:
             self.curr_submenu = self.display_submenus["none"]
             self.submenu_canvas.destroy()
             self.need_full_rerender = True
+            # Forces Update to player's area of sight
             self.player.handle_turn(
                 self.dungeon, self.actor_map, self.player, Move(Move.none)
             )
@@ -516,6 +530,7 @@ class Pyrogue_Game:
             self.curr_submenu = self.display_submenus["none"]
             self.submenu_canvas.destroy()
             self.need_full_rerender = True
+            # Forces Update to player's area of sight
             self.player.handle_turn(
                 self.dungeon, self.actor_map, self.player, Move(Move.none)
             )
@@ -576,6 +591,15 @@ class Pyrogue_Game:
                 self.submenu_select_idx = 7
             self.need_submenu_rerender = True
             self._render_equipment()
+
+    # Handles input for targeting mode
+    def _handle_targeting_input(self, key):
+        if key == "Escape" or key == "e":
+            # Return to player input
+            self.curr_input_mode = self.input_modes["player_turn"]
+            self.curr_submenu = self.display_submenus["none"]
+            self.need_full_rerender = True
+            self._update_top_label("")
 
     # Populates the actor_map with a dungeon size proportionate number of monsters.
     def _generate_monsters(self):
@@ -774,9 +798,7 @@ class Pyrogue_Game:
         r, c = self.player.get_pos()
         if not self.game_over:
             # Player score and position (line 1)
-            self.score_msg = (
-                f"SCORE: {self.player_score:06d}   MODIFIER: {self.difficulty:.2f}   POS: (R:{r:0d}, C:{c:0d})"
-            )
+            self.score_msg = f"SCORE: {self.player_score:06d}   MODIFIER: {self.difficulty:.2f}   POS: (R:{r:0d}, C:{c:0d})"
             self.score_msg_color = "white"
 
             # Player stats (line 2)
@@ -1352,6 +1374,9 @@ class Pyrogue_Game:
 
         self.need_full_rerender = False
 
+        # To check if targeting mode is active
+        is_targeting = self.curr_input_mode == self.input_modes["targeting"]
+
         for row in range(self.dungeon.height):
             for col in range(self.dungeon.width):
                 is_border_tile = (
@@ -1375,7 +1400,13 @@ class Pyrogue_Game:
                         item = self.item_map[row][col]
                         if self.player.visible_tiles[row][col]:
                             # Tile is visible, just render as normal.
-                            if actor:
+                            if is_targeting and (
+                                col == self.target_c and row == self.target_r
+                            ):
+                                # Targeting cursor
+                                char = "@"
+                                color = "white" if random.randint(0, 1) > 0 else "cyan"
+                            elif actor:
                                 char = actor.get_char()
                                 color = actor.get_color()
                             elif item:
@@ -1393,7 +1424,13 @@ class Pyrogue_Game:
                         # Ignoring player memory of dungeon; just displaying dungeon
                         actor = self.actor_map[row][col]
                         item = self.item_map[row][col]
-                        if actor:
+                        if is_targeting and (
+                            col == self.target_c and row == self.target_r
+                        ):
+                            # Targeting cursor
+                            char = "@"
+                            color = "white" if random.randint(0, 1) > 0 else "cyan"
+                        elif actor:
                             char = actor.get_char()
                             color = actor.get_color()
                         elif item:
@@ -1506,6 +1543,12 @@ class Pyrogue_Game:
             self.root.after(200, self._next_turn)
             self._update_hud()
             return
+
+        # Level clear check
+        if len(self.turn_pq) < 2:
+            # Just the player is left; print level clear message
+            message = "Level Clear"
+            self._update_top_label(message, "gold")
 
         self._render_frame(self.scrsize_h, self.scrsize_w)
 

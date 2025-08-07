@@ -22,5 +22,7 @@ v0.05; Main Menu + some sub-menus
     - Having one window dynamically scale was difficult on its own, so having multiple is even more complicated. So, the main menu code is going to be separate from the game code, so that things like input handlers will be more specific to what is currently being done. This also works in terms of OOP; if the user wants to start a game, or a new game after completing one, a new game object is made.
     - The main menu being offcenter is 100% an aestetic choice to look like old Valve main menus (like 1998 Half Life), and not because I didn't want to put in the work to center it. 100%.
     - The select arrow moving is the result of the whole home/settngs page re-rendering; this is less efficient than the rendering for the dungeon, but there are comparitively so few elements that it works fine.
-v0.07;
+v0.07; Item generation + inventory management
     - The combat system does not currently have a 'ranged' mode, despite there being ranged weapons. For now, all the item dice just get rolled at the same time to inflict damage.
+v0.08;
+    - Limiting speed to ~50 seems most fair; items quickly allowed speed to increase a lot, which kinda removed all challange to the game.
