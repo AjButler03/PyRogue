@@ -594,12 +594,80 @@ class Pyrogue_Game:
 
     # Handles input for targeting mode
     def _handle_targeting_input(self, key):
-        if key == "Escape" or key == "e":
-            # Return to player input
-            self.curr_input_mode = self.input_modes["player_turn"]
-            self.curr_submenu = self.display_submenus["none"]
-            self.need_full_rerender = True
-            self._update_top_label("")
+        # Compact way of checking for movement keys and grabbing the respective move
+        move_delta = {
+            "7": Move.up_left,
+            "y": Move.up_left,
+            "8": Move.up,
+            "k": Move.up,
+            "9": Move.up_right,
+            "u": Move.up_right,
+            "4": Move.left,
+            "h": Move.left,
+            "5": Move.none,
+            "space": Move.none,
+            "period": Move.none,
+            "6": Move.right,
+            "l": Move.right,
+            "1": Move.down_left,
+            "b": Move.down_left,
+            "2": Move.down,
+            "j": Move.down,
+            "3": Move.down_right,
+            "n": Move.down_right,
+        }
+
+        # Coordinate deltas for 8 surrounding points of a given point.
+        # up_left, up, up_right, left, right, down_left, down, down_right, none
+        delta_r = [-1, -1, -1, 0, 0, 1, 1, 1, 0]
+        delta_c = [-1, 0, 1, -1, 1, -1, 0, 1, 0]
+        # self.target_r + delta_r[move.value], self.c + self._delta_c[move.value]
+        if key not in move_delta:
+            # Input is not to move targeting cursor
+            if key == "Escape" or key == "e":
+                # Return to player input
+                self.curr_input_mode = self.input_modes["player_turn"]
+                self.curr_submenu = self.display_submenus["none"]
+                self.need_full_rerender = True
+                self._render_frame(self.scrsize_h, self.scrsize_w)
+                self._update_top_label("")
+            elif key == "g":
+                # teleport cheat
+                success, targ_actor = self.player.teleport(
+                    self.dungeon, self.actor_map, self.target_r, self.target_c
+                )
+                if success:
+                    # Check for murdered actor
+                    if targ_actor != None:
+                        message = f"You teleported, killing {targ_actor.get_name()}"
+                        # Killing via teleport is super cheesy, so no points are awarded here.
+                    else:
+                        message = f"You successfully teleported"
+                    # Return to player input
+                    self.curr_input_mode = self.input_modes["player_turn"]
+                    self.curr_submenu = self.display_submenus["none"]
+                    self.need_full_rerender = True
+                    self._render_frame(self.scrsize_h, self.scrsize_w)
+                else:
+                    message = "You cannot teleport there"
+                self._update_top_label(message)
+
+        else:
+            # Attempt to move targeting cursor
+            move = move_delta[key]
+            new_r = self.target_r + delta_r[move.value]
+            new_c = self.target_c + delta_c[move.value]
+            # Now determine if targeting position is valid
+            if self.dungeon.valid_point(new_r, new_c):
+                # Valid point within dungeon; is targeted tile visible to player, or x-ray render enabled?
+                if self.curr_render_mode == self.render_modes[
+                    "x-ray"
+                ] or self.player.is_visible_tile(new_r, new_c):
+                    # Tile is otherwise known about, so it can be targeted by player.
+                    self.target_c = new_c
+                    self.target_r = new_r
+                    # Update render for snappier feeling response
+                    self._render_frame(self.scrsize_h, self.scrsize_w)
 
     # Populates the actor_map with a dungeon size proportionate number of monsters.
     def _generate_monsters(self):
@@ -1398,7 +1466,7 @@ class Pyrogue_Game:
                     if self.curr_render_mode == self.render_modes["standard"]:
                         actor = self.actor_map[row][col]
                         item = self.item_map[row][col]
-                        if self.player.visible_tiles[row][col]:
+                        if self.player.is_visible_tile(row, col):
                             # Tile is visible, just render as normal.
                             if is_targeting and (
                                 col == self.target_c and row == self.target_r

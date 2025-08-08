@@ -489,7 +489,7 @@ class Menu_Main:
             select_opts = {
                 0: "Start Game",
                 1: "Settings",
-                2: "Manual",
+                2: "Game Manual",
                 3: "Monster Encyclopedia",
                 4: "Item Encyclopedia",
                 5: "Quit",

@@ -637,14 +637,18 @@ class Player(Actor):
                 # Bounds check
                 if dungeon.valid_point(Y, X):
                     dist = dx * dx + dy * dy
-                    if dist <= radius * radius:
-                        self.tmem[Y][X] = dungeon.tmap[Y][X]
-                        self.visible_tiles[Y][X] = True
 
+                    # Check if new point is rock (wall)
                     is_wall = dungeon.tmap[Y][X] in {
                         Dungeon.Terrain.stdrock,
                         Dungeon.Terrain.immrock,
                     }
+
+                    if dist <= radius * radius:
+                        self.tmem[Y][X] = dungeon.tmap[Y][X]
+                        # hard check to make sure walls aren't marked as visible by mistake
+                        if not is_wall:
+                            self.visible_tiles[Y][X] = True
 
                     if blocked:
                         if is_wall:
@@ -697,6 +701,50 @@ class Player(Actor):
         # Update the player's knowledge of the dungeon.
         self._update_terrain_memory(dungeon)
 
+    # Rolls dice to determine dmg output in melee combat
+    def _dmg_roll_melee(self) -> int:
+        dmg = 0
+        # Roll dice of main weapons/ equipment
+        item = self.equip_slots["weapon"]
+        if item != None:
+            dmg += item.damage_dice.roll()
+        # If and when ranged combat is implemented, this will not be rolled here.
+        item = self.equip_slots["ranged"]
+        if item != None:
+            dmg += item.damage_dice.roll()
+        item = self.equip_slots["offhand"]
+        if item != None:
+            dmg += item.damage_dice.roll()
+
+        # If no damage yet applied, default to fisticuffs dice.
+        if dmg == 0:
+            dmg = self.fisticuffs_dice.roll()
+
+        # Now roll for damage of rings/ amulets; they act as bonuses, so will be applied anywhere damage is applied
+        item = self.equip_slots["amulet"]
+        if item != None:
+            dmg += item.damage_dice.roll()
+        item = self.equip_slots["ring_l"]
+        if item != None:
+            dmg += item.damage_dice.roll()
+        item = self.equip_slots["ring_r"]
+        if item != None:
+            dmg += item.damage_dice.roll()
+
+        return dmg
+
+    # Attempts to place an item into inventory
+    def _place_in_inventory(self, item: Item):
+        # Check that there is room in the player carry slots
+        # Fill first available slot, if there is one
+        for slot_idx in range(self.inventory_size):
+            slot = self.inventory[slot_idx]
+            if slot == None:
+                self.inventory[slot_idx] = item
+                item.picked_up = True
+                return True  # Successfully placed into inventory
+        return False  # Failed to find room; cannot place into inventory
+
     # Player specific implementation for initializing position in dungeon
     def init_pos(self, dungeon: Dungeon, actor_map: list, r: int, c: int) -> bool:
         # Clear the player's memory of the dungeon.
@@ -732,18 +780,6 @@ class Player(Actor):
                     item_map[r][c] = None
                     return True, item
         return False, None
-
-    # Attempts to place an item into inventory
-    def _place_in_inventory(self, item: Item):
-        # Check that there is room in the player carry slots
-        # Fill first available slot, if there is one
-        for slot_idx in range(self.inventory_size):
-            slot = self.inventory[slot_idx]
-            if slot == None:
-                self.inventory[slot_idx] = item
-                item.picked_up = True
-                return True  # Successfully placed into inventory
-        return False  # Failed to find room; cannot place into inventory
 
     # Attempts to equip an item in given inventory slot
     # Returns a bool for success/failure, and the item equipped
@@ -825,37 +861,21 @@ class Player(Actor):
                 return False, True, item
         return False, False, item
 
-    # Rolls dice to determine dmg output in melee combat
-    def _dmg_roll_melee(self) -> int:
-        dmg = 0
-        # Roll dice of main weapons/ equipment
-        item = self.equip_slots["weapon"]
-        if item != None:
-            dmg += item.damage_dice.roll()
-        # If and when ranged combat is implemented, this will not be rolled here.
-        item = self.equip_slots["ranged"]
-        if item != None:
-            dmg += item.damage_dice.roll()
-        item = self.equip_slots["offhand"]
-        if item != None:
-            dmg += item.damage_dice.roll()
+    # Forcefully teleports the player to row, col within the dungeon, instantly killing any monster that is there.
+    # Returns true/false for success and any killed monster.
+    def teleport(self, dungeon: Dungeon, actor_map: list, row: int, col: int):
+        if dungeon.valid_point(row, col) and not (row == self.r and col == self.c):
+            # Grab any monster that might occupy that space
+            actor = actor_map[row][col]
+            if actor != None:
+                # Commit instant, brutal vaporization of the monster (kill them)
+                actor.hp = 0
+                actor.kill()
+            # Move player into that position
+            self._force_pos_update(dungeon, actor_map, row, col)
+            return True, actor
 
-        # If no damage yet applied, default to fisticuffs dice.
-        if dmg == 0:
-            dmg = self.fisticuffs_dice.roll()
-
-        # Now roll for damage of rings/ amulets; they act as bonuses, so will be applied anywhere damage is applied
-        item = self.equip_slots["amulet"]
-        if item != None:
-            dmg += item.damage_dice.roll()
-        item = self.equip_slots["ring_l"]
-        if item != None:
-            dmg += item.damage_dice.roll()
-        item = self.equip_slots["ring_r"]
-        if item != None:
-            dmg += item.damage_dice.roll()
-
-        return dmg
+        return False, None
 
     # Turn handler for the player.
     def handle_turn(self, dungeon: Dungeon, actor_map: list, player, move: int):
@@ -877,7 +897,7 @@ class Player(Actor):
 
         # Move the PC, removing whatever monster may be there
         a = actor_map[new_r][new_c]
-        if not a == None:
+        if a != None:
             dmg = self._dmg_roll_melee()
             new_hp = a.hp - dmg
             if new_hp <= 0:
@@ -893,6 +913,10 @@ class Player(Actor):
 
         # For combat dialog
         return True, a, dmg
+
+    # Returns true/false for if tile at row, col is visible to the player.
+    def is_visible_tile(self, row, col):
+        return self.visible_tiles[row][col]
 
     # Returns the character representation of the player.
     def get_char(self) -> str:

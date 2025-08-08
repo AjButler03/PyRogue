@@ -3,6 +3,12 @@ Built to run using Python 3.12
 
 pyrogue.py is the main file, and running it will open a new window with the PyRogue main menu.
 
+From there, you can navigate the menu using the arrow keys or using the movement keys below.
+You will have the option to start a game, alter game settings, view the game manual, view
+monster and item descriptions for monsters/items that will appear in the game, or quit.
+For more information on the game itself, be sure to check out the game manual.
+Have fun!
+
 New features with v0.08:
     - Manual page
     - Inspection of monster and item instances within dungeon

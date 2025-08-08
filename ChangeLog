@@ -9,6 +9,10 @@ v0.08 ==========================================================================
     - Manual pages are now accessible from main menu; They just need typed up.
     - "level clear" message fo when all monsters in current dungeon are defeated
     - Started on targeting mode, which will allow user to inspect items/monsters, teleport, and eventually do ranged combat.
+08/08/2025
+    - Fixed bug where rock within player's view distance would sometimes be marked as visible
+    - Targeting mode cursor can now move, allowing actual targeting
+    - Targeting mode now has ability to teleport
 v0.07 ===========================================================================================================================
 07/23/2025
     - Slightly modified item definition parser to better define item types with error handling
