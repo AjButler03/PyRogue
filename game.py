@@ -624,7 +624,7 @@ class Pyrogue_Game:
         # self.target_r + delta_r[move.value], self.c + self._delta_c[move.value]
         if key not in move_delta:
             # Input is not to move targeting cursor
-            if key == "Escape" or key == "e":
+            if key == "Escape" or key == "t":
                 # Return to player input
                 self.curr_input_mode = self.input_modes["player_turn"]
                 self.curr_submenu = self.display_submenus["none"]
@@ -651,7 +651,9 @@ class Pyrogue_Game:
                 else:
                     message = "You cannot teleport there"
                 self._update_top_label(message)
-
+            elif key == "i":
+                # Inspect monster or item at cursor location
+                pass
         else:
             # Attempt to move targeting cursor
             move = move_delta[key]
@@ -1336,6 +1338,16 @@ class Pyrogue_Game:
                 anchor="nw",
             )
             curr_line += 1
+
+    # Renders monster inspection screen
+    def _render_monster_inspect(self, monster: Monster):
+        lines = []
+
+        pass
+
+    # Renders item inspection screen
+    def _render_item_inspect(self, item: Item):
+        pass
 
     # Renders the dungeon to the screen canvas.
     def _render_frame(self, height, width):
