@@ -1341,9 +1341,62 @@ class Pyrogue_Game:
 
     # Renders monster inspection screen
     def _render_monster_inspect(self, monster: Monster):
-        lines = []
+        curr_line = 0
+        desc_lines = monster.get_desc()
+        line_count = 8 + len(desc_lines)
+        longest_line = 15 # Default to at least 15 width
+        # Determine what is actually the longest line, depending on description lines
+        for line in desc_lines:
+            new_len = len(line)
+            if new_len > longest_line:
+                longest_line = new_len
+        ideal_height = int((line_count + 1) * self.tile_size)
+        max_height = (self.mapsize_h - 3) * self.tile_size
+        ideal_width = int(longest_line * self.tile_size) # This may need to be adjusted
+        visible_menu_height = min(ideal_height, max_height)
+        visible_menu_width = min(self.tile_size * (self.mapsize_w - 3), ideal_width)
+        
+        # Attempt to grab current x/y scroll values to return to it
+        try:
+            y_scroll_val = self.submenu_canvas.yview()[0]
+            x_scroll_val = self.submenu_canvas.xview()[0]
+        except (tk.TclError, IndexError, AttributeError):
+            y_scroll_val = 0.0  # Revert to zero
+            x_scroll_val = 0.0
+        
+        if self.need_submenu_rerender:
+            if self.submenu_canvas:
+                self.submenu_canvas.destroy()
+            
+            self.submenu_canvas = tk.Canvas(
+                self.canvas,
+                height=visible_menu_height,
+                width=visible_menu_width,
+                bg="black",
+                highlightthickness=self.tile_size // 6,
+                yscrollincrement=self.tile_size,
+            )
 
-        pass
+            self.canvas.create_window(
+                self.scrsize_w // 2,
+                (self.tile_size * self.mapsize_h // 2) + self.tile_size,
+                height=visible_menu_height,
+                width=visible_menu_width,
+                window=self.submenu_canvas,
+                anchor="center",
+            )
+            
+            # Init canvas' ability to scroll
+            self.submenu_canvas.config(
+                scrollregion=(0, 0, ideal_width - self.tile_size, ideal_height - self.tile_size)
+            )
+            
+            
+        # Return to previous scroll values; I.e., scroll back to where user had it before redrawing
+        self.submenu_canvas.yview_moveto(y_scroll_val)
+        self.submenu_canvas.xview_moveto(x_scroll_val)
+            
+            
 
     # Renders item inspection screen
     def _render_item_inspect(self, item: Item):
