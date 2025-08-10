@@ -13,8 +13,10 @@ v0.08 ==========================================================================
     - Fixed bug where rock within player's view distance would sometimes be marked as visible
     - Targeting mode cursor can now move, allowing actual targeting
     - Targeting mode now has ability to teleport
-08/08/2025
+08/09/2025
     - Starting on monster inspection
+08/10/2025
+    - Continued progress on monster inspection
 v0.07 ===========================================================================================================================
 07/23/2025
     - Slightly modified item definition parser to better define item types with error handling

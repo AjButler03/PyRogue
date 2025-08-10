@@ -1051,6 +1051,13 @@ class Monster(Actor):
     def get_desc(self) -> list:
         return self.typedef.desc
 
+    def get_abil_str(self) -> str:
+        return self.typedef.get_abil_str()
+
+    # Returns the damage dice as a string.
+    def get_damage_str(self) -> str:
+        return self.typedef.get_damage_str()
+
     # Returns True if the monster is unqiue, false otherwise.
     def is_unique(self) -> bool:
         """
@@ -1060,6 +1067,9 @@ class Monster(Actor):
 
     def is_boss(self) -> bool:
         return has_attribute(self.attributes, ATTR_BOSS_______)
+
+    def get_rarity(self) -> int:
+        return self.typedef.get_rarity()
 
     # Returns the score value for defeating this monster.
     def get_score_val(self) -> int:

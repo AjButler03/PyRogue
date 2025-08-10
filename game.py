@@ -1344,7 +1344,7 @@ class Pyrogue_Game:
         curr_line = 0
         desc_lines = monster.get_desc()
         line_count = 8 + len(desc_lines)
-        longest_line = 15 # Default to at least 15 width
+        longest_line = 15  # Default to at least 15 width
         # Determine what is actually the longest line, depending on description lines
         for line in desc_lines:
             new_len = len(line)
@@ -1352,10 +1352,10 @@ class Pyrogue_Game:
                 longest_line = new_len
         ideal_height = int((line_count + 1) * self.tile_size)
         max_height = (self.mapsize_h - 3) * self.tile_size
-        ideal_width = int(longest_line * self.tile_size) # This may need to be adjusted
+        ideal_width = int(longest_line * self.tile_size)  # This may need to be adjusted
         visible_menu_height = min(ideal_height, max_height)
         visible_menu_width = min(self.tile_size * (self.mapsize_w - 3), ideal_width)
-        
+
         # Attempt to grab current x/y scroll values to return to it
         try:
             y_scroll_val = self.submenu_canvas.yview()[0]
@@ -1363,11 +1363,11 @@ class Pyrogue_Game:
         except (tk.TclError, IndexError, AttributeError):
             y_scroll_val = 0.0  # Revert to zero
             x_scroll_val = 0.0
-        
+
         if self.need_submenu_rerender:
             if self.submenu_canvas:
                 self.submenu_canvas.destroy()
-            
+
             self.submenu_canvas = tk.Canvas(
                 self.canvas,
                 height=visible_menu_height,
@@ -1385,18 +1385,129 @@ class Pyrogue_Game:
                 window=self.submenu_canvas,
                 anchor="center",
             )
-            
+
             # Init canvas' ability to scroll
             self.submenu_canvas.config(
-                scrollregion=(0, 0, ideal_width - self.tile_size, ideal_height - self.tile_size)
+                scrollregion=(
+                    0,
+                    0,
+                    ideal_width - self.tile_size,
+                    ideal_height - self.tile_size,
+                )
             )
-            
-            
+
+        # Draw text
+        offset = self.tile_size
+        curr_line = 1
+
+        # Symbol (separate for defined color, appears on same line as name)
+        color = monster.get_single_color()
+        self.window_canvas.create_text(
+            offset,
+            curr_line * self.tile_size,
+            text=monster.get_char(),
+            fill=color,
+            font=(self.def_font, self.font_size),
+            tag="monstinspect_symb",
+            anchor="nw",
+        )
+
+        # Name (same line as symbol, again separate for separate colors)
+        self.window_canvas.create_text(
+            offset + self.tile_size,
+            curr_line * self.tile_size,
+            text=monster.get_name(),
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="monstinspect_name",
+            anchor="nw",
+        )
+        curr_line += 1
+
+        # Description
+        curr_line += 1
+        i = 1
+        for line in desc_lines:
+            self.window_canvas.create_text(
+                offset,
+                (self.tile_size * (curr_line)),
+                text=line,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag=f"monstinspect_desc_{i}",
+                anchor="nw",
+            )
+            i += 1
+            curr_line += 1
+        curr_line += 1
+
+        # Abilities
+        text = "ATTRIBUTES: " + monster.get_abil_str()
+        self.window_canvas.create_text(
+            offset,
+            curr_line * self.tile_size,
+            text=text,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="monstinspect_abil",
+            anchor="nw",
+        )
+        curr_line += 1
+
+        # Speed
+        text = f"SPEED:      {monster.get_speed()}"
+        self.window_canvas.create_text(
+            offset,
+            curr_line * self.tile_size,
+            text=text,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="monstinspect_speed",
+            anchor="nw",
+        )
+        curr_line += 1
+
+        # Health
+        text = f"HIT POINTS: {monster.get_hp()}"
+        self.window_canvas.create_text(
+            offset,
+            curr_line * self.tile_size,
+            text=text,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="monstinspect_hp",
+            anchor="nw",
+        )
+        curr_line += 1
+
+        # Damage
+        text = "DAMAGE:     " + monster.get_damage_str()
+        self.window_canvas.create_text(
+            offset,
+            curr_line * self.tile_size,
+            text=text,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="monstinspect_damage",
+            anchor="nw",
+        )
+        curr_line += 1
+
+        # Rarity
+        text = f"RARITY:     {monster.get_rarity()}"
+        self.window_canvas.create_text(
+            offset,
+            curr_line * self.tile_size,
+            text=text,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="monstinspect_rrty",
+            anchor="nw",
+        )
+
         # Return to previous scroll values; I.e., scroll back to where user had it before redrawing
         self.submenu_canvas.yview_moveto(y_scroll_val)
         self.submenu_canvas.xview_moveto(x_scroll_val)
-            
-            
 
     # Renders item inspection screen
     def _render_item_inspect(self, item: Item):
