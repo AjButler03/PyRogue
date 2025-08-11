@@ -95,6 +95,7 @@ class Pyrogue_Game:
         # Fields to handle submenus and their navigation
         self.submenu_canvas = None
         self.submenu_select_idx = 0
+        self.inspect_obj = None  # Monster/item to be inspected; storing to be able re-render inspect window
         self.need_submenu_rerender = False
         self.display_submenus = {
             "none": 0,
@@ -102,6 +103,8 @@ class Pyrogue_Game:
             "menu_monster_list": 2,
             "menu_inventory": 3,
             "menu_equipment": 4,
+            "inspect_monster": 5,
+            "inspect_item": 6,
         }
         self.curr_submenu = self.display_submenus["none"]
 
@@ -136,6 +139,7 @@ class Pyrogue_Game:
             "menu_inventory": 4,  # Input for inventory (carry slots) menu
             "menu_equipment": 5,  # Input for equipment menu
             "targeting": 6,  # Input for targeting mode (ranged attacks, teleport, item/monster inspection)
+            "inspect": 7,
         }
         # Targeted position information for when using targeting mode
         self.target_r = 0
@@ -210,6 +214,9 @@ class Pyrogue_Game:
         elif self.curr_input_mode == self.input_modes["targeting"]:
             # Calling the targeting mode input handler
             self._handle_targeting_input(key)
+        elif self.curr_input_mode == self.input_modes["inspect"]:
+            # Inspection window input handler
+            self._handle_inspect_input(key)
         # Any input after end of game returns control to main menu
         if self.game_over and (key == "Return" or key == "Escape"):
             self._end_game()
@@ -409,7 +416,8 @@ class Pyrogue_Game:
         elif key == "Escape":
             self.curr_input_mode = self.input_modes["player_turn"]
             self.curr_submenu = self.display_submenus["none"]
-            self.submenu_canvas.destroy()
+            if self.submenu_canvas:
+                self.submenu_canvas.destroy()
             self.need_full_rerender = True
             print("GAME: Exit sub-menu closed")
             self._update_top_label("")
@@ -420,7 +428,8 @@ class Pyrogue_Game:
             # Return to player input
             self.curr_input_mode = self.input_modes["player_turn"]
             self.curr_submenu = self.display_submenus["none"]
-            self.submenu_canvas.destroy()
+            if self.submenu_canvas:
+                self.submenu_canvas.destroy()
             self.need_full_rerender = True
             print("GAME: Monster list sub-menu closed")
             self._update_top_label("")
@@ -444,7 +453,8 @@ class Pyrogue_Game:
             # Return to player input
             self.curr_input_mode = self.input_modes["player_turn"]
             self.curr_submenu = self.display_submenus["none"]
-            self.submenu_canvas.destroy()
+            if self.submenu_canvas:
+                self.submenu_canvas.destroy()
             self.need_full_rerender = True
             # Forces Update to player's area of sight
             self.player.handle_turn(
@@ -528,7 +538,8 @@ class Pyrogue_Game:
             # Return to player input
             self.curr_input_mode = self.input_modes["player_turn"]
             self.curr_submenu = self.display_submenus["none"]
-            self.submenu_canvas.destroy()
+            if self.submenu_canvas:
+                self.submenu_canvas.destroy()
             self.need_full_rerender = True
             # Forces Update to player's area of sight
             self.player.handle_turn(
@@ -652,8 +663,24 @@ class Pyrogue_Game:
                     message = "You cannot teleport there"
                 self._update_top_label(message)
             elif key == "i":
-                # Inspect monster or item at cursor location
-                pass
+                # Attempt to grab monster, then attempt to grab item.
+                if self.actor_map[self.target_r][self.target_c]:
+                    self.inspect_obj = self.actor_map[self.target_r][self.target_c]
+                    self._update_top_label(f"Inspecting {self.inspect_obj.get_name()}")
+                    self.curr_input_mode = self.input_modes["inspect"]
+                    self.curr_submenu = self.display_submenus["inspect_monster"]
+                    self.need_submenu_rerender = True
+                    self._render_monster_inspect(self.inspect_obj)
+                elif self.item_map[self.target_r][self.target_c]:
+                    pass
+                    # self.inspect_obj = self.actor_map[self.target_r][self.target_c]
+                    # self.curr_input_mode = self.input_modes["inspect"]
+                    # self.curr_submenu = self.display_submenus["inspect_item"]
+                    # self.need_submenu_rerender = True
+                    # self._render_item_inspect(self.inspect_obj)
+                else:
+                    message = "No monster or item to inspect"
+                    self._update_top_label(message)
         else:
             # Attempt to move targeting cursor
             move = move_delta[key]
@@ -670,6 +697,45 @@ class Pyrogue_Game:
                     self.target_r = new_r
                     # Update render for snappier feeling response
                     self._render_frame(self.scrsize_h, self.scrsize_w)
+
+    # Handles inspection menu input
+    def _handle_inspect_input(self, key):
+        # Exit or scrolling input
+        if key == "Escape" or key == "t":
+            # Return to player input
+            if self.submenu_canvas:
+                self.submenu_canvas.destroy()
+            self.curr_input_mode = self.input_modes["player_turn"]
+            self.curr_submenu = self.display_submenus["none"]
+            self.need_full_rerender = True
+            self._render_frame(self.scrsize_h, self.scrsize_w)
+            self._update_top_label("")
+        elif key == "j" or key == "Down" or key == "2":
+            # Scroll down
+            self.submenu_canvas.yview_scroll(1, "units")
+        elif key == "k" or key == "Up" or key == "8":
+            # Attempt to grab current y scroll value
+            try:
+                scroll_val = self.submenu_canvas.yview()[0]
+            except (tk.TclError, IndexError, AttributeError):
+                scroll_val = 0.0  # Revert to zero
+
+            # Scroll up, but only if possible (scroll_val > 0.0)
+            if scroll_val > 0.0:
+                self.submenu_canvas.yview_scroll(-1, "units")
+        elif key == "Right" or key == "l" or key == "6":
+            # Scroll right
+            self.submenu_canvas.xview_scroll(1, "units")
+        elif key == "Left" or key == "h" or key == "4":
+            # Attempt to grab current x scroll value
+            try:
+                scroll_val = self.submenu_canvas.xview()[0]
+            except (tk.TclError, IndexError, AttributeError):
+                scroll_val = 0.0  # Revert to zero
+
+            # Scroll left, but only if possible (scroll_val > 0.0)
+            if scroll_val > 0.0:
+                self.submenu_canvas.xview_scroll(-1, "units")
 
     # Populates the actor_map with a dungeon size proportionate number of monsters.
     def _generate_monsters(self):
@@ -1344,7 +1410,7 @@ class Pyrogue_Game:
         curr_line = 0
         desc_lines = monster.get_desc()
         line_count = 8 + len(desc_lines)
-        longest_line = 15  # Default to at least 15 width
+        longest_line = self.mapsize_w  # default to at least the dungeon width
         # Determine what is actually the longest line, depending on description lines
         for line in desc_lines:
             new_len = len(line)
@@ -1352,7 +1418,9 @@ class Pyrogue_Game:
                 longest_line = new_len
         ideal_height = int((line_count + 1) * self.tile_size)
         max_height = (self.mapsize_h - 3) * self.tile_size
-        ideal_width = int(longest_line * self.tile_size)  # This may need to be adjusted
+        ideal_width = int(
+            longest_line * (self.tile_size / 1.75)
+        )  # This may need to be adjusted
         visible_menu_height = min(ideal_height, max_height)
         visible_menu_width = min(self.tile_size * (self.mapsize_w - 3), ideal_width)
 
@@ -1398,11 +1466,11 @@ class Pyrogue_Game:
 
         # Draw text
         offset = self.tile_size
-        curr_line = 1
+        curr_line = 0.3  # Weird value in attempt to center text
 
         # Symbol (separate for defined color, appears on same line as name)
-        color = monster.get_single_color()
-        self.window_canvas.create_text(
+        color = monster.get_color()
+        self.submenu_canvas.create_text(
             offset,
             curr_line * self.tile_size,
             text=monster.get_char(),
@@ -1413,7 +1481,7 @@ class Pyrogue_Game:
         )
 
         # Name (same line as symbol, again separate for separate colors)
-        self.window_canvas.create_text(
+        self.submenu_canvas.create_text(
             offset + self.tile_size,
             curr_line * self.tile_size,
             text=monster.get_name(),
@@ -1428,7 +1496,7 @@ class Pyrogue_Game:
         curr_line += 1
         i = 1
         for line in desc_lines:
-            self.window_canvas.create_text(
+            self.submenu_canvas.create_text(
                 offset,
                 (self.tile_size * (curr_line)),
                 text=line,
@@ -1443,7 +1511,7 @@ class Pyrogue_Game:
 
         # Abilities
         text = "ATTRIBUTES: " + monster.get_abil_str()
-        self.window_canvas.create_text(
+        self.submenu_canvas.create_text(
             offset,
             curr_line * self.tile_size,
             text=text,
@@ -1456,7 +1524,7 @@ class Pyrogue_Game:
 
         # Speed
         text = f"SPEED:      {monster.get_speed()}"
-        self.window_canvas.create_text(
+        self.submenu_canvas.create_text(
             offset,
             curr_line * self.tile_size,
             text=text,
@@ -1469,7 +1537,7 @@ class Pyrogue_Game:
 
         # Health
         text = f"HIT POINTS: {monster.get_hp()}"
-        self.window_canvas.create_text(
+        self.submenu_canvas.create_text(
             offset,
             curr_line * self.tile_size,
             text=text,
@@ -1482,7 +1550,7 @@ class Pyrogue_Game:
 
         # Damage
         text = "DAMAGE:     " + monster.get_damage_str()
-        self.window_canvas.create_text(
+        self.submenu_canvas.create_text(
             offset,
             curr_line * self.tile_size,
             text=text,
@@ -1495,7 +1563,7 @@ class Pyrogue_Game:
 
         # Rarity
         text = f"RARITY:     {monster.get_rarity()}"
-        self.window_canvas.create_text(
+        self.submenu_canvas.create_text(
             offset,
             curr_line * self.tile_size,
             text=text,
@@ -1612,9 +1680,13 @@ class Pyrogue_Game:
                 tag="dungeon_border",
             )
 
-        # To loop through monster symbol colors in submenu
+        # To loop through monster / item symbol colors in submenu
         if self.curr_submenu == self.display_submenus["menu_monster_list"]:
             self._render_monster_list()
+        elif self.curr_submenu == self.display_submenus["inspect_monster"]:
+            self._render_monster_inspect(self.inspect_obj)
+        elif self.curr_submenu == self.display_submenus["inspect_item"]:
+            self._render_item_inspect(self.inspect_obj)
 
         self.need_full_rerender = False
 
