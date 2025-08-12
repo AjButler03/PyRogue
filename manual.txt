@@ -43,7 +43,35 @@ BEGIN PAGE
  / /  / / /_/ / / / (__  ) /_/  __/ /  (__  ) 
 /_/  /_/\____/_/ /_/____/\__/\___/_/  /____/  
                                               
-Describe monsters and their potential abilities.
+Knowing the monsters of PyRogue is important- some will be easy to take down,
+others less so. Being able to differentiate between the easy to kill and the
+unstoppable killing machines will be life and death.
+
+All monsters will spawn with some amount of health, and will have a dice object
+to determine how much raw damage they deal. They will also have defined attributes
+that determine how they behave in the dungeon.
+
+All dice in PyRogue, including the damage dice for monsters, are defined as having
+a base value followed by some number of rolls of an x-sided die.
+For example, 10+2d6 represents a base value of 10, which is then added to the result
+of 2 rolls of a 6 sided die.
+The basic format, then, is {base}+{Number of rolls}d{number of sides to die}.
+
+The starting hitpoints of a monster are also determined by dice roll, as defined by
+the monster's type definition. All monster type definitions are viewable in the 
+Monster Encyclopedia.
+
+Attributes are also defined by the monster's type definition. Any definition may
+have any combination of the attributes, creating a wide variety of behaviors.
+
+There are 5 individual attributes that monsters can have:
+    - INTELLIGENT: Monster follows optimal path to the player, and can remember 
+                   the location of the player.
+    - TELEPATHIC:  Monster always knows where the player character is, regardless of 
+                   distance or line of sight.
+    - TUNNEL:      Monster can bore through rock, creating new paths between rooms.
+    - ERRATIC:     On every turn, 50% chance to move randomly.
+    - PASS:        Monster can move through rock without boring.
 END PAGE
 
 
@@ -54,8 +82,63 @@ BEGIN PAGE
  _/ // /_/  __/ / / / / (__  ) 
 /___/\__/\___/_/ /_/ /_/____/  
                                
-Describe the different item types, their purpose, and bonuses.
-Inventory space/ management.
+Scavenging for items is essential in preparing yourself for fighting the toughest
+enemies in the dungeon. A good weapon will be a life and death matter.
+
+Many aspects of items will have values determined by dice rolls.
+All dice in PyRogue are defined as having a base value followed by some number of 
+rolls of an x-sided die. For example, 10+2d6 represents a base value of 10, which is 
+then added to the result of 2 rolls of a 6 sided die.
+The basic format, then, is {base}+{Number of rolls}d{number of sides to die}.
+
+There are 9 possible item types, each filling a different role. Specific item
+definitions can be found in the Item Encyclopedia.
+
+Potions (symbol: ! )
+    These are single-use items that will give you some sort of bonus.
+    Some will grant a simple hitpoint restore, while others will give a bonus to 
+    maximum hit point, speed, defense, or dodge values.
+
+Weapons (symbol: | )
+    These are basic short range weapons that boost melee damage to enemies.
+    They may restore hitpoints, and/or grant bonuses to speed, defense, and 
+    dodge values, but not always. These might be the most important item to get
+    early, so that you can defeat enemies quickly before they deal significant damage.
+    May restore hitpoints upon equip.
+  
+Ranged (symbol: } )
+    Like normal weapons, ranged weapons (listed as "RANGED" in menus) allow you to deal 
+    damage to enemies. The difference is that they can be used to attack monsters from
+    a distance, which helps you avoid damage. The caveat is that they consume ammunition,
+    which must also be scavanged for.
+    May restore hitpoints upon equip.
+
+Ammo (symbol: TBD )
+    These are ammunition containers, which increase your ammunition by a certain amount.
+    Not currently implemented.
+
+Offhand (symbol: ) )
+    Objects, like shields, that are wielded in your non-dominant hand. They typically
+    prioritize granting a defensive bonus, but can be used to inflict melee damage as well.
+    May restore hitpoints upon equip.
+
+Armor (symbol: [ )
+    Clothing that is ideally protective, granting defensive bonuses.
+    May restore hitpoints upon equip.
+  
+Amulets (symbol: " )
+    Neckware that can apply a variety of bonuses, both offensive and defensive.
+    May restore hitpoints upon equip.
+
+Rings (symbol: = )
+    Rings are much like amulets, in that they apply a variety of bonuses, both
+    offensive and defenseive. They are unique in that they are the only item 
+    that the player can equip two of- one for each hand.
+    May restore hitpoints upon equip.
+
+Lights (symbol: _ )
+    Lights are the only item that benefits the player's view distance, or your 
+    ability to pierce the 'fog of war'. Lights have no other benefit.
 END PAGE
 
 BEGIN PAGE
@@ -63,9 +146,8 @@ BEGIN PAGE
   / ____/___  ____  / /__________  / /____
  / /   / __ \/ __ \/ __/ ___/ __ \/ / ___/
 / /___/ /_/ / / / / /_/ /  / /_/ / (__  ) 
-\____/\____/_/ /_/\__/_/   \____/_/____/  
-                                          
-                            
+\____/\____/_/ /_/\__/_/   \____/_/____/                                  
+
 ===== MOVEMENT =====
   7 or y : Attempt to move one cell to the upper left.
   8 or k : Attempt to move one cell up.
@@ -85,9 +167,12 @@ BEGIN PAGE
   d: Attempts to drop an item from inventory.
   x: Attempts to destroy an item from inventory.
 ===== OTHER =====
-  f : Toggle fog of war effect. 
+  t : toggle targeting mode
+  i : (while targeting mode or inventory) inspect item or monster.
   m : Opens a submenu to list all present monsters.
-  z : Cycles through standard / walking map / tunnelmap render modes.
   esc : Opens / closes pause menu.
-
+===== CHEATS / DEBUG TOOLS =====
+  f : Toggle fog of war effect. 
+  g : (while targeting mode) teleport to targeted location.
+  z : Cycles through standard / walking map / tunnelmap render modes.
 END PAGE
