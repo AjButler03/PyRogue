@@ -663,24 +663,27 @@ class Pyrogue_Game:
                     message = "You cannot teleport there"
                 self._update_top_label(message)
             elif key == "i":
-                # Attempt to grab monster, then attempt to grab item.
-                if self.actor_map[self.target_r][self.target_c]:
-                    self.inspect_obj = self.actor_map[self.target_r][self.target_c]
-                    self._update_top_label(f"Inspecting {self.inspect_obj.get_name()}")
-                    self.curr_input_mode = self.input_modes["inspect"]
-                    self.curr_submenu = self.display_submenus["inspect_monster"]
-                    self.need_submenu_rerender = True
-                    self._render_monster_inspect(self.inspect_obj)
-                elif self.item_map[self.target_r][self.target_c]:
-                    pass
-                    # self.inspect_obj = self.actor_map[self.target_r][self.target_c]
-                    # self.curr_input_mode = self.input_modes["inspect"]
-                    # self.curr_submenu = self.display_submenus["inspect_item"]
-                    # self.need_submenu_rerender = True
-                    # self._render_item_inspect(self.inspect_obj)
-                else:
-                    message = "No monster or item to inspect"
-                    self._update_top_label(message)
+                player_r, player_c = self.player.get_pos()
+                # Double check that not inspecting yourself
+                if not (self.target_r == player_r and self.target_c == player_c):
+                    # Attempt to grab monster, then attempt to grab item.
+                    if self.actor_map[self.target_r][self.target_c]:
+                        self.inspect_obj = self.actor_map[self.target_r][self.target_c]
+                        self._update_top_label(f"Inspecting {self.inspect_obj.get_name()}")
+                        self.curr_input_mode = self.input_modes["inspect"]
+                        self.curr_submenu = self.display_submenus["inspect_monster"]
+                        self.need_submenu_rerender = True
+                        self._render_monster_inspect(self.inspect_obj)
+                    elif self.item_map[self.target_r][self.target_c]:
+                        pass
+                        # self.inspect_obj = self.actor_map[self.target_r][self.target_c]
+                        # self.curr_input_mode = self.input_modes["inspect"]
+                        # self.curr_submenu = self.display_submenus["inspect_item"]
+                        # self.need_submenu_rerender = True
+                        # self._render_item_inspect(self.inspect_obj)
+                    else:
+                        message = "No monster or item to inspect"
+                        self._update_top_label(message)
         else:
             # Attempt to move targeting cursor
             move = move_delta[key]
@@ -707,6 +710,7 @@ class Pyrogue_Game:
                 self.submenu_canvas.destroy()
             self.curr_input_mode = self.input_modes["player_turn"]
             self.curr_submenu = self.display_submenus["none"]
+            self.inspect_obj = None # Reset stored inspection pointer to None
             self.need_full_rerender = True
             self._render_frame(self.scrsize_h, self.scrsize_w)
             self._update_top_label("")
@@ -1419,7 +1423,7 @@ class Pyrogue_Game:
         ideal_height = int((line_count + 1) * self.tile_size)
         max_height = (self.mapsize_h - 3) * self.tile_size
         ideal_width = int(
-            longest_line * (self.tile_size / 1.75)
+            longest_line * (self.tile_size / 1.85)
         )  # This may need to be adjusted
         visible_menu_height = min(ideal_height, max_height)
         visible_menu_width = min(self.tile_size * (self.mapsize_w - 3), ideal_width)
@@ -1510,7 +1514,7 @@ class Pyrogue_Game:
         curr_line += 1
 
         # Abilities
-        text = "ATTRIBUTES: " + monster.get_abil_str()
+        text = "ATTRIBUTES:  " + monster.get_abil_str()
         self.submenu_canvas.create_text(
             offset,
             curr_line * self.tile_size,
@@ -1523,7 +1527,7 @@ class Pyrogue_Game:
         curr_line += 1
 
         # Speed
-        text = f"SPEED:      {monster.get_speed()}"
+        text = f"SPEED:       {monster.get_speed()}"
         self.submenu_canvas.create_text(
             offset,
             curr_line * self.tile_size,
@@ -1536,7 +1540,7 @@ class Pyrogue_Game:
         curr_line += 1
 
         # Health
-        text = f"HIT POINTS: {monster.get_hp()}"
+        text = f"HIT POINTS:  {monster.get_hp()}"
         self.submenu_canvas.create_text(
             offset,
             curr_line * self.tile_size,
@@ -1549,7 +1553,7 @@ class Pyrogue_Game:
         curr_line += 1
 
         # Damage
-        text = "DAMAGE:     " + monster.get_damage_str()
+        text = "DAMAGE:      " + monster.get_damage_str()
         self.submenu_canvas.create_text(
             offset,
             curr_line * self.tile_size,
@@ -1562,14 +1566,14 @@ class Pyrogue_Game:
         curr_line += 1
 
         # Rarity
-        text = f"RARITY:     {monster.get_rarity()}"
+        text = f"SCORE VALUE: {monster.get_score_val()}"
         self.submenu_canvas.create_text(
             offset,
             curr_line * self.tile_size,
             text=text,
             fill="white",
             font=(self.def_font, self.font_size),
-            tag="monstinspect_rrty",
+            tag="monstinspect_val",
             anchor="nw",
         )
 
