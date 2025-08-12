@@ -1041,9 +1041,15 @@ class Menu_Main:
         defense_str = itypedef.get_defense_str()
         dodge_str = itypedef.get_dodge_str()
 
-        # Total number of lines to the monster description entry
-        # 7 are the other lines above, plus another 3 just for spacing
-        line_count = len(desc_lines) + 10
+        # Total number of lines to the item description entry
+        # Varies depending on type shown
+        itype = itypedef.get_type()
+        if itype == item_type_opts["POTION"]:
+            line_count = 12 + len(desc_lines)
+        elif itype == item_type_opts["LIGHT"]:
+            line_count = 8 + len(desc_lines)
+        else:
+            line_count = 12 + len(desc_lines)
         full_height = line_count * tile_size
 
         # Attempt to grab current y scroll value to return to it
@@ -1313,5 +1319,6 @@ class Menu_Main:
             tag="monstencyc_rrty",
             anchor="nw",
         )
+
         # Return to previous scroll value; I.e., scroll back to where user had it before redrawing
         self.window_canvas.yview_moveto(scroll_val)

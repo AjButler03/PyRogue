@@ -163,12 +163,13 @@ BEGIN PAGE
   p: Picks up an item, placing into inventory.
   e: Opens equipment menu.
   i: Opens inventory menu.
+  i: (while already in inventory / equipment menu) Inspect item.
   enter: Equip/unequip/use item.
   d: Attempts to drop an item from inventory.
   x: Attempts to destroy an item from inventory.
 ===== OTHER =====
   t : toggle targeting mode
-  i : (while targeting mode or inventory) inspect item or monster.
+  i : (while in targeting mode) inspect item or monster.
   m : Opens a submenu to list all present monsters.
   esc : Opens / closes pause menu.
 ===== CHEATS / DEBUG TOOLS =====

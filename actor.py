@@ -266,6 +266,9 @@ class Item:
     def get_type(self):
         return self.typedef.get_type()
 
+    def get_desc(self):
+        return self.typedef.desc
+
     # Returns a str keyword for a single Tkinter color.
     def get_color(self):
         return self.typedef.get_single_color()
@@ -282,6 +285,27 @@ class Item:
 
     def get_used_status(self):
         return self.used
+
+    def get_hp_restore(self):
+        return self.hp_restore
+
+    def get_attr_bonus(self):
+        return self.attr
+
+    def get_speed_bonus(self):
+        return self.speed
+
+    def get_dodge_bonus(self):
+        return self.dodge
+
+    def get_defense_bonus(self):
+        return self.defense
+
+    def get_damage_str(self):
+        return self.typedef.get_damage_str()
+
+    def get_rarity(self):
+        return self.typedef.rarity
 
     # resets generation eligibility of type definition
     def update_gen_eligible(self, is_new_item: bool, force_reset: bool):
@@ -861,6 +885,10 @@ class Player(Actor):
                 return False, True, item
         return False, False, item
 
+    # Forces the player back to maximum health.
+    def force_max_health(self):
+        self.hp = self.hp_cap
+
     # Forcefully teleports the player to row, col within the dungeon, instantly killing any monster that is there.
     # Returns true/false for success and any killed monster.
     def teleport(self, dungeon: Dungeon, actor_map: list, row: int, col: int):
@@ -948,10 +976,11 @@ class Player(Actor):
 
     # Returns what is inside a given inventory slot.
     def get_inventory_item(self, idx: int):
-        if idx >= self.inventory_size:
-            return False, None
-        else:
-            return True, self.inventory[idx]
+        if not (idx >= self.inventory_size):
+            item = self.inventory[idx]
+            if item != None:
+                return True, item
+        return False, None
 
     # Attempts to delete an item from inventory.
     def expunge_item(self, idx: int):
@@ -985,6 +1014,9 @@ class Player(Actor):
                     item_map[self.r][self.c] = item
                     return True, item
         return False, item
+
+    def get_equipped_by_key(self, key_str):
+        return self.equip_slots[key_str]
 
     def get_weapon(self):
         return self.equip_slots["weapon"]

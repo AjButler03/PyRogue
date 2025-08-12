@@ -19,6 +19,10 @@ v0.08 ==========================================================================
     - Continued progress on monster inspection
 08/11/2025
     - Monster inspection now functional, with x/y scrolling to see entire content.
+08/12/2025
+    - Wrote 'Monsters' and 'Items' pages for manual in manual.txt.
+    - Fixed visual scrolling bug with Item Encyclopedia.
+    - Items can now be inspected via targeting mode.
 v0.07 ===========================================================================================================================
 07/23/2025
     - Slightly modified item definition parser to better define item types with error handling

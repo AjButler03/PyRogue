@@ -206,17 +206,16 @@ END
 
 
 BEGIN MONSTER
-NAME Durin's Bane
+NAME the Giant Chicken
 DESC
-Nameless Terror, Flame of Udun, Shadow and Flame
-This is a Balrog of Morgoth - Wielding a Fiery whip and flaming sword, a
-hellish beast with a mane and eyes of fire. This creature is responsible
-for the destruction of the great city of Moria. The defeat of this monster
-will avenge the death of countless dwarves, re-establish the wealth and power
-of the Misty Mountains and bring peace to the halls of Khazad-dum.
+Some say that this mystical creature underwent many legendary battles
+with one Peter Griffin, causing utter chaos upon the land of Quahog.
+
+Those stories always seemed a bit cartoonish to you, but seeing the
+chicken here makes you wonder if there was some truth in them.
 .
-SYMB B
-COLOR red magenta
+SYMB G
+COLOR red yellow
 SPEED 20+0d1
 ABIL SMART TELE UNIQ
 HP 500+0d1

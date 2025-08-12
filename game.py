@@ -335,6 +335,10 @@ class Pyrogue_Game:
                 self.need_full_rerender = True
                 self._render_frame(self.scrsize_h, self.scrsize_w)
                 return False  # Turn not over
+            elif key == "plus":
+                self.player.force_max_health()
+                self._update_hud()
+                self._update_top_label("Restored hit points", "gold")
             elif key == "Escape":
                 # Enter the "exit" menu for exit options
                 self.curr_input_mode = self.input_modes["menu_exit"]
@@ -449,7 +453,7 @@ class Pyrogue_Game:
 
     # Handles input for the inventory submenu
     def _handle_inventory_input(self, key):
-        if key == "Escape" or key == "i":
+        if key == "Escape":
             # Return to player input
             self.curr_input_mode = self.input_modes["player_turn"]
             self.curr_submenu = self.display_submenus["none"]
@@ -493,6 +497,17 @@ class Pyrogue_Game:
                 self._update_hud()
             else:
                 self._update_top_label("No item to equip")
+        elif key == "i":
+            success, item = self.player.get_inventory_item(self.submenu_select_idx)
+            if success:
+                self.inspect_obj = item
+                self._update_top_label(f"Inspecting {self.inspect_obj.get_name()}")
+                self.curr_input_mode = self.input_modes["inspect"]
+                self.curr_submenu = self.display_submenus["inspect_item"]
+                self.need_submenu_rerender = True
+                self._render_item_inspect(self.inspect_obj)
+            else:
+                self._update_top_label("No item to inspect")
         elif key == "j" or key == "Down" or key == "2":
             # Move selection down
             if self.submenu_select_idx < self.player.get_inventory_size() - 1:
@@ -583,9 +598,30 @@ class Pyrogue_Game:
                 self.need_submenu_rerender = True
                 self._render_equipment()
                 self._update_hud()
-
             elif inventory_problem:
                 self._update_top_label("No room in inventory to unequip item")
+        elif key == "i":
+            key_str = {
+                0: "weapon",
+                1: "ranged",
+                2: "offhand",
+                3: "armor",
+                4: "amulet",
+                5: "ring_l",
+                6: "ring_r",
+                7: "light",
+            }
+            item = self.player.get_equipped_by_key(key_str[self.submenu_select_idx])
+            if item != None:
+                self.inspect_obj = item
+                self._update_top_label(f"Inspecting {self.inspect_obj.get_name()}")
+                self.curr_input_mode = self.input_modes["inspect"]
+                self.curr_submenu = self.display_submenus["inspect_item"]
+                self.need_submenu_rerender = True
+                self._render_item_inspect(self.inspect_obj)
+            else:
+                self._update_top_label("No item to inspect")
+
         elif key == "j" or key == "Down" or key == "2":
             # Move selection down
             if self.submenu_select_idx < 7:
@@ -669,18 +705,22 @@ class Pyrogue_Game:
                     # Attempt to grab monster, then attempt to grab item.
                     if self.actor_map[self.target_r][self.target_c]:
                         self.inspect_obj = self.actor_map[self.target_r][self.target_c]
-                        self._update_top_label(f"Inspecting {self.inspect_obj.get_name()}")
+                        self._update_top_label(
+                            f"Inspecting {self.inspect_obj.get_name()}"
+                        )
                         self.curr_input_mode = self.input_modes["inspect"]
                         self.curr_submenu = self.display_submenus["inspect_monster"]
                         self.need_submenu_rerender = True
                         self._render_monster_inspect(self.inspect_obj)
                     elif self.item_map[self.target_r][self.target_c]:
-                        pass
-                        # self.inspect_obj = self.actor_map[self.target_r][self.target_c]
-                        # self.curr_input_mode = self.input_modes["inspect"]
-                        # self.curr_submenu = self.display_submenus["inspect_item"]
-                        # self.need_submenu_rerender = True
-                        # self._render_item_inspect(self.inspect_obj)
+                        self.inspect_obj = self.item_map[self.target_r][self.target_c]
+                        self._update_top_label(
+                            f"Inspecting {self.inspect_obj.get_name()}"
+                        )
+                        self.curr_input_mode = self.input_modes["inspect"]
+                        self.curr_submenu = self.display_submenus["inspect_item"]
+                        self.need_submenu_rerender = True
+                        self._render_item_inspect(self.inspect_obj)
                     else:
                         message = "No monster or item to inspect"
                         self._update_top_label(message)
@@ -710,7 +750,7 @@ class Pyrogue_Game:
                 self.submenu_canvas.destroy()
             self.curr_input_mode = self.input_modes["player_turn"]
             self.curr_submenu = self.display_submenus["none"]
-            self.inspect_obj = None # Reset stored inspection pointer to None
+            self.inspect_obj = None  # Reset stored inspection pointer to None
             self.need_full_rerender = True
             self._render_frame(self.scrsize_h, self.scrsize_w)
             self._update_top_label("")
@@ -1414,12 +1454,15 @@ class Pyrogue_Game:
         curr_line = 0
         desc_lines = monster.get_desc()
         line_count = 8 + len(desc_lines)
+
         longest_line = self.mapsize_w  # default to at least the dungeon width
         # Determine what is actually the longest line, depending on description lines
         for line in desc_lines:
             new_len = len(line)
             if new_len > longest_line:
                 longest_line = new_len
+
+        # Determine screen sizing, both visible and full scrollable size
         ideal_height = int((line_count + 1) * self.tile_size)
         max_height = (self.mapsize_h - 3) * self.tile_size
         ideal_width = int(
@@ -1469,7 +1512,7 @@ class Pyrogue_Game:
             )
 
         # Draw text
-        offset = self.tile_size
+        offset = self.tile_size // 2
         curr_line = 0.3  # Weird value in attempt to center text
 
         # Symbol (separate for defined color, appears on same line as name)
@@ -1583,7 +1626,281 @@ class Pyrogue_Game:
 
     # Renders item inspection screen
     def _render_item_inspect(self, item: Item):
-        pass
+        curr_line = 0
+        desc_lines = item.get_desc()
+
+        # Line count will be dependant on what type of item it is. There may be duplicates here, but this leaves room for granularity later.
+        # Actual lines are created further down.
+        itype = item.get_type()
+        if itype == item_type_opts["POTION"]:
+            line_count = 9 + len(desc_lines)
+        elif itype == item_type_opts["LIGHT"]:
+            line_count = 5 + len(desc_lines)
+        else:
+            line_count = 9 + len(desc_lines)
+
+        longest_line = self.mapsize_w  # default to at least the dungeon width
+        # Determine what is actually the longest line, depending on description lines
+        for line in desc_lines:
+            new_len = len(line)
+            if new_len > longest_line:
+                longest_line = new_len
+
+        # Determine screen sizing, both visible and full scrollable size
+        ideal_height = int((line_count + 1) * self.tile_size)
+        max_height = (self.mapsize_h - 3) * self.tile_size
+        ideal_width = int(
+            longest_line * (self.tile_size / 1.85)
+        )  # This may need to be adjusted
+        visible_menu_height = min(ideal_height, max_height)
+        visible_menu_width = min(self.tile_size * (self.mapsize_w - 3), ideal_width)
+
+        # Attempt to grab current x/y scroll values to return to it
+        try:
+            y_scroll_val = self.submenu_canvas.yview()[0]
+            x_scroll_val = self.submenu_canvas.xview()[0]
+        except (tk.TclError, IndexError, AttributeError):
+            y_scroll_val = 0.0  # Revert to zero
+            x_scroll_val = 0.0
+
+        if self.need_submenu_rerender:
+            if self.submenu_canvas:
+                self.submenu_canvas.destroy()
+
+            self.submenu_canvas = tk.Canvas(
+                self.canvas,
+                height=visible_menu_height,
+                width=visible_menu_width,
+                bg="black",
+                highlightthickness=self.tile_size // 6,
+                yscrollincrement=self.tile_size,
+            )
+
+            self.canvas.create_window(
+                self.scrsize_w // 2,
+                (self.tile_size * self.mapsize_h // 2) + self.tile_size,
+                height=visible_menu_height,
+                width=visible_menu_width,
+                window=self.submenu_canvas,
+                anchor="center",
+            )
+
+            # Init canvas' ability to scroll
+            self.submenu_canvas.config(
+                scrollregion=(
+                    0,
+                    0,
+                    ideal_width - self.tile_size,
+                    ideal_height - self.tile_size,
+                )
+            )
+
+        # Draw text
+        offset = self.tile_size // 2
+        curr_line = 0.3  # Weird value in attempt to center text
+
+        # Symbol (separate for defined color, appears on same line as name)
+        color = item.get_color()
+        self.submenu_canvas.create_text(
+            offset,
+            curr_line * self.tile_size,
+            text=item.get_char(),
+            fill=color,
+            font=(self.def_font, self.font_size),
+            tag="iteminspect_symb",
+            anchor="nw",
+        )
+
+        # Name (same line as symbol, again separate for separate colors)
+        self.submenu_canvas.create_text(
+            offset + self.tile_size,
+            curr_line * self.tile_size,
+            text=item.get_name(),
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="iteminspect_name",
+            anchor="nw",
+        )
+        curr_line += 1
+
+        # Description
+        curr_line += 1
+        i = 1
+        for line in desc_lines:
+            self.submenu_canvas.create_text(
+                offset,
+                (self.tile_size * (curr_line)),
+                text=line,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag=f"iteminspect_desc_{i}",
+                anchor="nw",
+            )
+            i += 1
+            curr_line += 1
+        curr_line += 1
+
+        # From here on, what is printed depends on the type of the item.
+        if itype == item_type_opts["POTION"]:
+            # Hit Point Restore
+            text = f"HITPOINT RESTORE:  {item.get_hp_restore()}"
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="iteminspect_hp_r",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # MAX HIT POINT BONUS
+            text = f"HP CAP BONUS:      {item.get_attr_bonus()}"
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="iteminspect_hp_b",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # speed
+            text = f"SPEED BONUS:       {item.get_speed_bonus()}"
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="iteminspect_spd",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # Dodge
+            text = f"DODGE BONUS:       {item.get_dodge_bonus()}"
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="iteminspect_dodge",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # Defense
+            text = f"DEFENSE BONUS:     {item.get_defense_bonus()}"
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="iteminspect_def",
+                anchor="nw",
+            )
+            curr_line += 1
+        elif itype == item_type_opts["LIGHT"]:
+            # VIEW DIST BONUS
+            text = f"VIEW DIST BONUS:   {item.get_attr_bonus()}"
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="iteminspect_attr",
+                anchor="nw",
+            )
+            curr_line += 1
+        else:
+            # All other types will present the same information
+            # Damage
+            text = f"DAMAGE BONUS:      {item.get_damage_str()}"
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="iteminspect_dam",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # hp restore
+            text = f"HIT POINT RESTORE: {item.get_hp_restore()}"
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="iteminspect_hp_r",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # speed
+            text = f"SPEED BONUS:       {item.get_speed_bonus()}"
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="iteminspect_spd",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # Dodge
+            text = f"DODGE BONUS:       {item.get_dodge_bonus()}"
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="iteminspect_dodge",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # Defense
+            text = f"DEFENSE BONUS:     {item.get_defense_bonus()}"
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="iteminspect_def",
+                anchor="nw",
+            )
+            curr_line += 1
+
+        # Rarity
+        text = "RARITY:            " + str(item.get_rarity())
+        self.submenu_canvas.create_text(
+            offset,
+            curr_line * self.tile_size,
+            text=text,
+            fill="white",
+            font=(self.def_font, self.font_size),
+            tag="iteminspect_rrty",
+            anchor="nw",
+        )
+
+        # Return to previous scroll values; I.e., scroll back to where user had it before redrawing
+        self.submenu_canvas.yview_moveto(y_scroll_val)
+        self.submenu_canvas.xview_moveto(x_scroll_val)
 
     # Renders the dungeon to the screen canvas.
     def _render_frame(self, height, width):
