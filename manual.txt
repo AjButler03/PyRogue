@@ -111,11 +111,13 @@ Ranged (symbol: } )
     damage to enemies. The difference is that they can be used to attack monsters from
     a distance, which helps you avoid damage. The caveat is that they consume ammunition,
     which must also be scavanged for.
+    NOTE: ranged combat not yet implemented. For now, there is no ammunition consumption,
+    and ranged weapons contribute to melee damage.
     May restore hitpoints upon equip.
 
 Ammo (symbol: TBD )
     These are ammunition containers, which increase your ammunition by a certain amount.
-    Not currently implemented.
+    NOTE: Not currently implemented, and will not spawn.
 
 Offhand (symbol: ) )
     Objects, like shields, that are wielded in your non-dominant hand. They typically
