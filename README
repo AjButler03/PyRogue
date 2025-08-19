@@ -1,5 +1,5 @@
 PyRogue v0.08 By Andrew Butler, Summer 2025
-Built to run using Python 3.12
+Built to run using Python 3.12 & Tkinter library
 
 pyrogue.py is the main file, and running it will open a new window with the PyRogue main menu.
 
@@ -37,14 +37,17 @@ The game has the following key binds:
   x: Attempts to destroy an item from inventory.
 ===== OTHER =====
   t : toggle targeting mode
-  i : (while targeting mode) inspect item or monster.
+  i : (while in targeting mode) inspect item or monster.
   m : Opens a submenu to list all present monsters.
   esc : Opens / closes pause menu.
 ===== CHEATS / DEBUG TOOLS =====
   f : Toggle fog of war effect. 
   g : (while targeting mode) teleport to targeted location.
   z : Cycles through standard / walking map / tunnelmap render modes.
+  + : Restores player hitpoints to current maximum.
 
 Known Issues:
   - The game does not instantly end when win conditions are met.
+  - Monsters with PASS and SMART will follow the tunneling distance map, which is not the most optimal path.
+  - Item / Monster definition parser does not allow negative values, nor does it account for x+yd0. (0-sided dice).
 

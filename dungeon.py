@@ -77,17 +77,6 @@ class Dungeon:
         self.walk_distmap = [[float("inf")] * self.width for _ in range(self.height)]
         self.tunn_distmap = [[float("inf")] * self.width for _ in range(self.height)]
 
-    # Boolean function; checks if point is within immutable outer border of dungeon
-    def valid_point(self, r, c):
-        '''
-        Determines if the row, column coordinate is within the dungeon bounds (within immutable outer border).
-        Returns True if so, False otherwise.
-        '''
-        if (r < 1) or (c < 1) or (r > self.height - 2) or (c > self.width - 2):
-            return False
-        else:
-            return True
-
     # Attempts to place a room into the dungeon terrain map
     def _place_room(self, room):
         r = room.origin_r
@@ -491,19 +480,70 @@ class Dungeon:
 
     # Calculates the distance maps from specified point
     def calc_dist_maps(self, r, c):
-        '''
+        """
         This calculates distance maps for walking and tunneling to a given row, column coordinate.
         These distance maps are used for monster pathfinding, so that coordinate is intended to be the player's position.
-        '''
-        
+        """
+
         self._calc_walk_distmap(r, c)
         self._calc_tunn_distmap(r, c)
 
     # Generates a random dungeon
     def generate_dungeon(self):
-        '''
+        """
         Generates the dungeon's terrain.
-        '''
+        """
         self._generate_rockmap()
         self._generate_terrain()
         return
+
+    # grabs dungeon width
+    def get_width(self)-> int:
+        return self.width
+    
+    # Grabs dungeon height
+    def get_height(self)-> int:
+        return self.height
+    
+    # Boolean function; checks if point is within immutable outer border of dungeon
+    def valid_point(self, r, c):
+        """
+        Determines if the row, column coordinate is within the dungeon bounds (within immutable outer border).
+        Returns True if so, False otherwise.
+        """
+        if (r < 1) or (c < 1) or (r > self.height - 2) or (c > self.width - 2):
+            return False
+        else:
+            return True
+
+    # Grabs rock hardness at a specific location.
+    def get_rock_at(self, row: int, col: int) -> int:
+        return self.rmap[row][col]
+    
+    def set_rock_at(self, row: int, col: int, val: int):
+        self.rmap[row][col] = val
+    
+    # Grabs terrain at a specific location.
+    def get_terrain_at(self, row: int, col: int) -> Terrain:
+        return self.tmap[row][col]
+
+    # Makes specified location floor.
+    def make_floor_at(self, row: int, col: int):
+        self.tmap[row][col] = self.Terrain.floor
+        self.rmap[row][col] = 0
+    
+    # Grabs walking distance map, in it's entirety.
+    def get_walking_distmap(self) -> list:
+        return self.walk_distmap
+
+    # Grabs a walking distance map weight at a given location.
+    def get_walking_weight_at(self, row: int, col: int) -> int:
+        return self.walk_distmap[row][col]
+    
+    # Grabs tunneling distance map, in it's entirety.
+    def get_tunneling_distmap(self)-> list:
+        return self.tunn_distmap
+    
+    # Grabs a tunneling distance map weight at a given location.
+    def get_tunneling_weight_at(self, row: int, col: int) -> int:
+        return self.tunn_distmap[row][col]

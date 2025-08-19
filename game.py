@@ -251,7 +251,7 @@ class Pyrogue_Game:
             if key == "greater" or key == "0":
                 pc_r, pc_c = self.player.get_pos()
                 # Wanting to navigate staircase; check that staircase is present where player is standing
-                if self.dungeon.tmap[pc_r][pc_c] == Dungeon.Terrain.stair:
+                if self.dungeon.get_terrain_at(pc_r, pc_c) == Dungeon.Terrain.stair:
                     # replace the dungeon, re-generating monsters and restarting the turn loop
                     self._replace_dungeon()
                     pc_r, pc_c = self.player.get_pos()
@@ -785,7 +785,7 @@ class Pyrogue_Game:
     def _generate_monsters(self):
         attemptc = 0
         monsterc = 0
-        size_modifier = self.dungeon.width * self.dungeon.height
+        size_modifier = self.mapsize_w * self.mapsize_h
         attempt_limit = int(self.difficulty * size_modifier)
         min_monsterc = max(1, int(size_modifier // 100 * self.difficulty))
         # Adjust exp_chancetime's decay curve to increase additional monster probability with difficulty
@@ -809,8 +809,8 @@ class Pyrogue_Game:
                     if new_monster.init_pos(
                         self.dungeon,
                         self.actor_map,
-                        random.randint(1, self.dungeon.height - 2),
-                        random.randint(1, self.dungeon.width - 2),
+                        random.randint(1, self.mapsize_h - 2),
+                        random.randint(1, self.mapsize_w - 2),
                     ):
                         # Update gen eligibility of monster type; Newly generated monster True, force reset False
                         new_monster.update_gen_eligible(True, False)
@@ -831,7 +831,7 @@ class Pyrogue_Game:
     def _generate_items(self):
         attemptc = 0
         itemc = 0
-        size_modifier = self.dungeon.width * self.dungeon.height
+        size_modifier = self.mapsize_w * self.mapsize_h
         attempt_limit = size_modifier
         min_itemc = max(1, int(size_modifier // 100))
         decay_rate = 0.75
@@ -852,8 +852,8 @@ class Pyrogue_Game:
                     if new_item.init_pos(
                         self.dungeon,
                         self.item_map,
-                        random.randint(1, self.dungeon.height - 2),
-                        random.randint(1, self.dungeon.width - 2),
+                        random.randint(1, self.mapsize_h - 2),
+                        random.randint(1, self.mapsize_w - 2),
                     ):
                         # Update gen eligibility of monster type; Newly generated monster True, force reset False
                         new_item.update_gen_eligible(True, False)
@@ -898,12 +898,8 @@ class Pyrogue_Game:
         self.dungeon.generate_dungeon()
 
         # Clear actor map, monster list, and priority queue
-        self.actor_map = [
-            [None] * self.dungeon.width for _ in range(self.dungeon.height)
-        ]
-        self.item_map = [
-            [None] * self.dungeon.width for _ in range(self.dungeon.height)
-        ]
+        self.actor_map = [[None] * self.mapsize_w for _ in range(self.mapsize_h)]
+        self.item_map = [[None] * self.mapsize_w for _ in range(self.mapsize_h)]
         self.monster_list = []
         self.item_list = []
         self.turn_pq = PriorityQueue()
@@ -934,12 +930,8 @@ class Pyrogue_Game:
         self.dungeon.generate_dungeon()
 
         # Init actor map and item map
-        self.actor_map = [
-            [None] * self.dungeon.width for _ in range(self.dungeon.height)
-        ]
-        self.item_map = [
-            [None] * self.dungeon.width for _ in range(self.dungeon.height)
-        ]
+        self.actor_map = [[None] * self.mapsize_w for _ in range(self.mapsize_h)]
+        self.item_map = [[None] * self.mapsize_w for _ in range(self.mapsize_h)]
 
         # Init player
         self.player = Player()
@@ -1904,7 +1896,7 @@ class Pyrogue_Game:
 
     # Renders the dungeon to the screen canvas.
     def _render_frame(self, height, width):
-        max_tile_width = width // self.dungeon.width
+        max_tile_width = width // self.mapsize_w
         max_tile_height = (
             height // self.scrn_rows
         )  # Note that there are 3 extra rows for messages / player information
@@ -1919,7 +1911,7 @@ class Pyrogue_Game:
             Dungeon.Terrain.debug: " ",
         }
 
-        x_offset = (width - self.tile_size * self.dungeon.width) // 2  # To center
+        x_offset = (width - self.tile_size * self.mapsize_w) // 2  # To center
         y_offset = self.tile_size  # To leave room for top message
 
         if self.need_full_rerender:
@@ -1929,14 +1921,10 @@ class Pyrogue_Game:
             dungeon_left = x_offset + self.tile_size
             dungeon_top = y_offset + self.tile_size
             dungeon_right = (
-                dungeon_left
-                + ((self.dungeon.width - 1) * self.tile_size)
-                - self.tile_size
+                dungeon_left + ((self.mapsize_w - 1) * self.tile_size) - self.tile_size
             )
             dungeon_bottom = (
-                dungeon_top
-                + ((self.dungeon.height - 1) * self.tile_size)
-                - self.tile_size
+                dungeon_top + ((self.mapsize_h - 1) * self.tile_size) - self.tile_size
             )
 
             # Deleting existing messages and border
@@ -1956,7 +1944,7 @@ class Pyrogue_Game:
             )
 
             # Draw score message label
-            y = int((self.dungeon.height + 0.5) * self.tile_size)
+            y = int((self.mapsize_h + 0.5) * self.tile_size)
             self.canvas.create_text(
                 x + self.tile_size // 2,
                 y + self.tile_size // 2.5,
@@ -2014,13 +2002,13 @@ class Pyrogue_Game:
         # To check if targeting mode is active
         is_targeting = self.curr_input_mode == self.input_modes["targeting"]
 
-        for row in range(self.dungeon.height):
-            for col in range(self.dungeon.width):
+        for row in range(self.mapsize_h):
+            for col in range(self.mapsize_w):
                 is_border_tile = (
                     row == 0
                     or col == 0
-                    or row == self.dungeon.height - 1
-                    or col == self.dungeon.width - 1
+                    or row == self.mapsize_h - 1
+                    or col == self.mapsize_w - 1
                 )
 
                 if not is_border_tile:
@@ -2050,7 +2038,7 @@ class Pyrogue_Game:
                                 char = item.get_char()
                                 color = item.get_color()
                             else:
-                                terrain = self.dungeon.tmap[row][col]
+                                terrain = self.dungeon.get_terrain_at(row, col)
                                 char = terrain_char[terrain]
                                 color = "white"
                         else:
@@ -2074,12 +2062,12 @@ class Pyrogue_Game:
                             char = item.get_char()
                             color = item.get_color()
                         else:
-                            terrain = self.dungeon.tmap[row][col]
+                            terrain = self.dungeon.get_terrain_at(row, col)
                             char = terrain_char[terrain]
                             color = "white"
                     elif self.curr_render_mode == self.render_modes["walkmap"]:
                         # Grab walkmap character
-                        val = self.dungeon.walk_distmap[row][col]
+                        val = self.dungeon.get_walking_weight_at(row, col)
                         if val == 0:
                             char = "@"
                             color = "gold"
@@ -2090,7 +2078,7 @@ class Pyrogue_Game:
                             char = f"{val}"
                     elif self.curr_render_mode == self.render_modes["tunnmap"]:
                         # Grab walkmap character
-                        val = self.dungeon.tunn_distmap[row][col]
+                        val = self.dungeon.get_tunneling_weight_at(row, col)
                         if val == 0:
                             char = "@"
                             color = "gold"

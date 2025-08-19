@@ -237,7 +237,7 @@ class Item:
         """
 
         if dungeon.valid_point(r, c):
-            if dungeon.rmap[r][c] == 0:
+            if dungeon.get_rock_at(r, c) == 0:
                 return True
         return False
 
@@ -246,7 +246,7 @@ class Item:
     def init_pos(self, dungeon: Dungeon, item_map: list, r: int, c: int) -> bool:
         if (
             dungeon.valid_point(r, c)
-            and dungeon.rmap[r][c] == 0
+            and dungeon.get_rock_at(r, c) == 0
             and item_map[r][c] == None
         ):
             self.r = r
@@ -479,7 +479,7 @@ class Actor(abc.ABC):
     def init_pos(self, dungeon: Dungeon, actor_map: list, r: int, c: int) -> bool:
         if (
             dungeon.valid_point(r, c)
-            and dungeon.rmap[r][c] == 0
+            and dungeon.get_rock_at(r, c) == 0
             and actor_map[r][c] == None
         ):
             self.r = r
@@ -663,13 +663,13 @@ class Player(Actor):
                     dist = dx * dx + dy * dy
 
                     # Check if new point is rock (wall)
-                    is_wall = dungeon.tmap[Y][X] in {
+                    is_wall = dungeon.get_terrain_at(Y, X) in {
                         Dungeon.Terrain.stdrock,
                         Dungeon.Terrain.immrock,
                     }
 
                     if dist <= radius * radius:
-                        self.tmem[Y][X] = dungeon.tmap[Y][X]
+                        self.tmem[Y][X] = dungeon.get_terrain_at(Y, X)
                         # hard check to make sure walls aren't marked as visible by mistake
                         if not is_wall:
                             self.visible_tiles[Y][X] = True
@@ -698,11 +698,13 @@ class Player(Actor):
         Compute what the player can see from its current location using recursive shadowcasting.
         Updates player.tmem, which is the player's remembered dungeon terrain.
         """
-        self.visible_tiles = [[False] * dungeon.width for _ in range(dungeon.height)]
+        self.visible_tiles = [
+            [False] * dungeon.get_width() for _ in range(dungeon.get_height())
+        ]
 
         cx = self.c
         cy = self.r
-        self.tmem[cy][cx] = dungeon.tmap[cy][cx]
+        self.tmem[cy][cx] = dungeon.get_terrain_at(cy, cx)
         self.visible_tiles[cy][cx] = True
 
         for octant in range(8):
@@ -711,7 +713,7 @@ class Player(Actor):
 
     # Determines if the player can be at this position.
     def _valid_pos(self, dungeon: Dungeon, r: int, c: int) -> bool:
-        if dungeon.valid_point(r, c) and dungeon.rmap[r][c] == 0:
+        if dungeon.valid_point(r, c) and dungeon.get_rock_at(r, c) == 0:
             return True
         else:
             return False
@@ -773,12 +775,13 @@ class Player(Actor):
     def init_pos(self, dungeon: Dungeon, actor_map: list, r: int, c: int) -> bool:
         # Clear the player's memory of the dungeon.
         self.tmem = [
-            [Dungeon.Terrain.debug] * dungeon.width for _ in range(dungeon.height)
+            [Dungeon.Terrain.debug] * dungeon.get_width()
+            for _ in range(dungeon.get_height())
         ]
 
         if (
             dungeon.valid_point(r, c)
-            and dungeon.rmap[r][c] == 0
+            and dungeon.get_rock_at(r, c) == 0
             and actor_map[r][c] == None
         ):
             self.r = r
@@ -1149,7 +1152,7 @@ class Monster(Actor):
 
         if dungeon.valid_point(r, c):
             if (
-                dungeon.rmap[r][c] == 0
+                dungeon.get_rock_at(r, c) == 0
                 or has_attribute(self.attributes, ATTR_TUNNEL_____)
                 or has_attribute(self.attributes, ATTR_PASS_______)
             ):
@@ -1169,7 +1172,7 @@ class Monster(Actor):
         # Scan from the monster's position, moving towards the player's location.
         while True:
             # Check if there is rock in the way
-            if dungeon.rmap[curr_r][curr_c] > 0:
+            if dungeon.get_rock_at(curr_r, curr_c) > 0:
                 # Rock is in the way; no line of sight, so return False.
                 return False
 
@@ -1201,7 +1204,9 @@ class Monster(Actor):
         # dist is to give the path a useful weight to use when deciding where to go
         dist = 0
         # Init path to 'infinite' weight at every point; slow, but prevents multiple paths overlapping if LOS broken and regained
-        self.path = [[float("inf")] * dungeon.width for _ in range(dungeon.height)]
+        self.path = [
+            [float("inf")] * dungeon.get_width() for _ in range(dungeon.get_height())
+        ]
 
         # Scan from the player's position, moving towards the monster's location.
         while True:
@@ -1296,16 +1301,16 @@ class Monster(Actor):
         else:
             dmg = 0  # to have a return value
             # Check if there is rock in the way
-            if dungeon.rmap[new_r][new_c] != 0:
-                hardness = dungeon.rmap[new_r][new_c]
+            if dungeon.get_rock_at(new_r, new_c) != 0:
+                hardness = dungeon.get_rock_at(new_r, new_c)
                 if has_attribute(self.attributes, ATTR_TUNNEL_____):
                     # Bore rock
                     hardness = max(0, hardness - 86)
-                    dungeon.rmap[new_r][new_c] = hardness
+                    dungeon.set_rock_at(new_r, new_c, hardness)
                 if hardness < 1 or has_attribute(self.attributes, ATTR_PASS_______):
                     # Rock has been cleared and/or monster can pass through
                     if has_attribute(self.attributes, ATTR_TUNNEL_____):
-                        dungeon.tmap[new_r][new_c] = dungeon.Terrain.floor
+                        dungeon.make_floor_at(new_r, new_c)
                     # Update the actor map + position information
                     actor_map[self.r][self.c] = None
                     actor_map[new_r][new_c] = self
@@ -1372,11 +1377,11 @@ class Monster(Actor):
                 # Check if monster is a tunneling monster to determine which it should get.
                 if has_attribute(self.attributes, ATTR_TUNNEL_____):
                     # Tunneler, get tunneling distance map.
-                    self.path = dungeon.tunn_distmap
+                    self.path = dungeon.get_tunneling_distmap()
                     return True
                 else:
                     # Not a tunneler, get walking distance map.
-                    self.path = dungeon.walk_distmap
+                    self.path = dungeon.get_walking_distmap()
                     return True
             else:
                 # Monster is intelligent, but not telepathic. Need to check for line of sight.
@@ -1384,10 +1389,10 @@ class Monster(Actor):
                     # Has line of sight, so need to check which distance map monster should recieve a copy of.
                     # Also: Copy instead of direct assignment to emmulate 'memory' of last PC sighting.
                     if has_attribute(self.attributes, ATTR_TUNNEL_____):
-                        self.path = copy.deepcopy(dungeon.tunn_distmap)
+                        self.path = copy.deepcopy(dungeon.get_tunneling_distmap())
                         return True
                     else:
-                        self.path = copy.deepcopy(dungeon.walk_distmap)
+                        self.path = copy.deepcopy(dungeon.get_walking_distmap())
                         return True
         else:
             if has_attribute(self.attributes, ATTR_TELEPATHIC_):

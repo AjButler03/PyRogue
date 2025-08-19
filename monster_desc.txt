@@ -55,11 +55,16 @@ RRTY 10
 END
 
 BEGIN MONSTER
-NAME a cave rat
-SYMB r
+NAME a head crab
+SYMB h
 COLOR red
 DESC
-The little lad is pretty fast, but it can't do much to you.
+It can't really hurt you if you would just wear a helmet, Gordon.
+Literally just pick up a bucket off the ground and put it on your head.
+
+No?
+
+I guess just whack it then.
 .
 SPEED 10+1d3
 DAM 0+2d3
@@ -164,14 +169,46 @@ SYMB R
 COLOR red orange yellow green blue violet
 SPEED 5+5d2
 ABIL SMART ERRATIC
-HP 100+0d1
+HP 100+5d20
 DAM 5+3d6
-NAME RoyGeeBiv
+NAME a RoyGeeBiv
 DESC
 Pretty, in a tacky sort of way.
 It must have escaped from a nearby gaming computer.
 .
 RRTY 50
+END
+
+BEGIN MONSTER
+SYMB C
+COLOR red orange yellow
+SPEED 7+5d2
+ABIL SMART ERRATIC
+HP 250+20d10
+DAM 5+3d6
+NAME a Code Compiler
+DESC
+A bog-standard compiler for C-code.
+
+Wait .... this is Python, get your compiler outa here.
+.
+RRTY 55
+END
+
+BEGIN MONSTER
+SYMB p
+COLOR yellow blue
+SPEED 2+3d2
+ABIL SMART ERRATIC
+HP 250+20d10
+DAM 10+3d10
+NAME a Python Script
+DESC
+Pretty convenient and easy to write/run.
+
+Good god is it slow, though.
+.
+RRTY 55
 END
 
 BEGIN MONSTER
@@ -181,7 +218,7 @@ SPEED 25+3d20
 ABIL ERRATIC SMART
 HP 1000+0d1
 DAM 10+3d6
-NAME Undead Knight
+NAME an Undead Knight
 DESC
 You've seen the remains of many knights in here, many of which
 suffered pretty gruesome deaths. This seems much, much worse.
@@ -190,11 +227,30 @@ RRTY 65
 END
 
 BEGIN MONSTER
+SYMB S
+COLOR chartreuse1
+SPEED 20+3d10
+ABIL UNIQ SMART
+HP 500+3d20
+DAM 5+1d20
+NAME the Sauce Man
+DESC
+You know him from outside this dungeon; he was a connoisseur
+of condiments, a man with divine taste for the things that 
+turned a dry meal into an incredible one.
+
+He must have sampled something truly terrible, however,
+because he seems to have become a crazed murderer.
+.
+RRTY 75
+END
+
+BEGIN MONSTER
 SYMB P
 COLOR maroon
 SPEED 15+3d10
 ABIL UNIQ SMART
-HP 2500+0d1
+HP 2000+0d1
 DAM 15+1d20
 NAME Sir Pepper
 DESC
@@ -203,7 +259,6 @@ For he is the harbinger of Dr. Pepper, and you'll soon be dead.
 .
 RRTY 75
 END
-
 
 BEGIN MONSTER
 NAME the Giant Chicken
@@ -262,6 +317,31 @@ END
 
 
 BEGIN MONSTER
+NAME HEV Zombie
+DESC
+As you stumble through the dungeon, you come across someone wearing their own 
+HEV suit. Instinctively, you call out to them, hoping for an ally.
+
+They don't answer, or even seem to acknowledge you.
+
+So, you move in closer, trying to see what is going on. They slowly turn 
+around, revealing the headcrab firmly secured on their head.
+
+Their suit croaks out "v-vi-vital ss-ssig-signs critical", clearly losing 
+its battle to keep its wearer alive and well.
+
+Your ally hopes are quickly replaced with dread.
+.
+SYMB Z
+COLOR yellow orange green orange yellow
+ABIL SMART PASS
+DAM 20+2d20
+HP 3000+2d250
+SPEED 10+10d2
+RRTY 70
+END
+
+BEGIN MONSTER
 NAME Amazon Lich Queen
 DESC
 She was a powerful Amazon warrior in life.  Death at the hands of the undead
@@ -271,11 +351,11 @@ that don't move in the wind, her incorporeal form commands the power of death
 over life.  You may just be her next victim.  You fear for your soul as you
 quake before her malevolent majesty.
 .
-SYMB p
+SYMB Q
 COLOR white red magenta
 ABIL SMART PASS
 DAM 30+5d9
-HP 2999+1d1001
+HP 4999+1d1001
 SPEED 10+10d2
 RRTY 75
 END
@@ -294,15 +374,15 @@ Don't underestimate him, or you will suffer the same fate as Big Milk.
 .
 ABIL UNIQ ERRATIC DESTROY TUNNEL BOSS
 SPEED 15+0d1
-HP 6666+1d666
+HP 66666+1d666
 DAM 25+2d20
-RRTY 75
+RRTY 85
 END
 
 BEGIN MONSTER
 NAME Death
 DESC
-He's here for someone; and he seems to be following you.
+He's obviously here for someone; and he seems to be following you.
 You should probably keep moving.
 .
 SYMB D
@@ -310,8 +390,8 @@ COLOR gray maroon
 ABIL PASS TELE UNIQ BOSS
 DAM 500+10d20
 HP 99999+0d1
-SPEED 5+0d1
-RRTY 95
+SPEED 7+3d1
+RRTY 99
 END
 
 ========================= FUN / EASTER EGG MONSTERS
@@ -326,6 +406,20 @@ DAM 0+0d1
 NAME Piper the Dog
 DESC
 2014 - 2024
+.
+RRTY 100
+END
+
+BEGIN MONSTER
+SYMB G
+COLOR blue3
+SPEED 5+0d1
+ABIL SMART UNIQ
+HP 999999+0d1
+DAM 0+0d1
+NAME Harry Carray's Ghost
+DESC
+HOLY COW!
 .
 RRTY 100
 END

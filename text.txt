@@ -1,3 +1,6 @@
+This is just a working file for figuring out the text of the menus.
+It is not used in the actual game code in any way.
+
 ASCII text generated at https://patorjk.com/software/taag/#p=display&f=Slant&t=PyRogue
 Main font is Slant, side pages are Small Slant
 
