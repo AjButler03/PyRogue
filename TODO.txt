@@ -1,0 +1,8 @@
+2025 semester started, so PyRogue will take a wayside for a while.
+Things left that I want to implement before a full "1.0":
+- Ranged combat (ammunition items)
+- cheats toggle in settings
+- combat log viewer (visible after death/ game over)
+- monster item pickup / destroy abilities
+- Monster item drop on death (if possible)
+- Make game runable in easy way (no terminal navigation, just launch and play)

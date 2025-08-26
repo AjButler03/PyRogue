@@ -456,7 +456,7 @@ class Menu_Main:
         y_offset = tile_size
 
         if self.need_full_rerender:
-            version_str = "Andrew Butler v0.08 08/2025"
+            version_str = "Andrew Butler v1.00 ??/2025"
 
             # This is a series of string lines that form the PyRogue ASCII art text.
             # It's a little garbled here because of excape character \.
