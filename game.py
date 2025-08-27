@@ -6,7 +6,6 @@ from dungeon import *
 
 # This file handles the main gameloop and the tkinter UI for the game itself.
 
-
 # The Pyrogue_Game class handles all the high-level game logic and control.
 class Pyrogue_Game:
 
@@ -158,6 +157,14 @@ class Pyrogue_Game:
         self._start_turnloop()
         print("=== GAME START ===")
 
+    # Helper to create the hud's line 1 string.
+    def _hud_str1(self)-> str:
+        r, c = self.player.get_pos()
+        return f"SCORE: {self.player_score:06d}   MODIFIER: {self.difficulty:.2f}   POS: (R:{r:0d}, C:{c:0d})"
+    
+    def _hud_str2(self)-> str:
+        return f"HP:           AMMO: {}   DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}" 
+        
     # Nerfs speed value so that it doesn't become too overpowered.
     def _speed_nerf(self, base_speed: int) -> int:
         # I don't know how best to do this, so i'm just capping the speed for the player.
@@ -970,13 +977,14 @@ class Pyrogue_Game:
         r, c = self.player.get_pos()
         if not self.game_over:
             # Player score and position (line 1)
-            self.score_msg = f"SCORE: {self.player_score:06d}   MODIFIER: {self.difficulty:.2f}   POS: (R:{r:0d}, C:{c:0d})"
+            self.score_msg = self._hud_str1
             self.score_msg_color = "white"
 
             # Player stats (line 2)
             curr_hp = self.player.get_hp()
             hp_cap = self.player.get_hp_cap()
             self.hp_msg = f"{curr_hp:03d}/{hp_cap:03d}"
+            self.ammo_msg = f"{curr_hp:03d}/{hp_cap:03d}"
             # Determine HP color based on current percentage of health
             ratio = max(0.0, min(curr_hp / hp_cap, 1.0))
 
