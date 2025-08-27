@@ -119,6 +119,7 @@ ART TRUE
 END
 
 ============================== RANGED definitions
+Ranged weapons will use ATTR as the amount of ammunition needed per shot.
 
 BEGIN ITEM
 NAME a slingshot
@@ -185,7 +186,7 @@ SPEED 0+0d1
 DESC
 A two-handed boom stick.
 .
-ATTR 1+0d1
+ATTR 3+0d1
 RRTY 65
 ART FALSE
 END
@@ -203,7 +204,7 @@ DESC
 Two for the shields, one for the head.
 Piss your friends off today!
 .
-ATTR 1+0d1
+ATTR 5+0d1
 RRTY 85
 ART TRUE
 END
@@ -220,7 +221,7 @@ SPEED 0+0d1
 DESC
 They told you the game was rigged from the start; so you responded with this.
 .
-ATTR 1+0d1
+ATTR 15+0d1
 RRTY 95
 ART TRUE
 END
@@ -471,6 +472,7 @@ ART TRUE
 END
 
 ============================== LIGHT definitions
+Only field that matters here is ATTR; this is the bonus to the view distance of the player.
 
 BEGIN ITEM
 NAME a torch
@@ -526,6 +528,8 @@ ART FALSE
 END
 
 ============================== POTION definitions
+ATTR acts as the bonus to HP capacity, hp still acts as a HP restore.
+Capacity bonus is applied first, then the HP Restore.
 
 BEGIN ITEM
 NAME a Potion of healing
@@ -600,7 +604,7 @@ END
 
 ============================== AMMO definitions
 Intended to be ammo 'containers'. Only the ATTR field will be used, which will specify the amount of ammunition
-the container gives. Ammo types are not something I'll be looking into for the foreseeable future.
+the container gives. Pyrogue will not distinquish ammo types; i.e., a gun and a bow both just shoot 'ammo'.
 
 BEGIN ITEM
 NAME Small Ammunition Box

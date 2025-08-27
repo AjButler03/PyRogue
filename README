@@ -1,4 +1,4 @@
-PyRogue v0.08 By Andrew Butler, Summer 2025
+PyRogue v1.00 By Andrew Butler
 Built to run using Python 3.12 & Tkinter library
 
 To run and play PyRogue, you will need to navigate to the folder with all the associated files
@@ -12,11 +12,12 @@ monster and item descriptions for monsters/items that will appear in the game, o
 For more information on the game itself, be sure to check out the game manual.
 Have fun!
 
-New features with v0.08:
-    - Manual page
-    - Inspection of monster and item instances within dungeon
-    - Difficulty score multiplier
-    - Increased difficulty as game progresses
+New features with v1.00:
+    - Ranged combat using ranged weapons (WIP)
+    - Cheats toggle in settings (TODO)
+    - Combat log viewer (TODO)
+    - Monster PICKUP & DESTROY abilities (TODO)
+    - Installer, allowing easy play from terminal (TODO)
 
 The game has the following key binds:
 ===== MOVEMENT =====
