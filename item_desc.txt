@@ -597,3 +597,59 @@ ATTR 500+0d1
 RRTY 100
 ART TRUE
 END
+
+============================== AMMO definitions
+Intended to be ammo 'containers'. Only the ATTR field will be used, which will specify the amount of ammunition
+the container gives. Ammo types are not something I'll be looking into for the foreseeable future.
+
+BEGIN ITEM
+NAME Small Ammunition Box
+TYPE AMMO
+COLOR brown
+DODGE 0+0d1
+DAM 0+0d1
+DEF 0+0d1
+HIT 0+0d1
+SPEED 0+0d1
+DESC
+A small box of ammunition for your ranged weapon.
+not much to work with on its own, but if you find more it'll add up.
+.
+ATTR 0+2d6
+RRTY 35
+ART FALSE
+END
+
+BEGIN ITEM
+NAME Medium Ammunition Box
+TYPE AMMO
+COLOR gray
+DODGE 0+0d1
+DAM 0+0d1
+DEF 0+0d1
+HIT 0+0d1
+SPEED 0+0d1
+DESC
+A decent sized box of ammunition for your ranged weapon.
+.
+ATTR 5+2d10
+RRTY 50
+ART FALSE
+END
+
+BEGIN ITEM
+NAME Large Ammunition Box
+TYPE AMMO
+COLOR white
+DODGE 0+0d1
+DAM 0+0d1
+DEF 0+0d1
+HIT 0+0d1
+SPEED 0+0d1
+DESC
+A pretty sizeable cache of ammunition for your ranged weapon.
+.
+ATTR 10+2d20
+RRTY 70
+ART FALSE
+END

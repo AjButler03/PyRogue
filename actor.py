@@ -29,6 +29,7 @@ item_type_opts = {
     "AMULET": 5,
     "LIGHT": 6,
     "RING": 7,
+    "AMMO": 8,
 }
 
 # Shortcut to turn type (int) back into corresponding string
@@ -41,6 +42,7 @@ _item_type_to_str = {
     5: "AMULET",
     6: "LIGHT",
     7: "RING",
+    8: "AMMO",
 }
 
 # Universal symbols depending on type
@@ -53,6 +55,7 @@ _item_symb_by_type = {
     5: '"',  # Amulet
     6: "_",  # Light
     7: "=",  # Ring
+    8: "#",  # Ammunition
 }
 
 
