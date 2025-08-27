@@ -553,21 +553,21 @@ class Player(Actor):
         self.alive = True
 
         # Init base values
-        self.turn = 0 # Current turn
-        self.speed = 10 # Speed (turn offset)
-        self.hp_cap = 100 # Maximum hp
-        self.hp = self.hp_cap # Set current hp to max
-        self.defense = 10 # damage reduction value
-        self.dodge = 10 # dodge chance value; this is not 10%, but larger number gives larger chance
-        self.ammo = 0 # Start with no ammunition for ranged weapons
-        self.ammo_cap = 100 # Limit ammo capacity
-        self.view_dist = 3 # Initial view distance of 3 cells
+        self.turn = 0  # Current turn
+        self.speed = 10  # Speed (turn offset)
+        self.hp_cap = 100  # Maximum hp
+        self.hp = self.hp_cap  # Set current hp to max
+        self.defense = 10  # damage reduction value
+        self.dodge = 10  # dodge chance value; this is not 10%, but larger number gives larger chance
+        self.ammo = 0  # Start with no ammunition for ranged weapons
+        self.ammo_cap = 100  # Limit ammo capacity
+        self.view_dist = 3  # Initial view distance of 3 cells
 
         # Base damage for the player, assuming that it has no other weapons
         self.fisticuffs_dice = Dice(0, 2, 6)
 
-        self.tmem = [] # To have memory of dungeon terrain
-        self.visible_tiles = [] # to Tag currently visible tiles
+        self.tmem = []  # To have memory of dungeon terrain
+        self.visible_tiles = []  # to Tag currently visible tiles
 
         # Player inventory / equipment slots
         self.inventory_size = 10  # Carry slot limit; intended to be a hard value
@@ -968,6 +968,12 @@ class Player(Actor):
 
     def get_dodge(self) -> int:
         return self.dodge
+
+    def get_curr_ammo(self) -> int:
+        return self.ammo
+
+    def get_ammo_cap(self) -> int:
+        return self.ammo_cap
 
     # Returns the player's inventory size
     def get_inventory_size(self) -> int:

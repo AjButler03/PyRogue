@@ -113,19 +113,27 @@ class Pyrogue_Game:
         self.canvas.bind("<Configure>", self._on_win_resize)
 
         # Store what messages and font color should be displayed
-        # Cache is to prevent unnecessary updates in render
+        # Top message (top layer of text)
         self.top_msg_cache = ("", "")
         self.top_msg = "Press any key to start"
         self.top_msg_color = "gold"
+        
+        # Score msg, second from bottom line of text, first line of hud
         self.score_msg_cache = ("", "")
-        r, c = self.player.get_pos()
-        self.score_msg = f"SCORE: {self.player_score:06d}   MODIFIER: {self.difficulty:.2f}   POS: (R:{r:0d}, C:{c:0d})"
+        self.score_msg = ""
+        self._hud_score_update() # Creates correct strings
         self.score_msg_color = "white"
+        
+        # Player stats msg(s), bottom line of text, second line of hud
         self.hp_msg_cache = ("", "")
-        self.hp_msg = f"{self.player.get_hp():03d}/{self.player.get_hp_cap():03d}"
-        self.hp_msg_color = "#00FF00"
+        self.hp_msg_color = ""
+        self.hp_msg = ""
+        self.ammo_msg_cache = ("", "")
+        self.ammo_msg = ""
+        self.ammo_msg_color = ""
         self.pinfo_msg_cache = ("", "")
-        self.pinfo_msg = f"HP:           SPEED: {self.player.get_speed():03d}   DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
+        self.pinfo_msg = ""
+        self._hud_stats_update() # Creates correct strings
         self.pinfo_msg_color = "white"
 
         # Fields for handling keyboard input
@@ -156,14 +164,6 @@ class Pyrogue_Game:
         # Start the turnloop for the game
         self._start_turnloop()
         print("=== GAME START ===")
-
-    # Helper to create the hud's line 1 string.
-    def _hud_str1(self)-> str:
-        r, c = self.player.get_pos()
-        return f"SCORE: {self.player_score:06d}   MODIFIER: {self.difficulty:.2f}   POS: (R:{r:0d}, C:{c:0d})"
-    
-    def _hud_str2(self)-> str:
-        return f"HP:           AMMO: {}   DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}" 
         
     # Nerfs speed value so that it doesn't become too overpowered.
     def _speed_nerf(self, base_speed: int) -> int:
@@ -972,41 +972,66 @@ class Pyrogue_Game:
             )
             self.top_msg_cache = (self.top_msg, self.top_msg_color)
 
+    # Helper to create the hud's line 1 string.
+    def _hud_score_update(self):
+        r, c = self.player.get_pos()
+        self.score_msg = f"SCORE: {self.player_score:07d}   MODIFIER: {self.difficulty:.2f}   POS: (R:{r:0d}, C:{c:0d})"
+    
+    # Helper to create the hud's line 2 string.
+    def _hud_stats_update(self):
+        curr_hp = self.player.get_hp()
+        hp_cap = self.player.get_hp_cap()
+        curr_ammo = self.player.get_curr_ammo()
+        ammo_cap = self.player.get_ammo_cap()
+        self.hp_msg = f"{curr_hp:03d}/{hp_cap:03d}"
+        self.ammo_msg = f"{curr_ammo:03d}/{ammo_cap:03d}"
+        
+        # Determine the color for the HP compenent
+        hp_ratio = max(0.0, min(curr_hp / hp_cap, 1.0))
+        if hp_ratio > 0.5:
+            # gradient between green and yellow
+            hp_red = int(255 * (1 - (hp_ratio - 0.5) * 2))
+            hp_green = 255
+        else:
+            # gradient between yellow and red
+            hp_red = 255
+            hp_green = int(255 * hp_ratio * 2)
+        
+        # Determine the color for the ammo component
+        ammo_ratio = max(0.0, min(curr_ammo / ammo_cap, 1.0))
+        if ammo_ratio > 0.5:
+            # gradient between green and yellow
+            ammo_red = int(255 * (1 - (ammo_ratio - 0.5) * 2))
+            ammo_green = 255
+        else:
+            # gradient between yellow and red
+            ammo_red = 255
+            ammo_green = int(255 * ammo_ratio * 2)
+        
+        blue = 0
+        self.hp_msg_color = f"#{hp_red:02X}{hp_green:02X}{blue:02X}"
+        self.ammo_msg_color = f"#{ammo_red:02X}{ammo_green:02X}{blue:02X}"
+        
+        self.pinfo_msg = f"HP:           AMMO:           DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
+    
     # Updates the player's hud (the two layers of text at the bottom of the screen)
     def _update_hud(self):
-        r, c = self.player.get_pos()
         if not self.game_over:
             # Player score and position (line 1)
-            self.score_msg = self._hud_str1
+            self._hud_score_update()
             self.score_msg_color = "white"
-
-            # Player stats (line 2)
-            curr_hp = self.player.get_hp()
-            hp_cap = self.player.get_hp_cap()
-            self.hp_msg = f"{curr_hp:03d}/{hp_cap:03d}"
-            self.ammo_msg = f"{curr_hp:03d}/{hp_cap:03d}"
-            # Determine HP color based on current percentage of health
-            ratio = max(0.0, min(curr_hp / hp_cap, 1.0))
-
-            if ratio > 0.5:
-                # gradient between green and yellow
-                red = int(255 * (1 - (ratio - 0.5) * 2))
-                green = 255
-            else:
-                # gradient between yellow and red
-                red = 255
-                green = int(255 * ratio * 2)
-            blue = 0
-            self.hp_msg_color = f"#{red:02X}{green:02X}{blue:02X}"
-            self.pinfo_msg = f"HP:           SPEED: {self._speed_nerf(self.player.get_speed()):03d}   DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
+            # player stats (line 2)
+            self._hud_stats_update()
             self.pinfo_msg_color = "white"
         else:
-            # Player score and position (line 1)
+            # Game over bottom messages
             self.score_msg = f"FINAL SCORE: {self.player_score:06d}"
             self.score_msg_color = "#00FF00"
 
             # Player stats (line 2)
             self.hp_msg = ""
+            self.ammo_msg = ""
+            
             self.pinfo_msg = "Press esc to exit"
 
         # Update score and location
@@ -1021,6 +1046,11 @@ class Pyrogue_Game:
             self.canvas.itemconfig("hp_msg", text=self.hp_msg, fill=self.hp_msg_color)
             self.hp_msg_cache = (self.hp_msg, self.hp_msg_color)
 
+        # Update Player ammo section
+        if (self.ammo_msg, self.ammo_msg_color) != self.ammo_msg_cache:
+            self.canvas.itemconfig("ammo_msg", text=self.ammo_msg, fill=self.ammo_msg_color)
+            self.ammo_msg_cache = (self.ammo_msg, self.ammo_msg_color)
+        
         # Update other player information
         if (self.pinfo_msg, self.pinfo_msg_color) != self.pinfo_msg_cache:
             self.canvas.itemconfig(
@@ -1976,6 +2006,19 @@ class Pyrogue_Game:
                 tag="hp_msg",
                 anchor="w",
             )
+            
+            # Individual section for ammo for color indication
+            self.canvas.create_text(
+                x + self.tile_size // 2 + (self.tile_size * 10),
+                y + self.tile_size // 2.5,
+                text=self.ammo_msg,
+                fill=self.ammo_msg_color,
+                font=(self.def_font, self.font_size),
+                tag="ammo_msg",
+                anchor="w",
+            )
+            
+            # Actual line for player info
             self.canvas.create_text(
                 x + self.tile_size // 2,
                 y + self.tile_size // 2.5,

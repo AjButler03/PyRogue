@@ -1,6 +1,7 @@
 v1.00 ===========================================================================================================================
 08/27/2025
     - Started work on adding ammunition boxes to the game
+    - Removed speed from HUD, replacing it with ammo counter w/ color.
 v0.08 ===========================================================================================================================
 08/02/2025
     - Escaping to new levels now ramps difficulty by 35% per escape
