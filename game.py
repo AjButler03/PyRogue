@@ -6,6 +6,7 @@ from dungeon import *
 
 # This file handles the main gameloop and the tkinter UI for the game itself.
 
+
 # The Pyrogue_Game class handles all the high-level game logic and control.
 class Pyrogue_Game:
 
@@ -67,9 +68,8 @@ class Pyrogue_Game:
         self.item_map = []
         self.turn_pq = None
 
-        # here in case I implement game save/load; until then, always randomly generate
-        if generate:
-            self._init_generated_game()
+        # Initialize dungeon, item, & monster generation
+        self._init_generated_game()
 
         # Init the canvas to display dungeon / actors
         self.canvas = tk.Canvas(
@@ -117,13 +117,13 @@ class Pyrogue_Game:
         self.top_msg_cache = ("", "")
         self.top_msg = "Press any key to start"
         self.top_msg_color = "gold"
-        
+
         # Score msg, second from bottom line of text, first line of hud
         self.score_msg_cache = ("", "")
         self.score_msg = ""
-        self._hud_score_update() # Creates correct strings
+        self._hud_score_update()  # Creates correct strings
         self.score_msg_color = "white"
-        
+
         # Player stats msg(s), bottom line of text, second line of hud
         self.hp_msg_cache = ("", "")
         self.hp_msg_color = ""
@@ -133,7 +133,7 @@ class Pyrogue_Game:
         self.ammo_msg_color = ""
         self.pinfo_msg_cache = ("", "")
         self.pinfo_msg = ""
-        self._hud_stats_update() # Creates correct strings
+        self._hud_stats_update()  # Creates correct strings
         self.pinfo_msg_color = "white"
 
         # Fields for handling keyboard input
@@ -146,7 +146,7 @@ class Pyrogue_Game:
             "menu_inventory": 4,  # Input for inventory (carry slots) menu
             "menu_equipment": 5,  # Input for equipment menu
             "targeting": 6,  # Input for targeting mode (ranged attacks, teleport, item/monster inspection)
-            "inspect": 7,
+            "inspect": 7,  # Input for inspection mode
         }
         # Targeted position information for when using targeting mode
         self.target_r = 0
@@ -158,17 +158,19 @@ class Pyrogue_Game:
 
         # Misc game control fields
         self.turnloop_started = False
+        self.selfdeath = False  # to check for suicide gameover message
         self.game_over = False  # Indicate game over
         self.game_exit = False  # Indicate that user intends to exit to main menu
 
         # Start the turnloop for the game
         self._start_turnloop()
         print("=== GAME START ===")
-        
+
     # Nerfs speed value so that it doesn't become too overpowered.
     def _speed_nerf(self, base_speed: int) -> int:
-        # I don't know how best to do this, so i'm just capping the speed for the player.
-        # Anything higher than that seems a little too OP, since it brings every other monster to a standstill.
+        # speed is a legacy mechanic, where the intention was that it levels the playing field for the player.
+        # In practice, the value grows way faster than is practical, and it turns overpowered very fast.
+        # It still exists, but this is here to nerf it down so that it doesn't break the game.
         return min(base_speed, 50)
 
     # Event handeler for screen resizing.
@@ -220,7 +222,19 @@ class Pyrogue_Game:
             self._handle_equipment_input(key)
         elif self.curr_input_mode == self.input_modes["targeting"]:
             # Calling the targeting mode input handler
-            self._handle_targeting_input(key)
+            # Certain targeting functions will end the player's turn
+            end_turn = self._handle_targeting_input(key)
+            if end_turn:
+                self.curr_input_mode = self.input_modes["none"]
+                print("GAME: Player turn completed")
+
+                # Requeue player
+                new_turn = self.player.get_currturn() + (
+                    1000 // self._speed_nerf(self.player.get_speed())
+                )
+                self.turn_pq.push(self.player, new_turn)
+                self.player.set_currturn(new_turn)
+                self.root.after(10, self._next_turn)
         elif self.curr_input_mode == self.input_modes["inspect"]:
             # Inspection window input handler
             self._handle_inspect_input(key)
@@ -648,6 +662,8 @@ class Pyrogue_Game:
 
     # Handles input for targeting mode
     def _handle_targeting_input(self, key):
+        # Successful ranged attacks will end turn; all other actions do not.
+        end_turn = False
         # Compact way of checking for movement keys and grabbing the respective move
         move_delta = {
             "7": Move.up_left,
@@ -731,6 +747,55 @@ class Pyrogue_Game:
                     else:
                         message = "No monster or item to inspect"
                         self._update_top_label(message)
+            elif key == "r":
+                # Attempt to do a ranged attack
+                attack_success, targ_actor, dmg = self.player.ranged_attack(
+                    self.actor_map, self.target_r, self.target_c
+                )
+                if attack_success:
+                    if targ_actor != None:
+                        # Check if targeted self
+                        if targ_actor == self.player:
+                            if targ_actor.is_alive():
+                                message = (
+                                    "Your ranged attack dealt "
+                                    + str(dmg)
+                                    + " dmg to *YOURSELF*"
+                                )
+                            else:
+                                message = "You know that the point is to survive, right?"
+                                self.selfdeath = True
+                                targ_r, targ_c = targ_actor.get_pos()
+                                self.actor_map[targ_r][targ_c] = None
+                        else:
+                            if targ_actor.is_alive():
+                                message = (
+                                    "Your ranged attack dealt "
+                                    + str(dmg)
+                                    + " dmg to "
+                                    + targ_actor.get_name()
+                                )
+                            else:
+                                # Print kill message
+                                message = (
+                                    "You killed " + targ_actor.get_name() + " at range"
+                                )
+                                # Remove monster from map
+                                targ_r, targ_c = targ_actor.get_pos()
+                                self.actor_map[targ_r][targ_c] = None
+                                self.player_score += int(
+                                    targ_actor.get_score_val() * self.difficulty
+                                )
+
+                        self._update_hud()
+                        self._update_top_label(message)
+                        message = (
+                            "TURN " + str(self.player.get_currturn()) + ": " + message
+                        )
+                        self.msg_log.append(message)
+
+                    # End player's turn? Attack was made, so yes
+                    end_turn = True
         else:
             # Attempt to move targeting cursor
             move = move_delta[key]
@@ -747,6 +812,9 @@ class Pyrogue_Game:
                     self.target_r = new_r
                     # Update render for snappier feeling response
                     self._render_frame(self.scrsize_h, self.scrsize_w)
+
+        # Return if player's turn should end or not as result of targeting actions
+        return end_turn
 
     # Handles inspection menu input
     def _handle_inspect_input(self, key):
@@ -976,7 +1044,7 @@ class Pyrogue_Game:
     def _hud_score_update(self):
         r, c = self.player.get_pos()
         self.score_msg = f"SCORE: {self.player_score:07d}   MODIFIER: {self.difficulty:.2f}   POS: (R:{r:0d}, C:{c:0d})"
-    
+
     # Helper to create the hud's line 2 string.
     def _hud_stats_update(self):
         curr_hp = self.player.get_hp()
@@ -985,7 +1053,7 @@ class Pyrogue_Game:
         ammo_cap = self.player.get_ammo_cap()
         self.hp_msg = f"{curr_hp:03d}/{hp_cap:03d}"
         self.ammo_msg = f"{curr_ammo:03d}/{ammo_cap:03d}"
-        
+
         # Determine the color for the HP compenent
         hp_ratio = max(0.0, min(curr_hp / hp_cap, 1.0))
         if hp_ratio > 0.5:
@@ -996,7 +1064,7 @@ class Pyrogue_Game:
             # gradient between yellow and red
             hp_red = 255
             hp_green = int(255 * hp_ratio * 2)
-        
+
         # Determine the color for the ammo component
         ammo_ratio = max(0.0, min(curr_ammo / ammo_cap, 1.0))
         if ammo_ratio > 0.5:
@@ -1007,13 +1075,13 @@ class Pyrogue_Game:
             # gradient between yellow and red
             ammo_red = 255
             ammo_green = int(255 * ammo_ratio * 2)
-        
+
         blue = 0
         self.hp_msg_color = f"#{hp_red:02X}{hp_green:02X}{blue:02X}"
         self.ammo_msg_color = f"#{ammo_red:02X}{ammo_green:02X}{blue:02X}"
-        
+
         self.pinfo_msg = f"HP:           AMMO:           DEFENSE: {self.player.get_defense():03d}   DODGE: {self.player.get_dodge():03d}"
-    
+
     # Updates the player's hud (the two layers of text at the bottom of the screen)
     def _update_hud(self):
         if not self.game_over:
@@ -1031,7 +1099,7 @@ class Pyrogue_Game:
             # Player stats (line 2)
             self.hp_msg = ""
             self.ammo_msg = ""
-            
+
             self.pinfo_msg = "Press esc to exit"
 
         # Update score and location
@@ -1048,9 +1116,11 @@ class Pyrogue_Game:
 
         # Update Player ammo section
         if (self.ammo_msg, self.ammo_msg_color) != self.ammo_msg_cache:
-            self.canvas.itemconfig("ammo_msg", text=self.ammo_msg, fill=self.ammo_msg_color)
+            self.canvas.itemconfig(
+                "ammo_msg", text=self.ammo_msg, fill=self.ammo_msg_color
+            )
             self.ammo_msg_cache = (self.ammo_msg, self.ammo_msg_color)
-        
+
         # Update other player information
         if (self.pinfo_msg, self.pinfo_msg_color) != self.pinfo_msg_cache:
             self.canvas.itemconfig(
@@ -2006,7 +2076,7 @@ class Pyrogue_Game:
                 tag="hp_msg",
                 anchor="w",
             )
-            
+
             # Individual section for ammo for color indication
             self.canvas.create_text(
                 x + self.tile_size // 2 + (self.tile_size * 10),
@@ -2017,7 +2087,7 @@ class Pyrogue_Game:
                 tag="ammo_msg",
                 anchor="w",
             )
-            
+
             # Actual line for player info
             self.canvas.create_text(
                 x + self.tile_size // 2,
@@ -2208,7 +2278,10 @@ class Pyrogue_Game:
         # Game over check
         if not self.player.is_alive():
             # You were defeated; game over
-            message = "You have been defeated; Game Over"
+            if self.selfdeath:
+                message = "You went out on your own terms; Game Over"
+            else:
+                message = "You have been defeated; Game Over"
             self._update_top_label(message, "red")
             print(message)
             self.msg_log.append(message)

@@ -36,6 +36,7 @@ and the items to make a run for. Your success is up to you.
 Good luck.
 END PAGE
 
+
 BEGIN PAGE
     __  ___                 __                
    /  |/  /___  ____  _____/ /____  __________
@@ -95,9 +96,13 @@ There are 9 possible item types, each filling a different role. Specific item
 definitions can be found in the Item Encyclopedia.
 
 Potions (symbol: ! )
-    These are single-use items that will give you some sort of bonus.
-    Some will grant a simple hitpoint restore, while others will give a bonus to 
-    maximum hit point, speed, defense, or dodge values.
+    These are consumable items that, on use, will give you some sort of bonus.
+    Possible effects (any combination of the following):
+        - Hitpoint restoration
+        - Permanent hitpoint capacity increase
+        - Permanent defense bonus
+        - Permanent dodge bonus
+    As a consumable, potions will be destroyed upon use.
 
 Weapons (symbol: | )
     These are basic short range weapons that boost melee damage to enemies.
@@ -111,13 +116,11 @@ Ranged (symbol: } )
     damage to enemies. The difference is that they can be used to attack monsters from
     a distance, which helps you avoid damage. The caveat is that they consume ammunition,
     which must also be scavanged for.
-    NOTE: ranged combat not yet implemented. For now, there is no ammunition consumption,
-    and ranged weapons contribute to melee damage.
     May restore hitpoints upon equip.
 
-Ammo (symbol: TBD )
-    These are ammunition containers, which increase your ammunition by a certain amount.
-    NOTE: Not currently implemented, and will not spawn.
+Ammo (symbol: # )
+    These are consumables that will increase your ammunition count upon use.
+    As a consumable, Ammo items will be destroyed upon use.
 
 Offhand (symbol: ) )
     Objects, like shields, that are wielded in your non-dominant hand. They typically
@@ -143,6 +146,7 @@ Lights (symbol: _ )
     ability to pierce the 'fog of war'. Lights have no other benefit.
 END PAGE
 
+
 BEGIN PAGE
    ______            __             __    
   / ____/___  ____  / /__________  / /____
@@ -165,18 +169,19 @@ BEGIN PAGE
   p: Picks up an item, placing into inventory.
   e: Opens equipment menu.
   i: Opens inventory menu.
-  i: (while already in inventory / equipment menu) Inspect item.
+  i: While in inventory / equipment menu, inspect item.
   enter: Equip/unequip/use item.
   d: Attempts to drop an item from inventory.
   x: Attempts to destroy an item from inventory.
 ===== OTHER =====
-  t : toggle targeting mode
-  i : (while in targeting mode) inspect item or monster.
+  t : Toggle targeting mode
+  r : Attempt a ranged attack; consumes turn on success.
+  i : While in targeting mode, inspect item or monster.
   m : Opens a submenu to list all present monsters.
   esc : Opens / closes pause menu.
 ===== CHEATS / DEBUG TOOLS =====
   f : Toggle fog of war effect. 
-  g : (while targeting mode) teleport to targeted location.
+  g : While targeting mode, teleport to targeted location.
   z : Cycles through standard / walking map / tunnelmap render modes.
   + : Restores player hitpoints to current maximum.
 END PAGE

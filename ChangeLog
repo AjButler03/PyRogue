@@ -2,6 +2,9 @@ v1.00 ==========================================================================
 08/27/2025
     - Started work on adding ammunition boxes to the game
     - Removed speed from HUD, replacing it with ammo counter w/ color.
+11/23/2025
+    - Updated manual.txt to reflect ranged combat's intended functionality.
+    - Ranged attacks are now minimally functional and consume a turn.
 v0.08 ===========================================================================================================================
 08/02/2025
     - Escaping to new levels now ramps difficulty by 35% per escape

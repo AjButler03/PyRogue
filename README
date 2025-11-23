@@ -35,18 +35,19 @@ The game has the following key binds:
   p: Picks up an item, placing into inventory.
   e: Opens equipment menu.
   i: Opens inventory menu.
-  i: (while already in inventory / equipment menu) Inspect item.
+  i: While in inventory / equipment menu, inspect item.
   enter: Equip/unequip/use item.
   d: Attempts to drop an item from inventory.
   x: Attempts to destroy an item from inventory.
 ===== OTHER =====
-  t : toggle targeting mode
-  i : (while in targeting mode) inspect item or monster.
+  t : Toggle targeting mode
+  r : Attempt a ranged attack; consumes turn on success.
+  i : While in targeting mode, inspect item or monster.
   m : Opens a submenu to list all present monsters.
   esc : Opens / closes pause menu.
 ===== CHEATS / DEBUG TOOLS =====
   f : Toggle fog of war effect. 
-  g : (while targeting mode) teleport to targeted location.
+  g : While targeting mode, teleport to targeted location.
   z : Cycles through standard / walking map / tunnelmap render modes.
   + : Restores player hitpoints to current maximum.
 

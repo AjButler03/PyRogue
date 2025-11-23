@@ -6,3 +6,4 @@ Things left that I want to implement before a full "1.0":
 - monster item pickup / destroy abilities
 - Monster item drop on death (if possible)
 - Make game runable in easy way (no terminal navigation, just launch and play)
+- main menu pages reset to zero scroll on page flip

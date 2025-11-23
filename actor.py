@@ -8,7 +8,8 @@ from utility import *
 # This file contains the class information for 'actors' - Monsters, the player, and the various items.
 
 # A monster can have any number of attributes. I will be indicating these using a bit field.
-# For v03, only the first 4 will be fully implemented. The others will come later, if I decide to do them at all.
+# Pickup & Destroy are not currently implemented.
+# See the game manual (text in manual.txt) for descriptions of what these are intended to do.
 ATTR_INTELLIGENT = 0b0000_0000_0000_0001  # Bit 1 (0000 0000 0000 0001)
 ATTR_TELEPATHIC_ = 0b0000_0000_0000_0010  # Bit 2 (0000 0000 0000 0010)
 ATTR_TUNNEL_____ = 0b0000_0000_0000_0100  # Bit 3 (0000 0000 0000 0100)
@@ -557,9 +558,9 @@ class Player(Actor):
         self.speed = 10  # Speed (turn offset)
         self.hp_cap = 100  # Maximum hp
         self.hp = self.hp_cap  # Set current hp to max
-        self.defense = 10  # damage reduction value
-        self.dodge = 10  # dodge chance value; this is not 10%, but larger number gives larger chance
-        self.ammo = 0  # Start with no ammunition for ranged weapons
+        self.defense = 25  # damage reduction value
+        self.dodge = 10  # dodge chance value; not direct percentage chance, but larger number gives larger chance
+        self.ammo = 15  # Starting ammount of ammunition
         self.ammo_cap = 100  # Limit ammo capacity
         self.view_dist = 3  # Initial view distance of 3 cells
 
@@ -730,9 +731,9 @@ class Player(Actor):
         if item != None:
             dmg += item.damage_dice.roll()
         # If and when ranged combat is implemented, this will not be rolled here.
-        item = self.equip_slots["ranged"]
-        if item != None:
-            dmg += item.damage_dice.roll()
+        # item = self.equip_slots["ranged"]
+        # if item != None:
+        #     dmg += item.damage_dice.roll()
         item = self.equip_slots["offhand"]
         if item != None:
             dmg += item.damage_dice.roll()
@@ -751,6 +752,17 @@ class Player(Actor):
         item = self.equip_slots["ring_r"]
         if item != None:
             dmg += item.damage_dice.roll()
+
+        return dmg
+
+    # Rolls dice to determine dmg output for a ranged attack.
+    def _dmg_roll_ranged(self) -> int:
+        dmg = 0  # Remains zero if no ranged weapon equipped
+        item = self.equip_slots["ranged"]
+
+        # Check for ranged item
+        if item != None:
+            dmg += item.damage_dice.roll()  # roll for damage
 
         return dmg
 
@@ -891,6 +903,8 @@ class Player(Actor):
     # Forces the player back to maximum health.
     def force_max_health(self):
         self.hp = self.hp_cap
+        # I *could* have made a separate cheat for ammo, but this is fine.
+        self.ammo = self.ammo_cap
 
     # Forcefully teleports the player to row, col within the dungeon, instantly killing any monster that is there.
     # Returns true/false for success and any killed monster.
@@ -907,6 +921,41 @@ class Player(Actor):
             return True, actor
 
         return False, None
+
+    # Ranged attack handler for player.
+    def ranged_attack(self, actor_map: list, row: int, col: int):
+        """
+        This function handles an attempted ranged attack.
+        Requires the actor map and the targeted location to determine target (if any).
+        Returns success (bool, based on weapon/ammunition check), damage dealt (0 by default), and actor hit (None by default)
+        """
+
+        # init return values
+        success = False
+        a = None
+        dmg = 0
+
+        ranged = self.equip_slots["ranged"]
+        # First determine if ranged weapon equipped & player has sufficient ammo
+        if ranged == None or self.ammo < ranged.get_attr_bonus():
+            # Cannot attack
+            return False, None, dmg
+
+        a = actor_map[row][col]
+        self.ammo -= ranged.get_attr_bonus()
+
+        # Check if actor present
+        if a != None:
+            # Roll for and apply damage
+            dmg = self._dmg_roll_ranged()
+            new_hp = a.hp - dmg
+            if new_hp <= 0:
+                a.hp = 0
+                a.kill()
+            else:
+                a.hp = new_hp
+
+        return True, a, dmg
 
     # Turn handler for the player.
     def handle_turn(self, dungeon: Dungeon, actor_map: list, player, move: int):
@@ -926,7 +975,7 @@ class Player(Actor):
         if not self._valid_pos(dungeon, new_r, new_c):
             return False, None, 0
 
-        # Move the PC, removing whatever monster may be there
+        # Move the PC, handling whatever monster may be there
         a = actor_map[new_r][new_c]
         if a != None:
             dmg = self._dmg_roll_melee()
