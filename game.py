@@ -763,7 +763,9 @@ class Pyrogue_Game:
                                     + " dmg to *YOURSELF*"
                                 )
                             else:
-                                message = "You know that the point is to survive, right?"
+                                message = (
+                                    "You know that the point is to survive, right?"
+                                )
                                 self.selfdeath = True
                                 targ_r, targ_c = targ_actor.get_pos()
                                 self.actor_map[targ_r][targ_c] = None
@@ -796,6 +798,15 @@ class Pyrogue_Game:
 
                     # End player's turn? Attack was made, so yes
                     end_turn = True
+                else:
+                    # Attack was unsuccessful
+                    # Two options: No ranged weapon or insufficient ammunition.
+                    if self.player.get_equipped_by_key("ranged") != None:
+                        # Player must have insufficient Ammunition
+                        message = "You do not have enough ammo"
+                    else:
+                        message = "You do not have a ranged weapon equipped"
+                    self._update_top_label(message)
         else:
             # Attempt to move targeting cursor
             move = move_delta[key]
@@ -1029,7 +1040,8 @@ class Pyrogue_Game:
 
     # Wrapper to update top message label. Cyan is the default message color.
     def _update_top_label(self, message: str, font_color: str = "cyan"):
-        print("GAME MSG:", message)
+        if message != "":
+            print("GAME MSG:", message)
         self.top_msg = message
         self.top_msg_color = font_color
 
@@ -2283,7 +2295,6 @@ class Pyrogue_Game:
             else:
                 message = "You have been defeated; Game Over"
             self._update_top_label(message, "red")
-            print(message)
             self.msg_log.append(message)
             print("=== GAME OVER ===")
             self.curr_render_mode = self.render_modes["x-ray"]
@@ -2307,9 +2318,9 @@ class Pyrogue_Game:
 
         if actor.is_alive():
             r, c = actor.get_pos()
-            print(
-                f"TURN {actor.get_currturn()} for {actor.get_name()} at (r:{r:0d}, c: {c:0d}) with speed {actor.get_speed()}"
-            )
+            # print(
+            #     f"TURN {actor.get_currturn()} for {actor.get_name()} at (r:{r:0d}, c: {c:0d}) with speed {actor.get_speed()}"
+            # )
 
             if player_turn:
                 # Await player input to call its turn handeler

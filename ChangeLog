@@ -5,6 +5,8 @@ v1.00 ==========================================================================
 11/23/2025
     - Updated manual.txt to reflect ranged combat's intended functionality.
     - Ranged attacks are now minimally functional and consume a turn.
+11/24/2025
+    - Added messages for failed ranged attacks (no weapon, insufficient ammo)
 v0.08 ===========================================================================================================================
 08/02/2025
     - Escaping to new levels now ramps difficulty by 35% per escape
