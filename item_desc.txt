@@ -131,8 +131,9 @@ DEF 0+0d1
 HIT 2+0d1
 SPEED 0+0d1
 DESC
-"Throw rock really fast" is basically the core of all ranged weapons.
-This is no different; it just struggles with the "really fast" part.
+"Throw rock really fast" is basically the core of all ranged weapons,
+including the humble slingshot.
+It just struggles with the "really fast" part.
 .
 ATTR 1+0d1
 RRTY 20
@@ -144,7 +145,7 @@ NAME a Crossbow
 TYPE RANGED
 COLOR gray
 DODGE 2+0d1
-DAM 15+1d10
+DAM 10+1d10
 DEF 5+0d1
 HIT 2+0d1
 SPEED 0+0d1
@@ -169,7 +170,7 @@ SPEED 0+0d1
 DESC
 A basic hand held boom stick. It will come in handy to keep your distance.
 .
-ATTR 1+0d1
+ATTR 3+0d1
 RRTY 50
 ART FALSE
 END
@@ -179,14 +180,14 @@ NAME a Service Rifle
 TYPE RANGED
 COLOR cyan
 DODGE 0+0d1
-DAM 10+3d20
+DAM 15+3d20
 DEF 5+0d1
 HIT 10+0d1
 SPEED 0+0d1
 DESC
-A two-handed boom stick.
+A tried and true two-handed boom stick.
 .
-ATTR 3+0d1
+ATTR 5+0d1
 RRTY 65
 ART FALSE
 END
@@ -204,7 +205,7 @@ DESC
 Two for the shields, one for the head.
 Piss your friends off today!
 .
-ATTR 5+0d1
+ATTR 15+0d1
 RRTY 85
 ART TRUE
 END
@@ -219,9 +220,10 @@ DEF 25+0d1
 HIT 10+2d20
 SPEED 0+0d1
 DESC
-They told you the game was rigged from the start; so you responded with this.
+They told you the game was rigged from the start; 
+this will help you even the odds a little.
 .
-ATTR 15+0d1
+ATTR 20+0d1
 RRTY 95
 ART TRUE
 END
@@ -616,11 +618,11 @@ DEF 0+0d1
 HIT 0+0d1
 SPEED 0+0d1
 DESC
-A small box of ammunition for your ranged weapon.
+A small box of ammunition for ranged weapons.
 not much to work with on its own, but if you find more it'll add up.
 .
 ATTR 0+2d6
-RRTY 35
+RRTY 15
 ART FALSE
 END
 
@@ -634,10 +636,10 @@ DEF 0+0d1
 HIT 0+0d1
 SPEED 0+0d1
 DESC
-A decent sized box of ammunition for your ranged weapon.
+A decent sized box of ammunition for ranged weapons.
 .
 ATTR 5+2d10
-RRTY 50
+RRTY 35
 ART FALSE
 END
 
@@ -651,9 +653,9 @@ DEF 0+0d1
 HIT 0+0d1
 SPEED 0+0d1
 DESC
-A pretty sizeable cache of ammunition for your ranged weapon.
+A pretty sizeable cache of ammunition for ranged weapons.
 .
 ATTR 10+2d20
-RRTY 70
+RRTY 50
 ART FALSE
 END

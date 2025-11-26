@@ -456,7 +456,7 @@ class Menu_Main:
         y_offset = tile_size
 
         if self.need_full_rerender:
-            version_str = "Andrew Butler v1.00 ??/2025"
+            version_str = "Andrew Butler v1.00 12/2025"
 
             # This is a series of string lines that form the PyRogue ASCII art text.
             # It's a little garbled here because of excape character \.
@@ -1046,7 +1046,7 @@ class Menu_Main:
         itype = itypedef.get_type()
         if itype == item_type_opts["POTION"]:
             line_count = 12 + len(desc_lines)
-        elif itype == item_type_opts["LIGHT"]:
+        elif itype == item_type_opts["LIGHT"] or itype == item_type_opts["AMMO"]:
             line_count = 8 + len(desc_lines)
         else:
             line_count = 12 + len(desc_lines)
@@ -1231,6 +1231,19 @@ class Menu_Main:
         elif itype == item_type_opts["LIGHT"]:
             # VIEW DIST BONUS
             text = "VIEW DIST BONUS:   " + attr_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_attr",
+                anchor="nw",
+            )
+            curr_line += 1
+        elif itype == item_type_opts["AMMO"]:
+            # AMMO BONUS
+            text = "AMMUNITION BONUS:   " + attr_str
             self.window_canvas.create_text(
                 offset,
                 curr_line * tile_size,

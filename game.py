@@ -1746,7 +1746,7 @@ class Pyrogue_Game:
         itype = item.get_type()
         if itype == item_type_opts["POTION"]:
             line_count = 9 + len(desc_lines)
-        elif itype == item_type_opts["LIGHT"]:
+        elif itype == item_type_opts["LIGHT"] or itype == item_type_opts["AMMO"]:
             line_count = 5 + len(desc_lines)
         else:
             line_count = 9 + len(desc_lines)
@@ -1921,6 +1921,19 @@ class Pyrogue_Game:
         elif itype == item_type_opts["LIGHT"]:
             # VIEW DIST BONUS
             text = f"VIEW DIST BONUS:   {item.get_attr_bonus()}"
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="iteminspect_attr",
+                anchor="nw",
+            )
+            curr_line += 1
+        elif itype == item_type_opts["AMMO"]:
+            # AMMO BONUS
+            text = f"AMMUNITION BONUS:   {item.get_attr_bonus()}"
             self.submenu_canvas.create_text(
                 offset,
                 curr_line * self.tile_size,
