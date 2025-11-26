@@ -9,6 +9,8 @@ v1.00 ==========================================================================
     - Added messages for failed ranged attacks (no weapon, insufficient ammo)
 11/25/2025
     - Updated Item Encyclopedia + Item Inspection to support AMMO item types
+11/26/2025
+    - Added cheats toggle to settings
 v0.08 ===========================================================================================================================
 08/02/2025
     - Escaping to new levels now ramps difficulty by 35% per escape

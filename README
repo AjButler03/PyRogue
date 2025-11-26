@@ -49,7 +49,7 @@ The game has the following key binds:
   f : Toggle fog of war effect. 
   g : While targeting mode, teleport to targeted location.
   z : Cycles through standard / walking map / tunnelmap render modes.
-  + : Restores player hitpoints to current maximum.
+  + : Restores player hitpoints & AMMO to current maximum.
 
 Known Issues:
   - The game does not instantly end when win conditions are met.

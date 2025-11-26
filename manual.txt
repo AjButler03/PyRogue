@@ -183,5 +183,5 @@ BEGIN PAGE
   f : Toggle fog of war effect. 
   g : While targeting mode, teleport to targeted location.
   z : Cycles through standard / walking map / tunnelmap render modes.
-  + : Restores player hitpoints to current maximum.
+  + : Restores player hitpoints & AMMO to current maximum.
 END PAGE

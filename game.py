@@ -22,6 +22,7 @@ class Pyrogue_Game:
         difficulty: float,
         monster_type_list: list,
         item_type_list: list,
+        enable_cheats: bool,
         generate=True,
     ):
         # Menu from which this game instance was launched from
@@ -29,6 +30,9 @@ class Pyrogue_Game:
 
         # Tkinter root
         self.root = root
+        
+        # Save if cheats are enabled
+        self.cheats_enabled = enable_cheats
 
         # Default font
         self.def_font = "Consolas"
@@ -296,7 +300,7 @@ class Pyrogue_Game:
                 self._update_top_label("PAUSED")
                 print("GAME: Player equipment sub-menu activated")
                 return False  # Turn not over
-            elif key == "f":
+            elif key == "f" and self.cheats_enabled:
                 # Toggle fog of war
                 if self.curr_render_mode == self.render_modes["standard"]:
                     # Turn on x-ray mode to show the full dungeon
@@ -345,7 +349,7 @@ class Pyrogue_Game:
                 self.curr_input_mode = self.input_modes["targeting"]
                 self.target_r, self.target_c = self.player.get_pos()
                 self._update_top_label("Targeting mode activated")
-            elif key == "z":
+            elif key == "z" and self.cheats_enabled:
                 # Rotate through distance map displays
                 if self.curr_render_mode == self.render_modes["standard"]:
                     self.curr_render_mode = self.render_modes["walkmap"]
@@ -356,7 +360,7 @@ class Pyrogue_Game:
                 self.need_full_rerender = True
                 self._render_frame(self.scrsize_h, self.scrsize_w)
                 return False  # Turn not over
-            elif key == "plus":
+            elif key == "plus" and self.cheats_enabled:
                 self.player.force_max_health()
                 self._update_hud()
                 self._update_top_label("Restored hit points", "gold")
@@ -701,7 +705,7 @@ class Pyrogue_Game:
                 self.need_full_rerender = True
                 self._render_frame(self.scrsize_h, self.scrsize_w)
                 self._update_top_label("")
-            elif key == "g":
+            elif key == "g" and self.cheats_enabled:
                 # teleport cheat
                 success, targ_actor = self.player.teleport(
                     self.dungeon, self.actor_map, self.target_r, self.target_c
@@ -906,7 +910,7 @@ class Pyrogue_Game:
         print(
             "MONSTERS:",
             min_monsterc,
-            "Min items,",
+            "Min monsters,",
             attemptc,
             "Placement attempts,",
             monsterc,

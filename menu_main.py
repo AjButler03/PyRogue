@@ -33,24 +33,26 @@ class Menu_Main:
         self.scrsize_h = scrsize_h
         self.scrsize_w = scrsize_w
 
-        # Init default dungeon size and difficulty
+        # Init default settings for dungeon size, difficulty, and cheats
         self.difficulty = 2
         self.dungeon_size = 2
+        # 0 -> on, 1 -> off b/c this is also idx for selection
+        self.enable_cheats = 1
 
         # Run file parsing operations
         self.man_pages = []
         self.monster_type_list = []
         self.item_type_list = []
         man_parse_success = parse_manual_text(self.man_pages)
-        monparse_success = parse_monster_typedefs(self.monster_type_list)
-        iteparse_success = parse_item_typedefs(self.item_type_list)
-        if not monparse_success:
+        mon_parse_success = parse_monster_typedefs(self.monster_type_list)
+        item_parse_success = parse_item_typedefs(self.item_type_list)
+        if not man_parse_success:
             print("MENU: Manual pages text parser failed. Quitting")
             exit(0)
-        if not monparse_success:
+        if not mon_parse_success:
             print("MENU: Monster type definition parser failed. Quitting")
             exit(0)
-        if not iteparse_success:
+        if not item_parse_success:
             print("MENU: Item type definition parser failed. Quitting")
             exit(0)
 
@@ -134,11 +136,18 @@ class Menu_Main:
                 5: "enormous",
             }
 
+            # Enable cheats based on selection
+            if self.enable_cheats == 0:
+                cheats = True
+            else:
+                cheats = False
             print(
-                "MENU: New game with size",
+                "MENU: New game with Size:",
                 dungeon_size_idx[self.dungeon_size],
-                " and diff",
+                "Difficulty:",
                 difficulty_idx[self.difficulty],
+                "Cheats:",
+                cheats
             )
 
             mapsize_h, mapsize_w = self.dungeon_size_setting[self.dungeon_size]
@@ -152,6 +161,7 @@ class Menu_Main:
                 self.difficulty_setting[self.difficulty],
                 self.monster_type_list,
                 self.item_type_list,
+                cheats,
             )
             self.canvas.pack_forget()
 
@@ -242,30 +252,47 @@ class Menu_Main:
                 self.dungeon_size = self.setting_select_row
                 self.need_full_rerender = True
                 self._render_settings(self.scrsize_h, self.scrsize_w)
-            else:
+            elif self.setting_select_col == 1:
                 self.difficulty = self.setting_select_row
                 self.need_full_rerender = True
                 self._render_settings(self.scrsize_h, self.scrsize_w)
+            elif self.setting_select_col == 2:
+                self.enable_cheats = self.setting_select_row
+                self.need_full_rerender = True
+                self._render_settings(self.scrsize_h, self.scrsize_w)
 
-        elif (
-            key == "Right"
-            or key == "l"
-            or key == "6"
-            or key == "Left"
-            or key == "h"
-            or key == "4"
-        ):
-            # Move select arrow left/right (two col, so just swap)
-            if self.setting_select_col == 1:
-                self.setting_select_col = 0
+        elif key == "Right" or key == "l" or key == "6":
+            # Move select arrow right, looping around if necessary
+            if self.setting_select_col < 2:
+                self.setting_select_col += 1
+                # If moving to third column (2 opts while other columns have 6), check to see if selection for row needs reduced to 1
+                if (self.setting_select_col == 2) and (self.setting_select_row > 1):
+                    self.setting_select_row = 1
             else:
-                self.setting_select_col = 1
-
+                # Loop around to first column
+                self.setting_select_col = 0
+            self.need_full_rerender = True
+            self._render_settings(self.scrsize_h, self.scrsize_w)
+        elif key == "Left" or key == "h" or key == "4":
+            # Move select arrow left, looping around if necessary
+            if self.setting_select_col > 0:
+                self.setting_select_col -= 1
+            else:
+                # Loop around to third column
+                self.setting_select_col = 2
+                # third col has 2 opts while other columns have 6, so check to see if selection for row needs reduced to 1
+                if self.setting_select_row > 1:
+                    self.setting_select_row = 1
             self.need_full_rerender = True
             self._render_settings(self.scrsize_h, self.scrsize_w)
         elif key == "j" or key == "Down" or key == "2":
             # Move selection down
-            if self.setting_select_row < 5:
+            # column 3 (cheats) has 2 opts while the others have 6, so handle them separately
+            if (
+                (self.setting_select_col < 2)
+                and (self.setting_select_row < 5)
+                or ((self.setting_select_col == 2) and (self.setting_select_row < 1))
+            ):
                 self.setting_select_row += 1
             else:
                 self.setting_select_row = 0
@@ -276,7 +303,11 @@ class Menu_Main:
             if self.setting_select_row > 0:
                 self.setting_select_row -= 1
             else:
-                self.setting_select_row = 5
+                # Column 3 has 2 opts instead of 6; need to handle it differently
+                if self.setting_select_col < 2:
+                    self.setting_select_row = 5
+                else:
+                    self.setting_select_row = 1
             self.need_full_rerender = True
             self._render_settings(self.scrsize_h, self.scrsize_w)
 
@@ -651,6 +682,22 @@ class Menu_Main:
                 4: "diff_opt_vhard",
                 5: "dif_opt_legend",
             }
+            cheat_opts = {
+                0: "On",
+                1: "Off",
+                2: "",
+                3: "",
+                4: "",
+                5: "",
+            }
+            cheat_opts_tags = {
+                0: "cheat_opt_on",
+                1: "cheat_opt_off",
+                2: "cheat_opt_2",
+                3: "cheat_opt_3",
+                4: "cheat_opt_4",
+                5: "cheat_opt_5",
+            }
 
             x = x_offset
             y = y_offset
@@ -672,6 +719,7 @@ class Menu_Main:
             header_color = "white"
             x1 = x_offset
             x2 = x_offset + (tile_size * 10)
+            x3 = x_offset + (tile_size * 19)
             y = y_offset + (tile_size * 6)
             # Dungeon Size header
             self.canvas.create_text(
@@ -688,6 +736,16 @@ class Menu_Main:
                 x2,
                 y,
                 text="Difficulty",
+                fill=header_color,
+                font=(self.def_font, self.font_size),
+                tag="header_diff_opt",
+                anchor="w",
+            )
+            # Cheats header
+            self.canvas.create_text(
+                x3,
+                y,
+                text="Cheats",
                 fill=header_color,
                 font=(self.def_font, self.font_size),
                 tag="header_diff_opt",
@@ -721,15 +779,33 @@ class Menu_Main:
                     tag=diff_opts_tags[i],
                     anchor="w",
                 )
+
+                # Draw cheat setting
+                color = "gold" if self.enable_cheats == i else "gray"
+                self.canvas.create_text(
+                    x3,
+                    y,
+                    text=cheat_opts[i],
+                    fill=color,
+                    font=(self.def_font, opt_fontsize),
+                    tag=cheat_opts_tags[i],
+                    anchor="w",
+                )
                 y += tile_size
 
             # Render arrow for selection
             if self.setting_select_col == 0:
                 x = x_offset + (tile_size * 6)
+            elif self.setting_select_col == 1:
+                x = x_offset + (tile_size * 13.25)
             else:
-                x = x_offset + (tile_size * 13)
+                x = x_offset + (tile_size * 20.25)
 
-            y = (self.setting_select_row * tile_size) + (tile_size * 8)
+            # Possible selection is different for column 3 (cheats has 2 opts instead of 6)
+            if self.setting_select_col < 2 or self.setting_select_row < 3:
+                y = (self.setting_select_row * tile_size) + (tile_size * 8)
+            else:
+                y = (2 * tile_size) + (tile_size * 8)
 
             self.canvas.create_text(
                 x,
