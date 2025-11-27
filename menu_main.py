@@ -147,7 +147,7 @@ class Menu_Main:
                 "Difficulty:",
                 difficulty_idx[self.difficulty],
                 "Cheats:",
-                cheats
+                cheats,
             )
 
             mapsize_h, mapsize_w = self.dungeon_size_setting[self.dungeon_size]
@@ -1120,10 +1120,12 @@ class Menu_Main:
         # Total number of lines to the item description entry
         # Varies depending on type shown
         itype = itypedef.get_type()
-        if itype == item_type_opts["POTION"]:
+        if itype == item_type_opts["RANGED"]:
+            line_count = 13 + len(desc_lines)
+        elif itype == item_type_opts["POTION"]:
             line_count = 12 + len(desc_lines)
         elif itype == item_type_opts["LIGHT"] or itype == item_type_opts["AMMO"]:
-            line_count = 8 + len(desc_lines)
+            line_count = 9 + len(desc_lines)
         else:
             line_count = 12 + len(desc_lines)
         full_height = line_count * tile_size
@@ -1239,7 +1241,84 @@ class Menu_Main:
         # From here, display information based on item type, depending on relevance to that type.
         # For example, a light only needs light displayed.
         itype = itypedef.get_type()
-        if itype == item_type_opts["POTION"]:
+        if itype == item_type_opts["RANGED"]:
+            # Damage
+            text = "DAMAGE:            " + damage_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_dam",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            text = "AMMO PER USE:      " + attr_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_attr",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # hp restore
+            text = "HIT POINT RESTORE: " + hp_restore_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_hp_r",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # speed
+            # text = "SPEED BONUS:       " + speed_str
+            # self.window_canvas.create_text(
+            #     offset,
+            #     curr_line * tile_size,
+            #     text=text,
+            #     fill="white",
+            #     font=(self.def_font, self.font_size),
+            #     tag="itemencyc_spd",
+            #     anchor="nw",
+            # )
+            # curr_line += 1
+
+            # Dodge
+            text = "DODGE BONUS:       " + dodge_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_dodge",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # Defense
+            text = "DEFENSE BONUS:     " + defense_str
+            self.window_canvas.create_text(
+                offset,
+                curr_line * tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_def",
+                anchor="nw",
+            )
+            curr_line += 1
+        elif itype == item_type_opts["POTION"]:
             # Hit Point Restore
             text = "HITPOINT RESTORE:  " + hp_restore_str
             self.window_canvas.create_text(
@@ -1267,17 +1346,17 @@ class Menu_Main:
             curr_line += 1
 
             # speed
-            text = "SPEED BONUS:       " + speed_str
-            self.window_canvas.create_text(
-                offset,
-                curr_line * tile_size,
-                text=text,
-                fill="white",
-                font=(self.def_font, self.font_size),
-                tag="itemencyc_spd",
-                anchor="nw",
-            )
-            curr_line += 1
+            # text = "SPEED BONUS:       " + speed_str
+            # self.window_canvas.create_text(
+            #     offset,
+            #     curr_line * tile_size,
+            #     text=text,
+            #     fill="white",
+            #     font=(self.def_font, self.font_size),
+            #     tag="itemencyc_spd",
+            #     anchor="nw",
+            # )
+            # curr_line += 1
 
             # Dodge
             text = "DODGE BONUS:       " + dodge_str
@@ -1359,17 +1438,17 @@ class Menu_Main:
             curr_line += 1
 
             # speed
-            text = "SPEED BONUS:       " + speed_str
-            self.window_canvas.create_text(
-                offset,
-                curr_line * tile_size,
-                text=text,
-                fill="white",
-                font=(self.def_font, self.font_size),
-                tag="itemencyc_spd",
-                anchor="nw",
-            )
-            curr_line += 1
+            # text = "SPEED BONUS:       " + speed_str
+            # self.window_canvas.create_text(
+            #     offset,
+            #     curr_line * tile_size,
+            #     text=text,
+            #     fill="white",
+            #     font=(self.def_font, self.font_size),
+            #     tag="itemencyc_spd",
+            #     anchor="nw",
+            # )
+            # curr_line += 1
 
             # Dodge
             text = "DODGE BONUS:       " + dodge_str

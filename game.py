@@ -30,7 +30,7 @@ class Pyrogue_Game:
 
         # Tkinter root
         self.root = root
-        
+
         # Save if cheats are enabled
         self.cheats_enabled = enable_cheats
 
@@ -283,8 +283,6 @@ class Pyrogue_Game:
                     self._update_hud()
                     message = "You escaped to a new level of the dungeon"
                     self._update_top_label(message, "gold")
-
-                    message = "TURN " + str(self.player.get_currturn()) + ": " + message
                     self.msg_log.append(message)
                     return True
                 else:
@@ -399,7 +397,6 @@ class Pyrogue_Game:
                         )
 
                     self._update_top_label(message)
-                    message = "TURN " + str(self.player.get_currturn()) + ": " + message
                     self.msg_log.append(message)
                 else:
                     # Just a plain successful move; reset message
@@ -795,9 +792,6 @@ class Pyrogue_Game:
 
                         self._update_hud()
                         self._update_top_label(message)
-                        message = (
-                            "TURN " + str(self.player.get_currturn()) + ": " + message
-                        )
                         self.msg_log.append(message)
 
                     # End player's turn? Attack was made, so yes
@@ -1748,12 +1742,14 @@ class Pyrogue_Game:
         # Line count will be dependant on what type of item it is. There may be duplicates here, but this leaves room for granularity later.
         # Actual lines are created further down.
         itype = item.get_type()
-        if itype == item_type_opts["POTION"]:
+        if itype == item_type_opts["RANGED"]:
             line_count = 9 + len(desc_lines)
+        elif itype == item_type_opts["POTION"]:
+            line_count = 8 + len(desc_lines)
         elif itype == item_type_opts["LIGHT"] or itype == item_type_opts["AMMO"]:
             line_count = 5 + len(desc_lines)
         else:
-            line_count = 9 + len(desc_lines)
+            line_count = 8 + len(desc_lines)
 
         longest_line = self.mapsize_w  # default to at least the dungeon width
         # Determine what is actually the longest line, depending on description lines
@@ -1857,7 +1853,84 @@ class Pyrogue_Game:
         curr_line += 1
 
         # From here on, what is printed depends on the type of the item.
-        if itype == item_type_opts["POTION"]:
+        if itype == item_type_opts["RANGED"]:
+            # Damage
+            text = "DAMAGE:            " + item.get_damage_str()
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_dam",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            text = "AMMO PER USE:      " + str(item.get_attr_bonus())
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_attr",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # hp restore
+            text = "HIT POINT RESTORE: " + str(item.get_hp_restore())
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_hp_r",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # speed
+            # text = "SPEED BONUS:       " + item.get_speed_bonus()
+            # self.submenu_canvas.create_text(
+            #     offset,
+            #     curr_line * self.tile_size,
+            #     text=text,
+            #     fill="white",
+            #     font=(self.def_font, self.font_size),
+            #     tag="itemencyc_spd",
+            #     anchor="nw",
+            # )
+            # curr_line += 1
+
+            # Dodge
+            text = "DODGE BONUS:       " + str(item.get_dodge_bonus())
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_dodge",
+                anchor="nw",
+            )
+            curr_line += 1
+
+            # Defense
+            text = "DEFENSE BONUS:     " + str(item.get_defense_bonus())
+            self.submenu_canvas.create_text(
+                offset,
+                curr_line * self.tile_size,
+                text=text,
+                fill="white",
+                font=(self.def_font, self.font_size),
+                tag="itemencyc_def",
+                anchor="nw",
+            )
+            curr_line += 1
+        elif itype == item_type_opts["POTION"]:
             # Hit Point Restore
             text = f"HITPOINT RESTORE:  {item.get_hp_restore()}"
             self.submenu_canvas.create_text(
@@ -1884,18 +1957,18 @@ class Pyrogue_Game:
             )
             curr_line += 1
 
-            # speed
-            text = f"SPEED BONUS:       {item.get_speed_bonus()}"
-            self.submenu_canvas.create_text(
-                offset,
-                curr_line * self.tile_size,
-                text=text,
-                fill="white",
-                font=(self.def_font, self.font_size),
-                tag="iteminspect_spd",
-                anchor="nw",
-            )
-            curr_line += 1
+            # # speed
+            # text = f"SPEED BONUS:       {item.get_speed_bonus()}"
+            # self.submenu_canvas.create_text(
+            #     offset,
+            #     curr_line * self.tile_size,
+            #     text=text,
+            #     fill="white",
+            #     font=(self.def_font, self.font_size),
+            #     tag="iteminspect_spd",
+            #     anchor="nw",
+            # )
+            # curr_line += 1
 
             # Dodge
             text = f"DODGE BONUS:       {item.get_dodge_bonus()}"
@@ -1976,18 +2049,18 @@ class Pyrogue_Game:
             )
             curr_line += 1
 
-            # speed
-            text = f"SPEED BONUS:       {item.get_speed_bonus()}"
-            self.submenu_canvas.create_text(
-                offset,
-                curr_line * self.tile_size,
-                text=text,
-                fill="white",
-                font=(self.def_font, self.font_size),
-                tag="iteminspect_spd",
-                anchor="nw",
-            )
-            curr_line += 1
+            # # speed
+            # text = f"SPEED BONUS:       {item.get_speed_bonus()}"
+            # self.submenu_canvas.create_text(
+            #     offset,
+            #     curr_line * self.tile_size,
+            #     text=text,
+            #     fill="white",
+            #     font=(self.def_font, self.font_size),
+            #     tag="iteminspect_spd",
+            #     anchor="nw",
+            # )
+            # curr_line += 1
 
             # Dodge
             text = f"DODGE BONUS:       {item.get_dodge_bonus()}"
@@ -2289,6 +2362,7 @@ class Pyrogue_Game:
         self.canvas.destroy()
         self.root.unbind("<Key>")
         self._reset_gen_eligibility()
+        print(self.msg_log)
         # Relinquish control back to the main menu
         self.menu_main.toggle_ingame()
 
@@ -2362,7 +2436,6 @@ class Pyrogue_Game:
                 message = actor.get_name() + " dealt " + str(dmg) + " damage to you"
 
                 self._update_top_label(message)
-                message = "TURN " + str(actor.get_currturn()) + ": " + message
                 self.msg_log.append(message)
         elif actor.is_boss():
             # Killed a boss monster; Game ends
