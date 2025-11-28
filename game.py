@@ -361,7 +361,7 @@ class Pyrogue_Game:
             elif key == "plus" and self.cheats_enabled:
                 self.player.force_max_health()
                 self._update_hud()
-                self._update_top_label("Restored hit points", "gold")
+                self._update_top_label("Restored hit points & ammunition", "gold")
             elif key == "Escape":
                 # Enter the "exit" menu for exit options
                 self.curr_input_mode = self.input_modes["menu_exit"]
@@ -558,14 +558,14 @@ class Pyrogue_Game:
             self._render_inventory()
         elif key == "d":
             success, item = self.player.drop_item(
-                self.submenu_select_idx, self.item_list, self.item_map
+                self.submenu_select_idx, self.dungeon, self.item_list, self.item_map
             )
             if success:
                 msg = f"You dropped {item.get_name()}"
                 self.need_submenu_rerender = True
                 self._render_inventory()
             elif item != None:
-                msg = f"Cannot drop; item already on floor"
+                msg = f"Cannot drop item here"
             else:
                 msg = f"No item to drop"
             self._update_top_label(msg)
@@ -2387,7 +2387,6 @@ class Pyrogue_Game:
         self.canvas.destroy()
         self.root.unbind("<Key>")
         self._reset_gen_eligibility()
-        print(self.msg_log)
         # Relinquish control back to the main menu
         self.menu_main.toggle_ingame()
 

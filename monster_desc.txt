@@ -21,7 +21,7 @@ SPEED 2+1d3
 DAM 1+1d4
 HP 12+2d6
 ABIL ERRATIC PICKUP
-RRTY 50
+RRTY 20
 END
 
 BEGIN MONSTER
@@ -34,7 +34,7 @@ How it moves, or even holds itself together, you have no idea.
 .
 SPEED 2+1d3
 DAM 0+1d4
-HP 5+2d6
+HP 10+2d6
 ABIL SMART
 RRTY 10
 END
@@ -99,9 +99,9 @@ Given its unimpressive stature, you have a hard time being intimidated.
 .
 SPEED 7+1d4
 DAM 0+1d4
-HP 12+2d6
+HP 25+2d6
 ABIL SMART
-RRTY 15
+RRTY 20
 END
 
 BEGIN MONSTER
@@ -109,7 +109,7 @@ SYMB c
 COLOR red
 SPEED 40+0d1
 ABIL PICKUP TELE SMART
-HP 200+0d1
+HP 100+0d1
 DAM 0+0d1
 NAME River Crab
 DESC
@@ -144,7 +144,7 @@ ABIL TELE PASS UNIQ
 SPEED 7+1d5
 HP 19+1d11
 DAM 0+1d2
-RRTY 40
+RRTY 50
 END
 
 BEGIN MONSTER
@@ -158,7 +158,7 @@ DAM 3+2d6
 HP 20+0d1
 SPEED 7+1d3
 ABIL TUNNEL ERRATIC PICKUP
-RRTY 45
+RRTY 35
 END
 
 ========================= MODERATE DIFFICULTY
@@ -168,14 +168,14 @@ SYMB R
 COLOR red orange yellow green blue violet
 SPEED 5+5d2
 ABIL SMART ERRATIC
-HP 100+5d20
+HP 50+5d20
 DAM 5+3d6
 NAME a RoyGeeBiv
 DESC
 Pretty, in a tacky sort of way.
 It must have escaped from a nearby gaming computer.
 .
-RRTY 50
+RRTY 40
 END
 
 BEGIN MONSTER
@@ -191,7 +191,7 @@ A bog-standard compiler for C-code.
 
 Wait .... this is Python, get your compiler outa here.
 .
-RRTY 55
+RRTY 50
 END
 
 BEGIN MONSTER
@@ -200,14 +200,14 @@ COLOR yellow blue
 SPEED 2+3d2
 ABIL SMART ERRATIC
 HP 250+20d10
-DAM 10+3d10
+DAM 5+3d10
 NAME a Python Script
 DESC
 Pretty convenient and easy to write/run.
 
 Definitely not the fastest runner, though.
 .
-RRTY 55
+RRTY 50
 END
 
 BEGIN MONSTER
@@ -270,11 +270,11 @@ chicken here makes you wonder if there was some truth in them.
 .
 SYMB G
 COLOR red yellow
-SPEED 20+0d1
+SPEED 10+0d1
 ABIL SMART TELE UNIQ
 HP 500+0d1
-DAM 15+2d20
-RRTY 45
+DAM 5+2d20
+RRTY 60
 END
 
 BEGIN MONSTER
@@ -288,11 +288,11 @@ and it looks like it's hellbent on ending your day.
 .
 SYMB H
 COLOR blue orange
-SPEED 4+2d3
+SPEED 2+2d3
 DAM 25+4d10
 HP 500+2d500
 ABIL SMART TUNNEL
-RRTY 55
+RRTY 65
 END
 
 BEGIN MONSTER
@@ -329,7 +329,7 @@ to keep the user alive. They definitely will not be helping you.
 .
 SYMB Z
 COLOR yellow orange green orange yellow
-ABIL SMART PASS PICKUP
+ABIL SMART PICKUP
 DAM 20+2d20
 HP 3000+2d250
 SPEED 10+10d2
@@ -366,7 +366,7 @@ Don't underestimate him, or you will suffer the same fate as Big Milk.
 ABIL UNIQ ERRATIC DESTROY TUNNEL BOSS
 SPEED 15+0d1
 HP 66666+1d666
-DAM 25+2d20
+DAM 50+3d20
 RRTY 85
 END
 

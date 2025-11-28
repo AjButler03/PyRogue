@@ -808,6 +808,17 @@ class Player(Actor):
         # Check for ranged item
         if item != None:
             dmg += item.damage_dice.roll()  # roll for damage
+            
+        # Now roll for damage of rings/ amulets; they act as bonuses, so will be applied anywhere damage is applied
+        item = self.equip_slots["amulet"]
+        if item != None:
+            dmg += item.damage_dice.roll()
+        item = self.equip_slots["ring_l"]
+        if item != None:
+            dmg += item.damage_dice.roll()
+        item = self.equip_slots["ring_r"]
+        if item != None:
+            dmg += item.damage_dice.roll()
 
         return dmg
 
@@ -1107,7 +1118,7 @@ class Player(Actor):
             if item != None:
                 # Now need to check if dropping the item is possible at current location
                 existing_item = item_map[self.r][self.c]
-                if existing_item == None and dungeon.get_rock_at(self.r, self.c) > 0:
+                if existing_item == None and dungeon.get_rock_at(self.r, self.c) < 1:
                     # Possible to drop item, since there is not an item in place already.
                     # Add the item to the game's item_list, if necessary.
                     if item not in item_list:

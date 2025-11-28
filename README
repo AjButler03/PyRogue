@@ -1,5 +1,5 @@
-PyRogue v1.00 By Andrew Butler
-Built to run using Python 3.12 & Tkinter library
+PyRogue v1.00 December 2025 By Andrew Butler
+Built to run using Python 3.12 with Tkinter library
 
 To run and play PyRogue, you will need to navigate to the folder with all the associated files
 in a terminal and run pyrogue.py with Python. It's important to run pyrogue.py from the same
@@ -13,10 +13,10 @@ For more information on the game itself, be sure to check out the game manual.
 Have fun!
 
 New features with v1.00:
-    - Ranged combat using ranged weapons (WIP)
-    - Cheats toggle in settings (TODO)
+    - Ranged combat using ranged weapons
+    - Monster PICKUP & DESTROY abilities
+    - Setting for toggling cheats
     - Combat log viewer (TODO)
-    - Monster PICKUP & DESTROY abilities (TODO)
     - Installer, allowing easy play from terminal (TODO)
 
 The game has the following key binds:

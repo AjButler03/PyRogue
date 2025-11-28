@@ -96,7 +96,7 @@ DESC
 Make them feel the democracy in their hearts.
 .
 ATTR 10+0d1
-RRTY 50
+RRTY 55
 ART TRUE
 END
 
@@ -136,7 +136,7 @@ including the humble slingshot.
 It just struggles with the "really fast" part.
 .
 ATTR 1+0d1
-RRTY 20
+RRTY 10
 ART FALSE
 END
 
@@ -145,7 +145,7 @@ NAME a Crossbow
 TYPE RANGED
 COLOR gray
 DODGE 2+0d1
-DAM 10+1d10
+DAM 15+1d10
 DEF 5+0d1
 HIT 2+0d1
 SPEED 0+0d1
@@ -154,7 +154,7 @@ A really old crossbow, which luckily still seems to work.
 With some good aim, this will be pretty useful.
 .
 ATTR 1+0d1
-RRTY 25
+RRTY 20
 ART FALSE
 END
 
@@ -163,7 +163,7 @@ NAME a Hand Gun
 TYPE RANGED
 COLOR white
 DODGE 5+0d1
-DAM 15+3d10
+DAM 20+3d10
 DEF 10+0d1
 HIT 15+0d1
 SPEED 0+0d1
@@ -180,7 +180,7 @@ NAME a Service Rifle
 TYPE RANGED
 COLOR cyan
 DODGE 0+0d1
-DAM 15+3d20
+DAM 25+3d20
 DEF 5+0d1
 HIT 10+0d1
 SPEED 0+0d1
@@ -206,7 +206,7 @@ Two for the shields, one for the head.
 Piss your friends off today!
 .
 ATTR 15+0d1
-RRTY 85
+RRTY 90
 ART TRUE
 END
 
@@ -262,27 +262,26 @@ ATTR 0+0d1
 DEF 20+5d5
 SPEED 0+0d1
 COLOR white
-RRTY 40
+RRTY 35
 ART FALSE
 END
 
 BEGIN ITEM
-NAME the Aegis
+NAME Handheld Energy Shield
 DESC
-A very high-quality shield.  Nobody knows what it looks like, except for
-maybe--now--you, but you're not telling.  The back side is inscribed with the
-words: "If found, please return to Zeus, Mount Olympus".
+A small puck that fits confortably in your hand, which looks impossibly advanced.
+When held, it emits a shimmering golden barier, acting as a very effective shield.
 .
 TYPE OFFHAND
 HIT 0+1d20
 DAM 0+0d1
 DODGE 10+5d6
 ATTR 0+0d1
-DEF 50+3d10
+DEF 50+3d20
 SPEED 10+0d1
 COLOR yellow
 RRTY 65
-ART TRUE
+ART FALSE
 END
 
 ============================== ARMOR definitions
@@ -341,7 +340,7 @@ ART FALSE
 END
 
 BEGIN ITEM
-NAME the HEV Mk. V Suit
+NAME HEV Mk. V
 DESC
 This suit is incredible. Ballistic armor, energy dampening, even
 automatic medical assistance for the wearer.
@@ -361,7 +360,6 @@ RRTY 75
 ART TRUE
 END
 
-
 ============================== RING definitions
 
 BEGIN ITEM
@@ -377,7 +375,7 @@ DESC
 Not only is it stylish, but it will help you survive.
 .
 ATTR 0+0d1
-RRTY 80
+RRTY 45
 ART FALSE
 END
 
@@ -394,7 +392,7 @@ DESC
 Not only does it look great, but it will let you hit harder.
 .
 ATTR 0+0d1
-RRTY 80
+RRTY 75
 ART FALSE
 END
 
@@ -413,7 +411,7 @@ The One Ring to rule them all... and in the darkness bind them.  Created by
 Sauron as a tool in his quest to dominate Middle Earth.  It draws the dark
 sorcerer's eye upon its wearer.
 .
-RRTY 3
+RRTY 90
 ART TRUE
 END
 
@@ -432,7 +430,7 @@ DESC
 A stylish chain with a big stone that will make you tougher.
 .
 ATTR 0+0d1
-RRTY 50
+RRTY 45
 ART FALSE
 END
 
@@ -449,7 +447,7 @@ DESC
 A stylish chain with a big stone that will make you more lethal.
 .
 ATTR 0+0d1
-RRTY 50
+RRTY 75
 ART FALSE
 END
 
@@ -469,7 +467,7 @@ Atlantic Ocean (thanks, Rose).  Little did she know, it's imbued with
 fantastic magical powers!
 .
 ATTR 0+0d1
-RRTY 80
+RRTY 90
 ART TRUE
 END
 
@@ -565,7 +563,7 @@ An emergency triage kit that will heal significant injuries.
 You'd better keep this for a rainy day.
 .
 ATTR 0+0d1
-RRTY 65
+RRTY 60
 ART FALSE
 END
 
@@ -583,7 +581,7 @@ A potion that heals your wounds, but also earns you advanced endurance.
 Restores hit points and increases hit point capacity.
 .
 ATTR 10+1d20
-RRTY 50
+RRTY 55
 ART FALSE
 END
 
@@ -639,7 +637,7 @@ DESC
 A decent sized box of ammunition for ranged weapons.
 .
 ATTR 5+2d10
-RRTY 35
+RRTY 30
 ART FALSE
 END
 
@@ -656,6 +654,6 @@ DESC
 A pretty sizeable cache of ammunition for ranged weapons.
 .
 ATTR 10+2d20
-RRTY 50
+RRTY 55
 ART FALSE
 END

@@ -26,9 +26,8 @@ You are capable of carrying 10 items in inventory, and have specific equip slots
 They are WEAPON, RANGED, OFFHAND, ARMOR, AMULET, RING LEFT, RING RIGHT, and LIGHT.
 
 LIGHT items will allow you to pierce the darkness of the dungeon better; the
-others can boost the damage you deal, reduce the damage you take, and even make 
-you faster and more nimble. Unfortunately, your body limits how fast you can go- 
-you are only human, after all.
+others can boost the damage you deal, reduce the damage you take, and will 
+generally improve your chances.
 
 Be sure to keep an eye on your surroundings, understand the enemies to avoid, 
 and the items to make a run for. Your success is up to you.
@@ -77,7 +76,7 @@ There are 5 individual attributes that monsters can have:
                    has limited inventory, and will drop a single picked up item from
                    its inventory on death (assuming it has one to drop). All other
                    held items are destroyed.
-    - DESTORY:     Monster will destroy any items it comes across.
+    - DESTROY:     Monster will destroy any items it comes across.
 END PAGE
 
 
@@ -148,7 +147,7 @@ Rings (symbol: = )
 
 Lights (symbol: _ )
     Lights are the only item that benefits the player's view distance, or your 
-    ability to pierce the 'fog of war'. Lights have no other benefit.
+    ability to pierce the 'fog of war'.
 END PAGE
 
 

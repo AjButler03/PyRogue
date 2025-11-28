@@ -15,6 +15,9 @@ v1.00 ==========================================================================
     - Changed item encyc & item inspection to indicate AMMO consumption, removed menions of SPEED stat
     - Adjusted difficulty multipliers & item spawn rates to make the game easier to survive starting moments
     - Implemented 'DESTORY' & 'PICKUP' attributes
+11/28/2025
+    - PICKUP & DESTROY ability bugfixes
+    - Gameplay balancing tweaks
 v0.08 ===========================================================================================================================
 08/02/2025
     - Escaping to new levels now ramps difficulty by 35% per escape
