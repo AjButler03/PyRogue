@@ -10,15 +10,15 @@ from utility import *
 # A monster can have any number of attributes. I will be indicating these using a bit field.
 # Pickup & Destroy are not currently implemented.
 # See the game manual (text in manual.txt) for descriptions of what these are intended to do.
-ATTR_INTELLIGENT = 0b0000_0000_0000_0001  # Bit 1 (0000 0000 0000 0001)
-ATTR_TELEPATHIC_ = 0b0000_0000_0000_0010  # Bit 2 (0000 0000 0000 0010)
-ATTR_TUNNEL_____ = 0b0000_0000_0000_0100  # Bit 3 (0000 0000 0000 0100)
-ATTR_ERRATIC____ = 0b0000_0000_0000_1000  # Bit 4 (0000 0000 0000 1000)
-ATTR_PASS_______ = 0b0000_0000_0001_0000  # Bit 5 (0000 0000 0001 0000)
-ATTR_PICKUP_____ = 0b0000_0000_0010_0000  # Bit 6 (0000 0000 0010 0000)
-ATTR_DESTROY____ = 0b0000_0000_0100_0000  # Bit 7 (0000 0000 0100 0000)
-ATTR_UNIQ_______ = 0b0000_0000_1000_0000  # Bit 8 (0000 0000 1000 0000)
-ATTR_BOSS_______ = 0b0000_0001_0000_0000  # Bit 9 (0000 0001 0000 0000)
+ATTR_INTELLIGENT = 0b0000_0000_0000_0001  # Bit 1
+ATTR_TELEPATHIC_ = 0b0000_0000_0000_0010  # Bit 2
+ATTR_TUNNEL_____ = 0b0000_0000_0000_0100  # Bit 3
+ATTR_ERRATIC____ = 0b0000_0000_0000_1000  # Bit 4
+ATTR_PASS_______ = 0b0000_0000_0001_0000  # Bit 5
+ATTR_PICKUP_____ = 0b0000_0000_0010_0000  # Bit 6
+ATTR_DESTROY____ = 0b0000_0000_0100_0000  # Bit 7
+ATTR_UNIQ_______ = 0b0000_0000_1000_0000  # Bit 8
+ATTR_BOSS_______ = 0b0000_0001_0000_0000  # Bit 9
 
 # For defining types by string in file
 item_type_opts = {
@@ -529,11 +529,56 @@ class Actor(abc.ABC):
 
     # Declare this actor as dead.
     def kill(self):
+        self.hp = 0
         self.alive = False
+
+    # Attempts to place an item into inventory
+    def _place_in_inventory(self, item: Item):
+        # Check that there is room in the player carry slots
+        # Fill first available slot, if there is one
+        for slot_idx in range(self.inventory_size):
+            slot = self.inventory[slot_idx]
+            if slot == None:
+                self.inventory[slot_idx] = item
+                item.picked_up = True
+                return True  # Successfully placed into inventory
+        return False  # Failed to find room; cannot place into inventory
+
+    # Attempts to pickup an item from the floor, placing in inventory.
+    # Returns True/False on success/failure.
+    def pickup_item(self, dungeon: Dungeon, item_map: list, r: int, c: int) -> bool:
+        # First check that (r, c) is a valid position within the dungeon
+        if dungeon.valid_point(r, c):
+            # Now check that there is an item present
+            item = item_map[r][c]
+            if item != None:
+                # Attempt to place in inventory; fails if no room
+                if self._place_in_inventory(item):
+                    item_map[r][c] = None
+                    return True, item
+        return False, None
+
+    @abc.abstractmethod
+    def drop_item(
+        self,
+        idx: int,
+        dungeon: Dungeon,
+        item_list: list,
+        item_map: list,
+    ):
+        pass
 
     # Handles the turn for the actor.
     @abc.abstractmethod
-    def handle_turn(self, dungeon: Dungeon, actor_map: list, player, move: Move):
+    def handle_turn(
+        self,
+        dungeon: Dungeon,
+        actor_map: list,
+        item_list: list,
+        item_map: list,
+        player,
+        move: Move,
+    ):
         pass
 
     # Returns the row, column coordinate of where the actor is attempting to move to.
@@ -766,18 +811,6 @@ class Player(Actor):
 
         return dmg
 
-    # Attempts to place an item into inventory
-    def _place_in_inventory(self, item: Item):
-        # Check that there is room in the player carry slots
-        # Fill first available slot, if there is one
-        for slot_idx in range(self.inventory_size):
-            slot = self.inventory[slot_idx]
-            if slot == None:
-                self.inventory[slot_idx] = item
-                item.picked_up = True
-                return True  # Successfully placed into inventory
-        return False  # Failed to find room; cannot place into inventory
-
     # Player specific implementation for initializing position in dungeon
     def init_pos(self, dungeon: Dungeon, actor_map: list, r: int, c: int) -> bool:
         # Clear the player's memory of the dungeon.
@@ -801,19 +834,6 @@ class Player(Actor):
             return True
         else:
             return False
-
-    # Attempts to pickup an item from the floor, placing in inventory.
-    # Returns True/False on success/failure.
-    def pickup_item(self, dungeon: Dungeon, item_map: list, r: int, c: int) -> bool:
-        # First check that (r, c) is a valid position within the dungeon
-        if dungeon.valid_point(r, c):
-            # Now check that there is an item present
-            item = item_map[r][c]
-            if item != None:
-                if self._place_in_inventory(item):
-                    item_map[r][c] = None
-                    return True, item
-        return False, None
 
     # Attempts to equip an item in given inventory slot
     # Returns a bool for success/failure, and the item equipped
@@ -908,14 +928,22 @@ class Player(Actor):
 
     # Forcefully teleports the player to row, col within the dungeon, instantly killing any monster that is there.
     # Returns true/false for success and any killed monster.
-    def teleport(self, dungeon: Dungeon, actor_map: list, row: int, col: int):
+    def teleport(
+        self,
+        dungeon: Dungeon,
+        actor_map: list,
+        item_list: list,
+        item_map: list,
+        row: int,
+        col: int,
+    ):
         if dungeon.valid_point(row, col) and not (row == self.r and col == self.c):
             # Grab any monster that might occupy that space
             actor = actor_map[row][col]
             if actor != None:
                 # Commit instant, brutal vaporization of the monster (kill them)
-                actor.hp = 0
                 actor.kill()
+                actor.drop_item(0, dungeon, item_list, item_map)
             # Move player into that position
             self._force_pos_update(dungeon, actor_map, row, col)
             return True, actor
@@ -923,7 +951,15 @@ class Player(Actor):
         return False, None
 
     # Ranged attack handler for player.
-    def ranged_attack(self, actor_map: list, row: int, col: int):
+    def ranged_attack(
+        self,
+        dungeon: Dungeon,
+        actor_map: list,
+        item_list: list,
+        item_map: list,
+        row: int,
+        col: int,
+    ):
         """
         This function handles an attempted ranged attack.
         Requires the actor map and the targeted location to determine target (if any).
@@ -950,15 +986,23 @@ class Player(Actor):
             dmg = self._dmg_roll_ranged()
             new_hp = a.hp - dmg
             if new_hp <= 0:
-                a.hp = 0
                 a.kill()
+                a.drop_item(0, dungeon, item_list, item_map)
             else:
                 a.hp = new_hp
 
         return True, a, dmg
 
     # Turn handler for the player.
-    def handle_turn(self, dungeon: Dungeon, actor_map: list, player, move: int):
+    def handle_turn(
+        self,
+        dungeon: Dungeon,
+        actor_map: list,
+        item_list: list,
+        item_map: list,
+        player,
+        move: int,
+    ):
         """
         This function handles the turn for the player.
         It requires the dungeon instance, the actor map for that dungeon, the player object (redundant), and a specified move, in that order.
@@ -981,8 +1025,8 @@ class Player(Actor):
             dmg = self._dmg_roll_melee()
             new_hp = a.hp - dmg
             if new_hp <= 0:
-                a.hp = 0
                 a.kill()
+                a.drop_item(0, dungeon, item_list, item_map)
             else:
                 a.hp = new_hp
         else:
@@ -1054,7 +1098,7 @@ class Player(Actor):
                 return False, item
 
     # Attempts to drop an item from inventory into the dungeon.
-    def drop_item(self, idx: int, item_list: list, item_map: list):
+    def drop_item(self, idx: int, dungeon: Dungeon, item_list: list, item_map: list):
         item = None
         if idx >= self.inventory_size:
             return False, item
@@ -1063,7 +1107,7 @@ class Player(Actor):
             if item != None:
                 # Now need to check if dropping the item is possible at current location
                 existing_item = item_map[self.r][self.c]
-                if existing_item == None:
+                if existing_item == None and dungeon.get_rock_at(self.r, self.c) > 0:
                     # Possible to drop item, since there is not an item in place already.
                     # Add the item to the game's item_list, if necessary.
                     if item not in item_list:
@@ -1121,6 +1165,10 @@ class Monster(Actor):
         # Declare the monster as initially alive
         self.alive = True
         self.hp = typedef.hp_dice.roll()
+
+        # Monster inventory
+        self.inventory_size = 3  # Carry slot limit; intended to be a hard value
+        self.inventory = [None for _ in range(self.inventory_size)]
 
     # Returns the character representation of the actor.
     def get_char(self) -> str:
@@ -1197,6 +1245,75 @@ class Monster(Actor):
                 # still alive, and not the initial generation.
                 # This will reset to True for a new dungeon (presumably why this was called)
                 self.typedef.gen_eligible = True
+
+    # If PICKUP monster, drops a held item onto the floor on/near position.
+    def drop_item(self, idx: int, dungeon: Dungeon, item_list: list, item_map: list):
+        """
+        A PICKUP monster can hold items that the come across, and randomly drop one of those items upon death.
+        This function aims to implement that dropping item functionality.
+
+        It will first attempt to drop an item in the location that the monster died at, and if there already exists an item there,
+        it will attempt to drop it by randomly running through the 8 surrounding points. If all are populated with items, then
+        the monster will simply not drop an item.
+
+        Any items that are not dropped will simply be destroyed (no longer accessible, should be deleted by Python garbage collection)
+
+        Parameters: idx: int (unused for Monster implementation), dungeon: Dungeon, item_map: list
+        Returns success: bool, item: Item
+        """
+
+        # First check if monster is a PICKUP monster; simply return false if not
+        if not has_attribute(self.attributes, ATTR_PICKUP_____):
+            return False, None
+
+        # Attempt to grab an item from inventory, randomizing selection
+        idx_slots = list(range(self.inventory_size))
+        random.shuffle(idx_slots)
+
+        item = None
+        for inv_idx in idx_slots:
+            if self.inventory[inv_idx] != None:
+                item = self.inventory[inv_idx]
+
+        # Check that a valid item was found
+        if item == None:
+            return False, None
+
+        # Found an item to drop, so find location to drop to
+        # First attempt monster's death location
+        if item_map[self.r][self.c] == None:
+            # Location empty, so dropping onto the dungeon floor
+            item_map[self.r][self.c] = item
+            # Add item to the list of items
+            if item not in item_list:
+                item_list.append(item)
+            # Return success + item dropped
+            return True, item
+        else:
+            # Spot already occupied, so attempt to drop somewhere in 8 surrounding points
+            delta_r = [-1, -1, -1, 0, 0, 1, 1, 1]
+            delta_c = [-1, 0, 1, -1, 1, -1, 0, 1]
+            # Randomize the order in which the 8 surrounding points are attempted
+            indices = list(range(8))
+            random.shuffle(indices)
+
+            for i in indices:
+                new_r = self.r + delta_r[i]
+                new_c = self.c + delta_c[i]
+                # Check that no item occupies spot and that spot is accessible floor
+                if (
+                    dungeon.get_rock_at(new_r, new_c) == 0
+                    and item_map[new_r][new_c] == None
+                ):
+                    item_map[new_r][new_c] = item
+                    # Add item to the list of items
+                    if item not in item_list:
+                        item_list.append(item)
+                    # Spot found; Return success + item dropped
+                    return True, item
+            # If execution made it out of the loop, then no viable spot was found; return failure
+            print("COULD NOT DROP AN ITEM")
+            return False, None
 
     # Determines if the monster can be at this position.
     def _valid_pos(self, dungeon: Dungeon, r: int, c: int) -> bool:
@@ -1290,6 +1407,7 @@ class Monster(Actor):
     ) -> int:
         a = actor_map[dest_r][dest_c]
 
+        # Check if player instance
         if isinstance(a, Player):
             if not dodge_chance(a.dodge):
                 # Player was unable to dodge attack
@@ -1297,7 +1415,6 @@ class Monster(Actor):
                 dam = def_dmg_reduction(self.typedef.damage_dice.roll(), a.defense)
                 new_hp = a.get_hp() - dam
                 if new_hp <= 0:
-                    a.hp = 0
                     a.kill()
                     actor_map[dest_r][dest_c] = None
                 else:
@@ -1306,7 +1423,7 @@ class Monster(Actor):
             else:
                 return 0  # player dodged attack
 
-        # Attempt to displace monster
+        # Not the player; attempt to displace monster
         delta_r = [-1, -1, -1, 0, 0, 1, 1, 1]
         delta_c = [-1, 0, 1, -1, 1, -1, 0, 1]
 
@@ -1347,7 +1464,9 @@ class Monster(Actor):
         return 0
 
     # Handles moving monster, once target position found.
-    def _move_handeler(self, dungeon: Dungeon, actor_map: list, new_r: int, new_c: int):
+    def _move_handeler(
+        self, dungeon: Dungeon, actor_map: list, item_map: list, new_r: int, new_c: int
+    ):
         # Move the monster, handling whatever actor may be there
         a = actor_map[new_r][new_c]
         if a != None:
@@ -1378,11 +1497,22 @@ class Monster(Actor):
                 actor_map[new_r][new_c] = self
                 self.r = new_r
                 self.c = new_c
+                # If PICKUP or DESTROY monster, attemt item pickup/destruction
+                if has_attribute(self.attributes, ATTR_DESTROY____):
+                    # Attempt to destroy item (remove from item map)
+                    item = item_map[new_r][new_c]
+                    if item != None:
+                        item.picked_up = True
+                        item_map[new_r][new_c] = None
+                elif has_attribute(self.attributes, ATTR_PICKUP_____):
+                    # Attempt to pickup item (adding to inventory)
+                    success, item = self.pickup_item(dungeon, item_map, new_r, new_c)
+
         # Return actor + damage dealt for combat messages
         return a, dmg
 
     # Monster moves in a random direction.
-    def _random_move(self, dungeon: Dungeon, actor_map: list):
+    def _random_move(self, dungeon: Dungeon, actor_map: list, item_map: list):
         move = Move(random.randint(0, 7))
         new_r, new_c = self.target_pos(move)
         # Check that new position is valid for the monster to be at
@@ -1390,12 +1520,12 @@ class Monster(Actor):
         while not self._valid_pos(dungeon, new_r, new_c):
             move = Move(random.randint(0, 7))
             new_r, new_c = self.target_pos(move)
-        a, dmg = self._move_handeler(dungeon, actor_map, new_r, new_c)
+        a, dmg = self._move_handeler(dungeon, actor_map, item_map, new_r, new_c)
         # Return actor + damage dealt for combat messages
         return a, dmg
 
     # Monster moves based on its path.
-    def _path_move(self, dungeon: Dungeon, actor_map: list):
+    def _path_move(self, dungeon: Dungeon, actor_map: list, item_map: list):
         # Definine the min cost to be infinite to start
         min_cost = float("inf")
         minc_pt_idx = None
@@ -1410,14 +1540,14 @@ class Monster(Actor):
                     min_cost = cost
                     minc_pt_idx = pt_idx
 
-        # Error handeling; In theory, this shouldn't happen. My logic is broken somewhere such that this is an incredibly rare problem.
+        # Error handling for unlikely scenario that no ideal move was found; so stay put.
         if minc_pt_idx == None:
             # No min cost point was found; so don't move anywhere.
             minc_pt_idx = 8
 
         # Now attempt to move to that minimum cost point
         new_r, new_c = self.target_pos(Move(minc_pt_idx))
-        a, dmg = self._move_handeler(dungeon, actor_map, new_r, new_c)
+        a, dmg = self._move_handeler(dungeon, actor_map, item_map, new_r, new_c)
         # Return actor + damage dealt for combat messages
         return a, dmg
 
@@ -1464,7 +1594,13 @@ class Monster(Actor):
 
     # Turn handler for this monster.
     def handle_turn(
-        self, dungeon: Dungeon, actor_map: list, player: Player, move: Move
+        self,
+        dungeon: Dungeon,
+        actor_map: list,
+        item_list: list,
+        item_map: list,
+        player: Player,
+        move: Move,
     ):
         """
         This function handles the turn for the monster.
@@ -1478,12 +1614,12 @@ class Monster(Actor):
                 and random.randint(0, 1) > 0
             ):
                 # Erratic attribute triggered
-                a, dmg = self._random_move(dungeon, actor_map)
+                a, dmg = self._random_move(dungeon, actor_map, item_map)
             else:
                 # Move based on path
-                a, dmg = self._path_move(dungeon, actor_map)
+                a, dmg = self._path_move(dungeon, actor_map, item_map)
         else:
             # Path update failure indicates that the monster should move randomly
-            a, dmg = self._random_move(dungeon, actor_map)
+            a, dmg = self._random_move(dungeon, actor_map, item_map)
         # Return actor + damage dealt for combat messages
         return True, a, dmg

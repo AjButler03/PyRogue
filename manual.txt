@@ -73,6 +73,11 @@ There are 5 individual attributes that monsters can have:
     - TUNNEL:      Monster can bore through rock, creating new paths between rooms.
     - ERRATIC:     On every turn, 50% chance to move randomly.
     - PASS:        Monster can move through rock without boring.
+    - PICKUP:      Monster will pick up items, placing them into inventory. Monster
+                   has limited inventory, and will drop a single picked up item from
+                   its inventory on death (assuming it has one to drop). All other
+                   held items are destroyed.
+    - DESTORY:     Monster will destroy any items it comes across.
 END PAGE
 
 

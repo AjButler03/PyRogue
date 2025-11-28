@@ -13,6 +13,8 @@ v1.00 ==========================================================================
     - Added cheats toggle to settings
 11/27/2025
     - Changed item encyc & item inspection to indicate AMMO consumption, removed menions of SPEED stat
+    - Adjusted difficulty multipliers & item spawn rates to make the game easier to survive starting moments
+    - Implemented 'DESTORY' & 'PICKUP' attributes
 v0.08 ===========================================================================================================================
 08/02/2025
     - Escaping to new levels now ramps difficulty by 35% per escape

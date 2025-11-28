@@ -20,8 +20,8 @@ Brrraaiinnss...
 SPEED 2+1d3
 DAM 1+1d4
 HP 12+2d6
-ABIL ERRATIC
-RRTY 10
+ABIL ERRATIC PICKUP
+RRTY 50
 END
 
 BEGIN MONSTER
@@ -30,7 +30,7 @@ SYMB s
 COLOR white
 DESC
 This appears to be a walking human skeleton.
-How it's up and moving without any muscles, you have no idea.
+How it moves, or even holds itself together, you have no idea.
 .
 SPEED 2+1d3
 DAM 0+1d4
@@ -44,7 +44,7 @@ NAME a Group of Spiders
 SYMB s
 COLOR gray
 DESC
-A traveling group of 8-legged monstrosities of nature.
+A traveling group of eight-legged monstrosities of nature.
 If you have fire, then buring it with fire is probably preferable.
 .
 SPEED 5+1d3
@@ -78,7 +78,7 @@ NAME a feral cat
 SYMB c
 COLOR orange
 DESC
-It would be cute, if it weren't howling in anger.
+It would be cute, if it weren't hissing and growling at you.
 .
 SPEED 10+1d3
 DAM 2+2d6
@@ -88,15 +88,14 @@ RRTY 10
 END
 
 BEGIN MONSTER
-NAME Junior Barbarian
-SYMB p
+NAME Grunt
+SYMB y
 COLOR yellow
 DESC
-This is a junior barbarian.  He--or is it she?  You can't tell for sure--
-looks like... it should still be in barbarian school.  The barbarians are 
-putting them in the dungeons young these days.  It's wearing dirty, tattered
-cloth armor and wielding a wooden sword.  You have a hard time feeling
-intimidated.
+This little goblin dude seems to think that it's tough,
+muttering something about a 'Yip-Yap'. 
+
+Given its unimpressive stature, you have a hard time being intimidated.
 .
 SPEED 7+1d4
 DAM 0+1d4
@@ -151,14 +150,14 @@ END
 BEGIN MONSTER
 NAME Slime
 DESC
-Eww...  It's slimy.
+For a living cube of goop, it's surprisingly lethal.
 .
 SYMB s
-COLOR GREEN WHITE CYAN MAGENTA RED YELLOW BLUE
+COLOR green white cyan
 DAM 3+2d6
 HP 20+0d1
 SPEED 7+1d3
-ABIL TUNNEL ERRATIC
+ABIL TUNNEL ERRATIC PICKUP
 RRTY 45
 END
 
@@ -206,7 +205,7 @@ NAME a Python Script
 DESC
 Pretty convenient and easy to write/run.
 
-Good god is it slow, though.
+Definitely not the fastest runner, though.
 .
 RRTY 55
 END
@@ -279,15 +278,16 @@ RRTY 45
 END
 
 BEGIN MONSTER
-NAME Titan
+NAME Hunter
 DESC
-Looming over you at a massive 15 feet tall, weighing nearly a ton, the
-Titan is a force to be reckoned with. A mighty oak club is his weapon of
-choice, but you are all too aware it would take no more than a flick of
-the wrist for him to shatter every bone in your body.
+A horrific conglomerate of sentient worms clad in heavy armor, 
+which appears to have incredible brute strength.
+
+It could easily crush you into dust- 
+and it looks like it's hellbent on ending your day.
 .
-SYMB T
-COLOR green blue
+SYMB H
+COLOR blue orange
 SPEED 4+2d3
 DAM 25+4d10
 HP 500+2d500
@@ -315,7 +315,6 @@ END
 
 =========================  DIFFICULT MONSTERS
 
-
 BEGIN MONSTER
 NAME HEV Zombie
 DESC
@@ -324,17 +323,13 @@ HEV suit. Instinctively, you call out to them, hoping for an ally.
 
 They don't answer, or even seem to acknowledge you.
 
-So, you move in closer, trying to see what is going on. They slowly turn 
-around, revealing the headcrab firmly secured on their head.
-
-Their suit croaks out "v-vi-vital ss-ssig-signs critical", clearly losing 
-its battle to keep its wearer alive and well.
-
-Your ally hopes are quickly replaced with dread.
+You look a little closer, and notice that they have a headcrab firmly
+lodged on their head, and the suit appears to be losing the fight 
+to keep the user alive. They definitely will not be helping you.
 .
 SYMB Z
 COLOR yellow orange green orange yellow
-ABIL SMART PASS
+ABIL SMART PASS PICKUP
 DAM 20+2d20
 HP 3000+2d250
 SPEED 10+10d2
@@ -342,22 +337,18 @@ RRTY 70
 END
 
 BEGIN MONSTER
-NAME Amazon Lich Queen
+NAME Demon
 DESC
-She was a powerful Amazon warrior in life.  Death at the hands of the undead
-hordes was followed by her resurrection through dark, necromantic arts.  Her
-power in life didn't approach her undead glory.  Clad in night-black robes
-that don't move in the wind, her incorporeal form commands the power of death
-over life.  You may just be her next victim.  You fear for your soul as you
-quake before her malevolent majesty.
+This is a being of pure hatred.
+You'll need some serious equipment to rip and tear it apart.
 .
-SYMB Q
-COLOR white red magenta
+SYMB D
+COLOR magenta red
 ABIL SMART PASS
 DAM 30+5d9
 HP 4999+1d1001
 SPEED 10+10d2
-RRTY 75
+RRTY 85
 END
 
 BEGIN MONSTER
@@ -387,7 +378,7 @@ You should probably keep moving.
 .
 SYMB D
 COLOR gray maroon
-ABIL PASS TELE UNIQ BOSS
+ABIL PASS TELE UNIQ DESTROY BOSS
 DAM 500+10d20
 HP 99999+0d1
 SPEED 7+3d1

@@ -378,7 +378,12 @@ class Pyrogue_Game:
             # Regular valid move
             move = move_delta[key]
             success, targ_actor, dmg = self.player.handle_turn(
-                self.dungeon, self.actor_map, self.player, move
+                self.dungeon,
+                self.actor_map,
+                self.item_list,
+                self.item_map,
+                self.player,
+                move,
             )
             if success:
                 if targ_actor != None:
@@ -484,7 +489,12 @@ class Pyrogue_Game:
             self.need_full_rerender = True
             # Forces Update to player's area of sight
             self.player.handle_turn(
-                self.dungeon, self.actor_map, self.player, Move(Move.none)
+                self.dungeon,
+                self.actor_map,
+                self.item_list,
+                self.item_map,
+                self.player,
+                Move(Move.none),
             )
             print("GAME: Player inventory sub-menu closed")
             self._update_top_label("")
@@ -580,7 +590,12 @@ class Pyrogue_Game:
             self.need_full_rerender = True
             # Forces Update to player's area of sight
             self.player.handle_turn(
-                self.dungeon, self.actor_map, self.player, Move(Move.none)
+                self.dungeon,
+                self.actor_map,
+                self.item_list,
+                self.item_map,
+                self.player,
+                Move(Move.none),
             )
             print("GAME: Player equipment sub-menu closed")
             self._update_top_label("")
@@ -705,7 +720,12 @@ class Pyrogue_Game:
             elif key == "g" and self.cheats_enabled:
                 # teleport cheat
                 success, targ_actor = self.player.teleport(
-                    self.dungeon, self.actor_map, self.target_r, self.target_c
+                    self.dungeon,
+                    self.actor_map,
+                    self.item_list,
+                    self.item_map,
+                    self.target_r,
+                    self.target_c,
                 )
                 if success:
                     # Check for murdered actor
@@ -751,7 +771,12 @@ class Pyrogue_Game:
             elif key == "r":
                 # Attempt to do a ranged attack
                 attack_success, targ_actor, dmg = self.player.ranged_attack(
-                    self.actor_map, self.target_r, self.target_c
+                    self.dungeon,
+                    self.actor_map,
+                    self.item_list,
+                    self.item_map,
+                    self.target_r,
+                    self.target_c,
                 )
                 if attack_success:
                     if targ_actor != None:
@@ -917,7 +942,7 @@ class Pyrogue_Game:
         itemc = 0
         size_modifier = self.mapsize_w * self.mapsize_h
         attempt_limit = size_modifier
-        min_itemc = max(1, int(size_modifier // 100))
+        min_itemc = max(1, int(size_modifier // 50))
         decay_rate = 0.75
 
         # Generate items; runs until minimum number and attempt limit are met
@@ -2424,7 +2449,12 @@ class Pyrogue_Game:
             else:
                 # Call the monster's turn handler directly
                 success, targ_actor, dmg = actor.handle_turn(
-                    self.dungeon, self.actor_map, self.player, 8
+                    self.dungeon,
+                    self.actor_map,
+                    self.item_list,
+                    self.item_map,
+                    self.player,
+                    8,
                 )
 
             # Re-queue monster
