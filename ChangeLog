@@ -18,6 +18,8 @@ v1.00 ==========================================================================
 11/28/2025
     - PICKUP & DESTROY ability bugfixes
     - Gameplay balancing tweaks
+12/03/2025
+    - Minor fixes to some displayed text with AMMO items
 v0.08 ===========================================================================================================================
 08/02/2025
     - Escaping to new levels now ramps difficulty by 35% per escape
