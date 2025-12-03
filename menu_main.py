@@ -1398,7 +1398,7 @@ class Menu_Main:
             curr_line += 1
         elif itype == item_type_opts["AMMO"]:
             # AMMO BONUS
-            text = "AMMUNITION BONUS:   " + attr_str
+            text = "AMMUNITION BONUS:  " + attr_str
             self.window_canvas.create_text(
                 offset,
                 curr_line * tile_size,

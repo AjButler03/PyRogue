@@ -520,7 +520,7 @@ class Pyrogue_Game:
             success, item = self.player.equip_use_item(self.submenu_select_idx)
             if success:
                 # Check for message phrasing
-                if item.get_type() == item_type_opts["POTION"]:
+                if item.get_type() == item_type_opts["POTION"] or item.get_type() == item_type_opts["AMMO"]:
                     self._update_top_label("You used " + item.get_name())
                 else:
                     self._update_top_label("You equipped " + item.get_name())
@@ -2035,7 +2035,7 @@ class Pyrogue_Game:
             curr_line += 1
         elif itype == item_type_opts["AMMO"]:
             # AMMO BONUS
-            text = f"AMMUNITION BONUS:   {item.get_attr_bonus()}"
+            text = f"AMMUNITION BONUS:  {item.get_attr_bonus()}"
             self.submenu_canvas.create_text(
                 offset,
                 curr_line * self.tile_size,

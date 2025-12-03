@@ -6,3 +6,4 @@ Things left that I want to implement before a full "1.0":
 
 Misc
 - main menu pages reset to zero scroll on page flip (?)
+- used ammo instead of equipped ammo msg
