@@ -1,4 +1,4 @@
-v1.00 ===========================================================================================================================
+v0.1.0 ===========================================================================================================================
 08/27/2025
     - Started work on adding ammunition boxes to the game
     - Removed speed from HUD, replacing it with ammo counter w/ color.
@@ -20,7 +20,11 @@ v1.00 ==========================================================================
     - Gameplay balancing tweaks
 12/03/2025
     - Minor fixes to some displayed text with AMMO items
-v0.08 ===========================================================================================================================
+12/05/2025
+    - Implemented functionality for PIP installation
+    - Re-structured codebase to accomodate best (better) practice
+    - Retroactively fixed version format to match accepted standards
+v0.0.8 ===========================================================================================================================
 08/02/2025
     - Escaping to new levels now ramps difficulty by 35% per escape
     - Difficulty now acts as a score modifier
@@ -45,7 +49,7 @@ v0.08 ==========================================================================
     - Wrote 'Monsters' and 'Items' pages for manual in manual.txt.
     - Fixed visual scrolling bug with Item Encyclopedia.
     - Items can now be inspected via targeting mode.
-v0.07 ===========================================================================================================================
+v0.0.7 ===========================================================================================================================
 07/23/2025
     - Slightly modified item definition parser to better define item types with error handling
     - Implemented Item Encyclopedia for most item types
@@ -73,7 +77,7 @@ v0.07 ==========================================================================
     - Removed original win condition; now need to kill a monster marked as a boss
     - Small gameplay tweaks to speed and scoring
     - Can now drop items from inventory
-v0.06 ===========================================================================================================================
+v0.0.6 ===========================================================================================================================
 07/10/2025
     - Implemented fog of war using recursive shadowcasting
 07/11/2025
@@ -107,7 +111,7 @@ v0.06 ==========================================================================
     - Monster encyclopedia functionally complete
     - Fixed visual bug with scrolling up on short monster list / monster descriptions
     - Monster list now obscures the location of non-visible monsters
-v0.05 ===========================================================================================================================
+v0.0.5 ===========================================================================================================================
 06/26/2025
     - Init Menu_Main class to handle the main menu and its future sub-menus; Work in progress
 06/30/2025
@@ -131,7 +135,7 @@ v0.05 ==========================================================================
     - Added quit menu to game; opens with esc key, gives options to continue, end game, or quit pyrogue
 07/08/2025
     - Minor aesthetic changes
-v0.04 ===========================================================================================================================
+v0.0.4 ===========================================================================================================================
 06/17/2025
     - Added error checking where no optimal move based on path found; now results in no move instead of crash
 06/18/2025
@@ -160,7 +164,7 @@ v0.04 ==========================================================================
     - Made staircases functional; player can now escape to new levels
 06/26/2025
     - Removed labels, instead integrating hud text into the same canvas as the dungeon. Somewhat slower, but prettier.
-v0.03 ===========================================================================================================================
+v0.0.3 ===========================================================================================================================
 06/04/2025
     - Start v03; update ChangeLog + README
     - Monster Class + monster generation method
@@ -185,7 +189,7 @@ v0.03 ==========================================================================
 06/17/2025
     - Fixed several bugs with monster path movement
     - Implemented a basic combat dialogue; will be more useful later on
-v0.02 ===========================================================================================================================
+v0.0.2 ===========================================================================================================================
 05/31/2025
     - Start v02; update ChangeLog + README
     - Init pyrogue.py as the main file to run
@@ -199,7 +203,7 @@ v0.02 ==========================================================================
     - Created actor class (abstract), which player class inherits from
     - Created proper actor map to store actor locations
     - pyrogue.py now has render method to show terrain and actor positions
-v0.01 ===========================================================================================================================
+v0.0.1 ===========================================================================================================================
 05/20/2025
     - Starting this Project
 05/21/2025

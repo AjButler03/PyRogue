@@ -1,8 +1,0 @@
-2025 semester started, so PyRogue will take a wayside for a while.
-Things left that I want to implement before a full "1.0":
-- combat log viewer (visible after death/ game over)
-- Make game runable in easy way (no terminal navigation, just launch and play)
-
-
-Misc
-- main menu pages reset to zero scroll on page flip (?)

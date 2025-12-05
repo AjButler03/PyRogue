@@ -1,8 +1,8 @@
 import random
 import copy
-from utility import PriorityQueue
+from .utility import PriorityQueue
 from enum import Enum
-from utility import exp_chancetime
+from .utility import exp_chancetime
 from collections import deque
 
 # This file is to handle all functions that deal with the dungeon itself.

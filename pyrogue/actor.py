@@ -2,8 +2,8 @@ import random
 import abc
 import copy
 from enum import Enum
-from dungeon import *
-from utility import *
+from .dungeon import *
+from .utility import *
 
 # This file contains the class information for 'actors' - Monsters, the player, and the various items.
 

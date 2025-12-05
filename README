@@ -1,10 +1,13 @@
-PyRogue v1.00 December 2025 By Andrew Butler
+PyRogue v0.1.0 December 2025 By Andrew Butler
 Built to run using Python 3.12 with Tkinter library
 
-To run and play PyRogue, you will need to navigate to the folder with all the associated files
-in a terminal and run pyrogue.py with Python. It's important to run pyrogue.py from the same
-directory as the other files, so that it can access dependencies. Once the file is running,
-it should open up a separate window displaying the main menu.
+To run and play PyRogue, place PyRogue codebase wherever you would like on your system,
+navigate to that directory using command line, and run "pip install ."
+This will enable Pyrogue to run via either of the two commands, from any directory:
+  1. "pyrogue", if added as path variable
+  2. "python -m pyrogue"
+I am not super well versed in proper safety on package installation or anything like that, 
+so install at your own risk. 
 
 From there, you can navigate the menu using the arrow keys or using the movement keys below.
 You will have the option to start a game, alter game settings, view the game manual, view

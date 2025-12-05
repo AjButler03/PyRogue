@@ -1,7 +1,7 @@
 import tkinter as tk
-from utility import *
-from actor import *
-from dungeon import *
+from .utility import *
+from .actor import *
+from .dungeon import *
 
 
 # This file handles the main gameloop and the tkinter UI for the game itself.

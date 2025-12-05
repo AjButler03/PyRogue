@@ -1,6 +1,7 @@
 import re
-from utility import Dice
-from actor import *
+from importlib import resources
+from .utility import Dice
+from .actor import *
 
 # This file reads manual.txt,  monster_desc.txt, and item_desc.txt to get the manual pages, monster definitions, and item definitions, respectively.
 
@@ -19,7 +20,7 @@ def dice_from_str(str: str):
 def parse_manual_text(man_pages: list) -> bool:
     # Attempt to open file
     try:
-        with open("manual.txt", "r") as file:
+        with resources.open_text("pyrogue.gamedata", "manual.txt") as file:
             file_lines = file.readlines()
             curr_line = 0
             print("PARSEDESC: manual.txt opened... ", end="")
@@ -77,7 +78,7 @@ def parse_manual_text(man_pages: list) -> bool:
 def parse_monster_typedefs(monster_type_list: list) -> bool:
     # Attempt to open file
     try:
-        with open("monster_desc.txt", "r") as file:
+        with resources.open_text("pyrogue.gamedata", "monster_desc.txt") as file:
             file_lines = file.readlines()
             curr_line = 0  # To point to next line to look at
             print("PARSEDESC: monster_desc.txt opened... ", end="")
@@ -294,7 +295,7 @@ def parse_monster_typedefs(monster_type_list: list) -> bool:
 def parse_item_typedefs(item_type_list: list) -> bool:
     # Attempt to open file
     try:
-        with open("item_desc.txt", "r") as file:
+        with resources.open_text("pyrogue.gamedata", "item_desc.txt") as file:
             file_lines = file.readlines()
             curr_line = 0  # To point to next line to look at
             print("PARSEDESC: item_desc.txt opened... ", end="")
