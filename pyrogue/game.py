@@ -200,7 +200,7 @@ class Pyrogue_Game:
             turn_completed = self._handle_player_input(key)
             if turn_completed:
                 self.curr_input_mode = self.input_modes["none"]
-                print("GAME: Player turn completed")
+                # print("GAME: Player turn completed")
 
                 # Requeue player
                 new_turn = self.player.get_currturn() + (
@@ -209,9 +209,9 @@ class Pyrogue_Game:
                 self.turn_pq.push(self.player, new_turn)
                 self.player.set_currturn(new_turn)
                 self.root.after(10, self._next_turn)
-            else:
-                # Player turn was not concluded; turn continues
-                print("GAME: Player turn continues")
+            # else:
+            # Player turn was not concluded; turn continues
+            # print("GAME: Player turn continues")
         elif self.curr_input_mode == self.input_modes["menu_exit"]:
             # Calling exit submenu input handler
             self._handle_exit_input(key)
@@ -230,7 +230,7 @@ class Pyrogue_Game:
             end_turn = self._handle_targeting_input(key)
             if end_turn:
                 self.curr_input_mode = self.input_modes["none"]
-                print("GAME: Player turn completed")
+                # print("GAME: Player turn completed")
 
                 # Requeue player
                 new_turn = self.player.get_currturn() + (
@@ -296,18 +296,18 @@ class Pyrogue_Game:
                 self.submenu_select_idx = 0
                 self._render_equipment()
                 self._update_top_label("PAUSED")
-                print("GAME: Player equipment sub-menu activated")
+                # print("GAME: Player equipment sub-menu activated")
                 return False  # Turn not over
             elif key == "f" and self.cheats_enabled:
                 # Toggle fog of war
                 if self.curr_render_mode == self.render_modes["standard"]:
                     # Turn on x-ray mode to show the full dungeon
                     self.curr_render_mode = self.render_modes["x-ray"]
-                    print("GAME: Enabled x-ray render mode")
+                    # print("GAME: Enabled x-ray render mode")
                 else:
                     # return to standard render mode, known tiles
                     self.curr_render_mode = self.render_modes["standard"]
-                    print("GAME: Returned to standard render mode")
+                    # print("GAME: Returned to standard render mode")
                 self.need_full_rerender = True
                 self._render_frame(self.scrsize_h, self.scrsize_w)
                 return False  # Turn not over
@@ -319,7 +319,7 @@ class Pyrogue_Game:
                 self.submenu_select_idx = 0
                 self._render_inventory()
                 self._update_top_label("PAUSED")
-                print("GAME: Player inventory sub-menu activated")
+                # print("GAME: Player inventory sub-menu activated")
                 return False  # Turn not over
             elif key == "m":
                 # Enter the monster list menu
@@ -328,7 +328,7 @@ class Pyrogue_Game:
                 self.need_submenu_rerender = True
                 self._render_monster_list()
                 self._update_top_label("PAUSED")
-                print("GAME: Monster list sub-menu activated")
+                # print("GAME: Monster list sub-menu activated")
                 return False  # Turn not over
             elif key == "p":
                 # Attempt to pickup item
@@ -369,7 +369,7 @@ class Pyrogue_Game:
                 self.submenu_select_idx = 0
                 self._render_exit_menu()
                 self._update_top_label("PAUSED")
-                print("GAME: Exit sub-menu activated")
+                # print("GAME: Exit sub-menu activated")
                 return False  # Turn not over
             else:
                 # Misinput; turn not over
@@ -421,7 +421,7 @@ class Pyrogue_Game:
                 self.curr_submenu = self.display_submenus["none"]
                 self.submenu_canvas.destroy()
                 self.need_full_rerender = True
-                print("GAME: Exit sub-menu closed")
+                # print("GAME: Exit sub-menu closed")
                 self._update_top_label("")
             elif self.submenu_select_idx == 1:
                 self._end_game()
@@ -450,7 +450,7 @@ class Pyrogue_Game:
             if self.submenu_canvas:
                 self.submenu_canvas.destroy()
             self.need_full_rerender = True
-            print("GAME: Exit sub-menu closed")
+            # print("GAME: Exit sub-menu closed")
             self._update_top_label("")
 
     # Handles input for the monster list submenu
@@ -462,7 +462,7 @@ class Pyrogue_Game:
             if self.submenu_canvas:
                 self.submenu_canvas.destroy()
             self.need_full_rerender = True
-            print("GAME: Monster list sub-menu closed")
+            # print("GAME: Monster list sub-menu closed")
             self._update_top_label("")
         elif key == "j" or key == "Down" or key == "2":
             # Scroll down
@@ -496,7 +496,7 @@ class Pyrogue_Game:
                 self.player,
                 Move(Move.none),
             )
-            print("GAME: Player inventory sub-menu closed")
+            # print("GAME: Player inventory sub-menu closed")
             self._update_top_label("")
         elif (
             key == "Right"
@@ -512,15 +512,18 @@ class Pyrogue_Game:
             self.curr_submenu = self.display_submenus["menu_equipment"]
             self.submenu_canvas.destroy()
             self.need_submenu_rerender = True
-            print("GAME: Player inventory sub-menu closed")
-            print("GAME: Player equipment sub-menu opened")
+            # print("GAME: Player inventory sub-menu closed")
+            # print("GAME: Player equipment sub-menu opened")
             self._render_equipment()
         elif key == "Return":
             # Attempt to equip item
             success, item = self.player.equip_use_item(self.submenu_select_idx)
             if success:
                 # Check for message phrasing
-                if item.get_type() == item_type_opts["POTION"] or item.get_type() == item_type_opts["AMMO"]:
+                if (
+                    item.get_type() == item_type_opts["POTION"]
+                    or item.get_type() == item_type_opts["AMMO"]
+                ):
                     self._update_top_label("You used " + item.get_name())
                 else:
                     self._update_top_label("You equipped " + item.get_name())
@@ -597,7 +600,7 @@ class Pyrogue_Game:
                 self.player,
                 Move(Move.none),
             )
-            print("GAME: Player equipment sub-menu closed")
+            # print("GAME: Player equipment sub-menu closed")
             self._update_top_label("")
         elif (
             key == "Right"
@@ -613,8 +616,8 @@ class Pyrogue_Game:
             self.curr_submenu = self.display_submenus["menu_inventory"]
             self.submenu_canvas.destroy()
             self.need_submenu_rerender = True
-            print("GAME: Player equipment sub-menu closed")
-            print("GAME: Player iventory sub-menu opened")
+            # print("GAME: Player equipment sub-menu closed")
+            # print("GAME: Player iventory sub-menu opened")
             self._render_inventory()
         elif key == "Return":
             key_str = {
@@ -2376,7 +2379,7 @@ class Pyrogue_Game:
             monster.set_currturn(monster.get_speed())
             # 9 to ensure that ALL monsters get a turn after player's first turn
             self.turn_pq.push(monster, monster.get_currturn())
-        print("GAME: Turnloop started")
+        # print("GAME: Turnloop started")
         self._next_turn()
 
     # Ends the game, destroying the canvas and unbinding event listeners.

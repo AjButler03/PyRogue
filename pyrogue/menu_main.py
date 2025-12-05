@@ -455,16 +455,16 @@ class Menu_Main:
             self.need_full_rerender = True
             # Call appropriate renderer; depends on current menu to be shown
             if self.curr_mode == self.menu_modes["home"]:
-                print("MENU: Rendered home")
+                # print("MENU: Rendered home")
                 self._render_home(self.scrsize_h, self.scrsize_w)
             elif self.curr_mode == self.menu_modes["settings"]:
-                print("MENU: Rendered settings")
+                # print("MENU: Rendered settings")
                 self._render_settings(self.scrsize_h, self.scrsize_w)
             elif self.curr_mode == self.menu_modes["manual"]:
-                print(f"MENU: Rendered manual page {self.curr_man_idx + 1}")
+                # print(f"MENU: Rendered manual page {self.curr_man_idx + 1}")
                 self._render_manual(self.scrsize_h, self.scrsize_w)
             elif self.curr_mode == self.menu_modes["monstencyc"]:
-                print("MENU: Rendered Monster Encyclopedia")
+                # print("MENU: Rendered Monster Encyclopedia")
                 self._render_monstencyc(self.scrsize_h, self.scrsize_w)
             elif self.curr_mode == self.menu_modes["itemencyc"]:
                 pass  # Later problem

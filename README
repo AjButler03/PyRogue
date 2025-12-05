@@ -6,8 +6,6 @@ navigate to that directory using command line, and run "pip install ."
 This will enable Pyrogue to run via either of the two commands, from any directory:
   1. "pyrogue", if added as path variable
   2. "python -m pyrogue"
-I am not super well versed in proper safety on package installation or anything like that, 
-so install at your own risk. 
 
 From there, you can navigate the menu using the arrow keys or using the movement keys below.
 You will have the option to start a game, alter game settings, view the game manual, view
@@ -15,12 +13,11 @@ monster and item descriptions for monsters/items that will appear in the game, o
 For more information on the game itself, be sure to check out the game manual.
 Have fun!
 
-New features with v1.00:
+New features with v0.1.0:
     - Ranged combat using ranged weapons
     - Monster PICKUP & DESTROY abilities
-    - Setting for toggling cheats
-    - Combat log viewer (TODO)
-    - Installer, allowing easy play from terminal (TODO)
+    - Cheats toggle
+    - Installation via pip
 
 The game has the following key binds:
 ===== MOVEMENT =====
