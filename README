@@ -17,7 +17,7 @@ New features with v0.1.0:
     - Ranged combat using ranged weapons
     - Monster PICKUP & DESTROY abilities
     - Cheats toggle
-    - Installation via pip
+    - Package installation via pip
 
 The game has the following key binds:
 ===== MOVEMENT =====
