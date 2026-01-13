@@ -103,12 +103,12 @@ static void draw_menu_main(WINDOW *main_pad) {
 
     // Cool ASCII text for fanciness points
     wattron(main_pad, COLOR_PAIR(COLOR_RED));
-    wprintw(main_pad, line1);
-    wprintw(main_pad, line2);
-    wprintw(main_pad, line3);
-    wprintw(main_pad, line4);
-    wprintw(main_pad, line5);
-    wprintw(main_pad, line6);
+    wprintw(main_pad, "%s", line1);
+    wprintw(main_pad, "%s", line2);
+    wprintw(main_pad, "%s", line3);
+    wprintw(main_pad, "%s", line4);
+    wprintw(main_pad, "%s", line5);
+    wprintw(main_pad, "%s", line6);
     wattroff(main_pad, COLOR_PAIR(COLOR_RED));
 
     wprintw(main_pad, "\n");

@@ -2,18 +2,26 @@ Rogue 3270 (Legacy version of Pyrogue)
 Implemented by Andrew Butler
 Spring Semester 2025 @ Iowa State University
 
-
 About this legacy branch:
-Rogue 3270 is the product of a series of class assignments, and serves as the 
-predocessor to PyRogue. I do not claim that it is my best work; rather, it is 
-the result of balancing my time between this, 4 other classes, my part time job,
-and the various things necessary to living life. So, there is definitely a lot
-of jank present. The first handful of assignments that this started with were 
-also solely written in C as opposed to C++, so it also does not have a an 
-optimal object-oriented structure.
+Rogue 3270 is the predecessor to PyRogue, and is the result of a series 
+of assignments for a class at Iowa State University in the Spring of 2025.
+This code is suboptimal for a few reasons:
+  - Development was often rushed due to how busy I was.
+  - We started with exclusively C code, then moved to C++. This means the
+    OOP structure is very much so unoptimized, if only b/c I never fixed it.
+  - The control structure was rushed, and was built with a "just get it to work"
+    mentality; this is actually one of the main reasons PyRogue exists.
+Also worth noting:
+  - Some pieces of code (namely heap.h/.c) were provided by Prof. Jeremy Sheaffer
+  - Error/Fault prevention is spotty at best, so buggy behavior is possible.
 
 
 To run Rogue 3270:
+- Navigate to directory of files
+- run makefile using 'make'
+- run compiled/linked file with '/rogue'.
+- Might need to sort out dependencies (ncurses, pkg-config)
+
 
 There are four possible command line arguments:
 '-s | --save' will save the dungeon to file upon completion of the program.

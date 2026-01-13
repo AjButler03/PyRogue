@@ -40,7 +40,7 @@ uint8_t parse_monsters() {
     bool name, desc, color, abil, speed, hp, dam, symb, rrty;
     uint32_t temp1, temp2, temp3;
     int fpathlen;
-    char *home;
+    // char *home;
     char *fpath;
     std::ifstream stream;
     std::string line, tmp;
@@ -49,17 +49,28 @@ uint8_t parse_monsters() {
     name = desc = color = abil = speed = hp = dam = symb = rrty = false;
 
     // creating filepath
-    home = getenv("HOME");
-    fpathlen = strlen(home) + strlen("/.rlg327/monster_desc.txt") +
-               1;  // +1 for the null byte
+    // home = getenv("HOME");
+    // fpathlen = strlen(home) + strlen("/.rlg327/monster_desc.txt") +
+    //            1;  // +1 for the null byte
+
+    // fpath = (char *)malloc(fpathlen * sizeof(*fpath));
+    // if (!fpath) {
+    //     // I *should* throw and exception or something here.
+    //     printf("Memory allocation (malloc) error. Quitting.\n");
+    //     return 1;
+    // }
+    // strcpy(fpath, home);
+    // strcat(fpath, "/.rlg327/monster_desc.txt");
+
+    fpathlen = strlen("monster_desc.txt") + 1;
+
     fpath = (char *)malloc(fpathlen * sizeof(*fpath));
     if (!fpath) {
         // I *should* throw and exception or something here.
         printf("Memory allocation (malloc) error. Quitting.\n");
         return 1;
     }
-    strcpy(fpath, home);
-    strcat(fpath, "/.rlg327/monster_desc.txt");
+    strcpy(fpath, "monster_desc.txt");
 
     stream.open(fpath, std::ifstream::in);
     if (stream.is_open()) {
@@ -289,7 +300,6 @@ uint8_t parse_objects() {
         attribute, value, artifact, rrty;
     uint32_t temp1, temp2, temp3;
     int fpathlen;
-    char *home;
     char *fpath;
     std::ifstream stream;
     std::string line, tmp;
@@ -299,17 +309,26 @@ uint8_t parse_objects() {
         speed = attribute = value = artifact = rrty = false;
 
     // creating filepath
-    home = getenv("HOME");
-    fpathlen = strlen(home) + strlen("/.rlg327/object_desc.txt") +
-               1;  // +1 for the null byte
+    // home = getenv("HOME");
+    // fpathlen = strlen(home) + strlen("/.rlg327/object_desc.txt") +
+    //            1;  // +1 for the null byte
+    // fpath = (char *)malloc(fpathlen * sizeof(*fpath));
+    // if (!fpath) {
+    //     // I *should* throw and exception or something here.
+    //     printf("Memory allocation (malloc) error. Quitting.\n");
+    //     return 1;
+    // }
+    // strcpy(fpath, home);
+    // strcat(fpath, "/.rlg327/object_desc.txt");
+
+    fpathlen = strlen("object_desc.txt") + 1;
     fpath = (char *)malloc(fpathlen * sizeof(*fpath));
     if (!fpath) {
         // I *should* throw and exception or something here.
         printf("Memory allocation (malloc) error. Quitting.\n");
         return 1;
     }
-    strcpy(fpath, home);
-    strcat(fpath, "/.rlg327/object_desc.txt");
+    strcpy(fpath, "object_desc.txt");
 
     stream.open(fpath, std::ifstream::in);
     if (stream.is_open()) {
