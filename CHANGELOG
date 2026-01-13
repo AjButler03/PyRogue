@@ -1,0 +1,237 @@
+v1.10 ========================================================================================================
+04/25/2025
+    - Start on v1.10
+    - Modified some UI elements to use color highlights
+    - Inspecting an object now shows object type
+04/27/2025
+    - Combat is now influenced by PC dodge + defense bonuses
+    - Object inspect now shows defense & dodge bonuses
+    - Fixed bug with speed <= 0
+04/28/2025
+    - small balancing changes; gave PC higher start HP, dodge, and defense
+    - items (lights) can now influence the PC's view distance
+    - Starting on main menu
+04/29/2025
+    - Game can now 'loop'; when game ends, user can elect to start again w/o returning to terminal.
+    - Main menu now has a window for displaying all the monster types; each type gets a scrollable page
+    - Main menu now has a window for displaying all the item types; each type gets a scrollable page
+    - Main menu now has a window for display some directions (story + controls)
+04/30/2025
+    - created function for printing distance maps to NCurses screen for debugging
+    - 'z' to show distance maps; both walk/tunnel master copies on turn + monster path on monster inspect
+05/01/2025
+    - Fixed pathMove bug; I was mixing UINT8_t and INT8_t, which lead to errors.
+    - Fixed player_c destructor to prevent memory leak on carried / equipped items
+    - Updated controls page to reflect distance map / monster path binding
+05/04/2025
+    - Fixed 'Level Clear' message overwriting item pickup message
+    - Colorized header for carry slot list menu
+05/06/2025
+    - Minor text changes in directions pages
+05/08/2025
+    - bugfix with monster-pc line of sight detection
+    - v1.10 Complete
+v1.09 ========================================================================================================
+04/19/2025
+    - Starting work on v1.09
+    - created function to handle targeting control for monster inspection
+04/20/2025
+    - created function to generate + scroll monster inspection screen
+    - PC is now persistent between dungeon levels
+04/21/2025
+    - minor changes to color in monster list
+    - monsters can no longer attack other monsters; will 'shove' one another instead
+    - Killing a monster now produces a death message
+    - killing a monster marked as 'BOSS' will end the game with a win message
+    - added inventory for PC equipment / carry slots
+04/22/2025
+    - wrote function to allow PC to pick up an item and move it into next available carry slot
+04/23/2025
+    - Item pickup is now implemented with ',' key; not automatic
+    - Implemented carry slot item inspection + listing
+    - Implemented equipping items + listing
+    - Items can now be unequipped
+    - PC's damage output is now augmented by equipped items
+    - PC can now expunge items
+    - PC can now drop items
+    - PC speed now augmented by equipped items
+v1.08 ========================================================================================================
+04/13/2025
+    - Starting work on v1.08
+04/14/2025
+    - Added Sheaffer's dice class and converted monster parsing & descriptions to use it
+    - First pass at object parser (untested)
+04/15/2025
+    - Fixed small issues with object parser
+04/16/2025
+    - Edited actor_c, monster_c, actor_c to use monster descriptions
+    - Edited bitfield for actor attributes to include BOSS & PC + associated macros
+    - Removed legacy print dungeon function
+    - monster generation switched to description-based
+    - Health based 'combat' working
+    - Unique monsters are held to unique requirements
+    - monsters now have custom colors
+    - Now generating objects in dungeon based on object descriptions
+    - Fixed small issue with teleport, which also now insta-kills then moves if monster in desired location
+    - Monster List now reflects colors + names of monsters
+v1.07 ========================================================================================================
+04/05/2025
+    - Starting work on v1.07
+    - Removed some duplicated code for moving Monsters/PC
+    - actors now 'attack'; they have to kill another actor before they move into their space
+    - fixed bug where PC was not killed properly by monster if PC teleported into rock
+04/07/2025
+    - visible dungeon around PC is now bold, to better show what the PC can see
+04/08/2025
+    - added -p/--parse command line arg to print parsed monsters
+    - created parse.cpp/parse.h for parsing monster & item specification files
+    - added pass, pickup, destroy, and uniq to attribute bitfield + macros to check & removed attribute enum
+04/09/2025
+    - Yelled at Mr. Gates for automatic carriage returns and the issues they cause
+    - Implemented monster description parsing + storage of those descriptions
+    - Implemented basic method for printing monster descriptions
+    - Fixed memory leaks
+v1.06 ========================================================================================================
+03/31/2025
+    - Starting work on v1.06; converting dungeon.c and rogue.c to C++ (dungeon.cpp & rogue.cpp)
+    - Updated Makefile to use g++ compiler for C++ (Credit Jeremy Sheaffer, pulled from his 1.05 solution)
+    - Added appropriate pointer casts to rogue.cpp, dungeon.cpp
+04/01/2025
+    - Compilation & linking with C++ now working
+    - Dungeon now uses a terrain type array instead of a char array
+04/02/2025
+    - created abstract class 'actor_c' for subclasses 'monster_c' and 'player_c'.
+    - fixed (I think) bug where some monsters would have turns before PC even moved
+    - implemented 'fog of war' + toggle cheat
+    - implemented teleport cheat
+    - fixed previous bug where monster list would list dead monsters as alive
+    - fixed crash with teleport to PC's existing location (sef-kill)
+    - fixed bug with loading dungeons and PC's memory
+v1.05 ========================================================================================================
+03/6/2025
+    - Fixed a couple bugs with monster movement / straightline pathfinding (still more to kill)
+03/08/2025
+    - Monsters color-coded as red, PC as green (color is really easy, isn't it?)
+    - Fixed bug where it would declare PC defeated, even if PC defeated all monsters
+03/10/2025
+    - Changed code to work with a global pointer to 'pc' object
+    - Fixed an issue where monsters would try to follow their pathing without it being initialized correctly
+03/16/2025
+    - Fixed issue where PC being killed before moving itself would cause crash
+    - Fixed a bug I introduced recently (after 1.04) that caused tunneling to not be possible
+    - Found a bug where a monster is attempting to kill itself(?); fix in progress
+03/18/2025
+    - 'Fixed' bug where monster attempted to move in place (killing itself). Essentially just a band-aid.
+    - All (known) outstanding bugs from v1.04 are now fixed; I can properly start on v1.05 now
+03/19/2025
+    - Starting to move code around to allow user input (not everything in dungeon.c)
+03/20/2025
+    - The main turnloop is now in rogue.c, allowing access for user input later
+03/21/2025
+    - Got basic Ncurses window working; color temporarily removed
+03/22/2025
+    - Color for monsters / PC returned
+    - In-place character replacement; smoother animation between 'frames'
+    - User input for PC movement
+03/24/2025
+    - PC now moves on input
+    - Staircase traversal implemented (might be memory leak + errors; hasn't crashed in testing)
+03/25/2025
+    - Fixed invalid read bug when creating new dungeon on stair traversal
+    - Dungeon render is now exactly 80*21 (border on immutable edge) + fancier border
+    - Implemented monster list menu (basic, no scrolling, buggy)
+03/26/2025
+    - Implemented monster list menu, including scrolling capability
+    - Fixed memory leak with monster darray
+v1.04 ========================================================================================================
+02/27/2025
+    - Starting work for v1.04
+    - began restructuring some code; some files are now separated to improve readability and modularity
+02/28/2025
+    - Fixed --load --save (both switches) not calling the functions to calculate distance maps (oops)
+    - Fixed minor memory leak associated with creating filepath to save/load dungeon (oops x2)
+03/02/2025
+    - Initialized monster.h and monster.c
+    - Dungeon map is now separate 2d array from PC/Monsters
+    - Slightly Modified room generation to remove MAX_ROOMC; Consequently generates more rooms on average now.
+03/03/2025
+    - Moved code (little that I had) from monster.c/.h to dungeon.c/.h; separate files made little sense
+    - Changed PC generation to use my 'actors' typedef
+    - Implemented random monster generation, with random attributes (using attribute hex code as char)
+    - added '-s', '-l', '-n', '--nummon' switches (revamped arg parsing)
+03/05/2025
+    - added line of sight check + strightline path generation for monsters, Bresenham's algorithm based
+    - added monster movement methods (random and via path mapping)
+    - Added monster turn queue
+    - Fixed many, many bugs (pain). Many still remain.
+    - v1.04 'done' (out of time)
+v1.03 ========================================================================================================
+02/16/2025
+    - Starting work for v1.03
+02/17/2025
+    - Added heap.h and heap.c (credit Jeremy Scheaffer)
+02/19/2025
+    - update Makefile for heap datatype
+    - First pass at Dijkstra pathfinding for tunneling monsters
+02/20/2025
+    - First pass at Dijkstra pathfinding for walking only monsters
+    - Dijkstra implementation appears to be correct; I don't have correct output to compare against though
+    - Circled back to implement Dijkstra path generation, but correctly this time
+    - Made corridor start/end points randomized within rooms
+    - Removed straight corridor generation method (it was dumb, will not be missed)
+    - Slightly modified room spawn rate
+    - Refactored code to remove room_list datatype, opting for generic darray created in lecture
+02/22/2025
+    - fixed tunneling weight calculation (now dividing by 85, as specified in spec).
+    - recreated rock hardness print method with hexadecimal.
+    - Updated printDistMap to show unreachable points with 'X'.
+v1.02 ========================================================================================================
+02/07/2025 
+    - Starting on work for v1.02
+    - Reformatted CHANGELOG to be a little more organized between dates, changes, and versions
+    - Removed my broken Dijkstra cooridor generation, but keeping priority queue for now. I may come back to 
+      this in the future, but for now I'm just getting it out of my way.
+    - fixed (maybe?) room generation bug where size was not being recorded correctly
+02/08/2025
+    - Changed room creation method to generate room to a specified size; randomization is now done outside the 
+      method, before it is called. This makes reading/saving rooms more straight forward.
+    - Path generation should now consistently have a destination; no more paths to nowhere.
+    - 'Corridor' not 'Cooridor'. Lots of comments were spelling this wrong- should have been using spellcheck.
+    - Reconfigured staircase placement to allow for specific coordinates; again, to help with reading from file.
+    - Created 'room_list', which is essentially just a linked list to store rooms dynamically. This will allow
+      theoretically unlimited number of rooms. Updated Makefile accordingly.
+02/09/2025
+    - Fixed bugs with room_list. In the interest of time, I'm going to wait on actually using this
+      in dungeon.c; main goal here is reading/writing, and room_list solves a minor bug with that.
+02/10/2025
+    - Created basic bit to randomly place player character when generating dungeon
+    - Created methods for writing / reading to / from binary file; heavily work in progress.
+    - Converted my array of int for rooms to room_list for dynamic allocation.
+    - Created basic commandline arg parsing for --load and --save; or both, if that's your thing.
+02/11/2025
+    - Macgyver'd room_list to dynamically store locations for staircases (didn't think about it until now).
+    - Continued work on implementing --load and --save
+02/12/2025
+    - Fixed small bug where some parts of corridor generation were not changing hardness to 0
+    - Finished implementation of --load and --save, as well as the combination of the two
+    - Changed filepath to work accross different users
+    - v1.02 complete
+v1.01 ========================================================================================================
+01/30/2025 
+    - Project start. Initialized Makefile, README, this change log, and dungeon.c.
+02/01/2025 
+    - Implemented rock hardness generation
+    - Started on room placement
+02/02/2025
+    - Randomized room placement and size
+    - Cooridor generation (bad version)
+    - staircase placement
+02/03/2025
+    - Attempted to implement Dijkstra's alg for cooridor generation; Unfortunately still broken.
+02/04/2025
+    - Updated Makefile
+    - Dijkstra partially working; not using for v1.01
+    - Fixed some memory issues with priorityQueue
+02/05/2025
+    - Fixed bug with my basic path generation method, although it's still not great.
+    - v1.01 Complete

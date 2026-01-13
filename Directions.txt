@@ -1,27 +1,41 @@
-Rogue 3270 (Legacy version of Pyrogue)
-Implemented by Andrew Butler
-Spring Semester 2025 @ Iowa State University
+Lines of x are the 78 char width of the dungeon window; this is what there is to work with.
+this is the source text for the directions page. Easier to edit here.
+The ASCII art text is intended to be centered, I just didn't do that here.
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
+   ______________  _____  __
+  / __/_  __/ __ \/ _ \ \/ /
+ _\ \  / / / /_/ / , _/\  / 
+/___/ /_/  \____/_/|_| /_/  
+                            
+ Welcome, traveler.
+ 
+ You awake in a dimly lit dungeon, not remembering who you are, and not
+ knowing what to do. In the darkness, you hear shuffling movement and 
+ disgusting, gutteral, animal-like sounds. In the background there might also
+ be. . . is that right?. . . the childish laughter of Tom Kenny, but with 
+ a chilling malice behind it. 
+ 
+ You know that you are not safe; it is your job to survive.
 
+ There are items scattered around the dungeon to help you; these will be 
+ pivotal to your survival. They will increase your speed, your ability to 
+ dodge damage, and you defense against attacks.
+ Without them, you are as good as dead.
+ 
+ You have 10 carry slots to pickup and hold these items, and you have equip 
+ slots for weapon, offhand, ranged, armor, helmet, cloak, gloves, boots, 
+ amulet, light, and left & right rings.
 
-About this legacy branch:
-Rogue 3270 is the product of a series of class assignments, and serves as the 
-predocessor to PyRogue. I do not claim that it is my best work; rather, it is 
-the result of balancing my time between this, 4 other classes, my part time job,
-and the various things necessary to living life. So, there is definitely a lot
-of jank present. The first handful of assignments that this started with were 
-also solely written in C as opposed to C++, so it also does not have a an 
-optimal object-oriented structure.
+ Know that the dungeon is unforgiving; you never know what lurks in the 
+ darkness, and being caught unprepared is a sure way to die.
 
-
-To run Rogue 3270:
-
-There are four possible command line arguments:
-'-s | --save' will save the dungeon to file upon completion of the program.
-'-l | --load' will read a dungeon from file when starting program.
-'-n | --nummon <count>' specifies how many monsters to generate in the dungeon.
-'-p | --parse' prints parsed monster & object definitions to terminal, then ends.
-
-The game has the following key binds:
+ Good luck.
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  _________  _  ___________  ____  __   ____
+ / ___/ __ \/ |/ /_  __/ _ \/ __ \/ /  / __/
+/ /__/ /_/ /    / / / / , _/ /_/ / /___\ \  
+\___/\____/_/|_/ /_/ /_/|_|\____/____/___/  
+                                            
 ================================   MOVEMENT   ================================
   7 or y : Attempt to move PC one cell to the upper left.
   8 or k : Attempt to move PC one cell up.
@@ -62,17 +76,4 @@ The game has the following key binds:
   down arrow: Scrolls menu down, if scrolling is available/ necessary.
   esc : Returns to character control from the various menus.
   Q : Quit to main menu or quit game.
-
-Things of note with v1.10:
-  - v1.10 included main menu, replay on game over, dodge/def/hit bonuses, bugfixes
-  - Known issue: Quitting from main menu sometimes doesn't clear the screen correctly; 
-    This is both inconsistent and doesn't harm anything, so I'm not too worried about it.
-	- Known issue:  repeatedly equipping/unequipping items that result in speed/dodge/defense
-	  <= 0 allows those stats to be increased by 1 infinitely; This is a very tedious exploit.
-	  Given the VERY minimal impact on gameplay, and exists to prevent division by 0, it's fine.
-  - 'darray' datatype is a holdover from when everything was written in C; I did attempt to 
-	  change all uses of this to std::vector, but it rapidly started having issues that were
-	  taking too long to debug. So, darray remains a part of this codebase.
-	- Known issue: it takes a weirdly long time for sub-menus to go away. Not sure why.
-	- Known issue: there is a small 'memory leak' associated with ncurses. This is not actually
-	  an issue, and is intended behavior for the library.
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
