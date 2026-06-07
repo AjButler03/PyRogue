@@ -8,8 +8,7 @@ from .utility import *
 # This file contains the class information for 'actors' - Monsters, the player, and the various items.
 
 # A monster can have any number of attributes. I will be indicating these using a bit field.
-# Pickup & Destroy are not currently implemented.
-# See the game manual (text in manual.txt) for descriptions of what these are intended to do.
+# See the game manual (text in gamedata/manual.txt) for descriptions of what these are intended to do.
 ATTR_INTELLIGENT = 0b0000_0000_0000_0001  # Bit 1
 ATTR_TELEPATHIC_ = 0b0000_0000_0000_0010  # Bit 2
 ATTR_TUNNEL_____ = 0b0000_0000_0000_0100  # Bit 3

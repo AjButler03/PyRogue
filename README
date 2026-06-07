@@ -1,63 +1,16 @@
-PyRogue v0.1.0 December 2025 By Andrew Butler
-Built to run using Python 3.12 with Tkinter library
+PyRogue v0.2.0 Summer 2026 By Andrew Butler
+Built with Python 3.14
 
-Pyrogue is an ASCII-based roguelike game built in Python.
-It is based on a C/C++ project from a University course I wrote, but completely
-rewritten and overhauled to be more in line with what I wanted that project to be.
-The original C/C++ code can be found on the Legacy_C++ branch of the PyRogue repo.
+This version of PyRogue is intended to exist as a fully separate Python package; i.e., it does
+not include a functional UI component, nor does it run a full game loop on its own.
 
-To run and play PyRogue, place PyRogue codebase wherever you would like on your system,
-navigate to that directory using command line, and run "pip install ."
-This will enable Pyrogue to run via either of the two commands, from any directory:
-  1. "pyrogue", if added as path variable
-  2. "python -m pyrogue"
+The idea is to move PyRogue to a state that will enable it to be utilized by any developed frontend.
 
-From there, you can navigate the menu using the arrow keys or using the movement keys below.
-You will have the option to start a game, alter game settings, view the game manual, view
-monster and item descriptions for monsters/items that will appear in the game, or quit.
-For more information on the game itself, be sure to check out the game manual.
-Have fun!
 
-New features with v0.1.0:
-    - Ranged combat using ranged weapons
-    - Monster PICKUP & DESTROY abilities
-    - Cheats toggle
-    - Package installation via pip
 
-The game has the following key binds:
-===== MOVEMENT =====
-  7 or y : Attempt to move one cell to the upper left.
-  8 or k : Attempt to move one cell up.
-  9 or u : Attempt to move one cell to the upper right.
-  4 or h : Attempt to move one cell to the left.
-  5 or space or . : Rest for a turn NPCs still move.
-  6 or l : Attempt to move one cell to the right.
-  1 or b : Attempt to move one cell to the lower left.
-  2 or j : Attempt to move one cell down.
-  3 or n : Attempt to move one cell to the lower right.
-  > or 0 : attempt to escape to new dungeon level using a staircase.
-===== INVENTORY =====
-  p: Picks up an item, placing into inventory.
-  e: Opens equipment menu.
-  i: Opens inventory menu.
-  i: While in inventory / equipment menu, inspect item.
-  enter: Equip/unequip/use item.
-  d: Attempts to drop an item from inventory.
-  x: Attempts to destroy an item from inventory.
-===== OTHER =====
-  t : Toggle targeting mode
-  r : Attempt a ranged attack; consumes turn on success.
-  i : While in targeting mode, inspect item or monster.
-  m : Opens a submenu to list all present monsters.
-  esc : Opens / closes pause menu.
-===== CHEATS / DEBUG TOOLS =====
-  f : Toggle fog of war effect. 
-  g : While targeting mode, teleport to targeted location.
-  z : Cycles through standard / walking map / tunnelmap render modes.
-  + : Restores player hitpoints & AMMO to current maximum.
+Notes for myself:
+- selection and control options should be based on what they do; probably need to specify and convert to enums
+- Rendering methods need deleted and decoupled from existing code; will need to test that nothing breaks, although I think 
+    I will need a UI to do that. I guess that also means I should make the UI it's own thing as well.
 
-Known Issues:
-  - The game does not instantly end when win conditions are met.
-  - Monsters with PASS and SMART will follow the tunneling distance map, which is not the most optimal path.
-  - Item / Monster definition parser does not allow negative values, nor does it account for x+yd0. (0-sided dice).
 
