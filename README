@@ -1,10 +1,9 @@
 PyRogue v0.1.0 December 2025 By Andrew Butler
 Built to run using Python 3.12 with Tkinter library
 
-Pyrogue is an ASCII-based roguelike game built in Python.
-It is based on a C/C++ project from a University course I wrote, but completely
-rewritten and overhauled to be more in line with what I wanted that project to be.
-The original C/C++ code can be found on the Legacy_C++ branch of the PyRogue repo.
+This version of PyRogue is the original Python version, which has a hardcoded
+Tkinter-based UI. It will not receive any further update, but will be preserved
+on this branch.
 
 To run and play PyRogue, place PyRogue codebase wherever you would like on your system,
 navigate to that directory using command line, and run "pip install ."
