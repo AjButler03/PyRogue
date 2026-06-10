@@ -1,12 +1,15 @@
 PyRogue v0.2.0 Summer 2026 By Andrew Butler
 Built with Python 3.14
 
-This version of PyRogue is intended to exist as a fully separate Python package; i.e., it does
-not include a functional UI component, nor does it run a full game loop on its own.
+This is the core PyRogue game 'engine', if you want to call it something so fancy.
 
-The idea is to move PyRogue to a state that will enable it to be utilized by any developed frontend.
+This package handles all the game logic, allows calls to influence the game, and is capable of giving the 
+current game state. It requires a frontend/UI implementation, as it does not include one on its own.
 
-
+This is the third itteration of this project; the first was a C/C++ series of assignments for one of my
+university classes, and the second was the same Python game logic seen here but with a hardcoded Tkinter-based
+UI. Both of these are still accessible on the 'Legacy_C++' and 'tkinter-ui' branches, respectively.
+Neither the C++ code nor the tkinter UI version will be receiving updates.
 
 Notes for myself:
 - selection and control options should be based on what they do; probably need to specify and convert to enums
