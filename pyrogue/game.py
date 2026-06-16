@@ -1,30 +1,31 @@
+import logging
+
 from .utility import *
 from .actor import *
 from .dungeon import *
+from .parsedesc import parse_monster_typedefs, parse_item_typedefs
 
 
 # The Pyrogue_Game class handles all the high-level game logic and control.
 class Pyrogue_Game:
 
-    # Pyrogue_Game constructor.
+    '''
+    This is the Pyrogue_Game Constructor.
+    
+    It has 3 required parameters, with 1 optional parameter:
+    - mapsize_h (int, required): the height in cells of the dungeon map. Note that unusable outer border is included in this value.
+    - mapsize_w (int, required): the width in cells of the dungeon map. Note that the unusable outer border is included in this value.
+    - difficulty (float, required): the difficulty of the game, which modifies monster spawn rates. Higher is more difficult;
+        minimum value is 0.01, with no theoretical maximum. Keeping to smaller whole digits on the high end is recommended, however.
+    - enable_cheats (bool, optional): whether to enable cheat & debug modes. Default value is False.
+    '''
     def __init__(
         self,
-        menu_main,
-        root,
         mapsize_h: int,
         mapsize_w: int,
         difficulty: float,
-        monster_type_list: list,
-        item_type_list: list,
-        enable_cheats: bool,
-        generate=True,
+        enable_cheats: bool = False,
     ):
-        # Menu from which this game instance was launched from
-        self.menu_main = menu_main
-
-        # Tkinter root
-        self.root = root
-
         # Save if cheats are enabled
         self.cheats_enabled = enable_cheats
 
@@ -32,17 +33,24 @@ class Pyrogue_Game:
         self.mapsize_h = mapsize_h
         self.mapsize_w = mapsize_w
 
-        # Game difficulty; applies to monster spawn rates
-        self.difficulty = difficulty
+        # Game difficulty; applies to monster spawn rates. Check for minimum value of 0.01.
+        if difficulty < 0.01:
+            self.difficulty = 0.01
+        else:
+            self.difficulty = difficulty
 
         # Init dungeon and player fields
         self.dungeon = None
         self.player = None
         self.player_score = 0
 
+        # Init monster and item type definition lists, then call description parsers populate them with definitions.
+        self.monster_type_list = []
+        self.item_type_list = []
+        parse_monster_typedefs(self.monster_type_list)
+        parse_item_typedefs(self.item_type_list)
+
         # Init lists for monsters as well as the map storing all actor locations
-        self.monster_type_list = monster_type_list
-        self.item_type_list = item_type_list
         self.monster_list = []
         self.item_list = []
         self.actor_map = []
@@ -163,6 +171,13 @@ class Pyrogue_Game:
 
     # Resets the generation eligibility for item/monster type definitions
     def _reset_gen_eligibility(self):
+        """
+        Note: This was originally written with the intention that a main menu would
+        parse the monster & item definitions prior to launching a game, and that
+        list would be shared among games instances. That is no longer the intended use,
+        so there may be some code and checks here that are no longer necessary.
+        """
+
         # Reset monster generation eligibility
         # Note that unique monsters only reset if they were not killed or if the game is over
         for monster in self.monster_list:
@@ -256,22 +271,18 @@ class Pyrogue_Game:
             self.turn_pq.push(monster, monster.get_currturn())
         # print("GAME: Turnloop started")
 
-    # Ends the game, destroying the canvas and unbinding event listeners.
+    # Ends the game.
     def _end_game(self):
         self.game_exit = True
-        # Destroy the canvas for this game, also unbinding event listeners
-        self.canvas.unbind("<Configure>")
-        self.canvas.destroy()
-        self.root.unbind("<Key>")
-        self._reset_gen_eligibility()
+        # self._reset_gen_eligibility()
         # Relinquish control back to the main menu
-        self.menu_main.toggle_ingame()
 
     # Indicates that the game needs to handle the next turn in the turnloop.
     # This is both for players and monsters, so it may be called internally or externally.
     def next_turn(self):
-        # Stop calling _next_turn if user is exiting game
-        if self.game_exit:
+        # next turn should do nothing if game_over or game_exit is true
+        # Either condition indicates that the turnloop should no longer be active
+        if self.game_exit or self.game_over:
             return
 
         # Game over check
@@ -284,7 +295,6 @@ class Pyrogue_Game:
             self.msg_log.append(message)
             print("=== GAME OVER ===")
             self.game_over = True
-            self.root.after(200, self._next_turn)
             return
 
         # Level clear check
@@ -336,7 +346,3 @@ class Pyrogue_Game:
             self.msg_log.append(message)
             print("=== GAME OVER ===")
             self.game_over = True
-            self.root.after(200, self._next_turn)
-
-        # Wait 1ms before running next turn
-        self.root.after(1, self._next_turn)
