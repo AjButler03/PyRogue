@@ -1,9 +1,12 @@
 import random
 import copy
+import logging
 from .utility import PriorityQueue
 from enum import Enum
 from .utility import exp_chancetime
 from collections import deque
+
+logger = logging.getLogger(__name__)
 
 # This file is to handle all functions that deal with the dungeon itself.
 
@@ -234,7 +237,7 @@ class Dungeon:
         # Creating rooms; at least 1
         attemptc = 0  # To keep track of the number of room placement attempts
         attempt_limit = max(self.width, self.height) * 10
-        # print(attempt_limit, "attempt limit on room placement")
+        logger.debug(f"{attempt_limit} attempt limit on room placement")
         min_roomc = max(1, attempt_limit // 100)  # arbitrary; at least a few
         # Attempts either self.width or self.height times, whichever is smaller
         while (self.roomc < min_roomc) or (attemptc < attempt_limit):
@@ -252,14 +255,8 @@ class Dungeon:
                     self.room_list.append(new_room)
             attemptc += 1
 
-        print(
-            "ROOMS:",
-            min_roomc,
-            "Min rooms, ",
-            attemptc,
-            "Placement attempts,",
-            self.roomc,
-            "Placed",
+        logger.debug(
+            f"{self.roomc} rooms placed after {attemptc} attempts (minimally needed {min_roomc} rooms)"
         )
 
         # Now create corridors between rooms
@@ -293,14 +290,9 @@ class Dungeon:
                     self.stairc += 1
             # self.stairc += 1 # Remove line when staircase placement is actually implemented
             attemptc += 1
-        print(
-            "STAIRS:",
-            min_stairc,
-            "Min stairs,",
-            attemptc,
-            "Placement attempts,",
-            self.stairc,
-            "Placed",
+
+        logger.debug(
+            f"{self.stairc} staircases placed after {attemptc} attempts (minimally needed {min_stairc} staircases)"
         )
 
         # Fill in remaining terrain as rock
@@ -498,13 +490,13 @@ class Dungeon:
         return
 
     # grabs dungeon width
-    def get_width(self)-> int:
+    def get_width(self) -> int:
         return self.width
-    
+
     # Grabs dungeon height
-    def get_height(self)-> int:
+    def get_height(self) -> int:
         return self.height
-    
+
     # Boolean function; checks if point is within immutable outer border of dungeon
     def valid_point(self, r, c):
         """
@@ -519,10 +511,10 @@ class Dungeon:
     # Grabs rock hardness at a specific location.
     def get_rock_at(self, row: int, col: int) -> int:
         return self.rmap[row][col]
-    
+
     def set_rock_at(self, row: int, col: int, val: int):
         self.rmap[row][col] = val
-    
+
     # Grabs terrain at a specific location.
     def get_terrain_at(self, row: int, col: int) -> Terrain:
         return self.tmap[row][col]
@@ -531,7 +523,7 @@ class Dungeon:
     def make_floor_at(self, row: int, col: int):
         self.tmap[row][col] = self.Terrain.floor
         self.rmap[row][col] = 0
-    
+
     # Grabs walking distance map, in it's entirety.
     def get_walking_distmap(self) -> list:
         return self.walk_distmap
@@ -539,11 +531,11 @@ class Dungeon:
     # Grabs a walking distance map weight at a given location.
     def get_walking_weight_at(self, row: int, col: int) -> int:
         return self.walk_distmap[row][col]
-    
+
     # Grabs tunneling distance map, in it's entirety.
-    def get_tunneling_distmap(self)-> list:
+    def get_tunneling_distmap(self) -> list:
         return self.tunn_distmap
-    
+
     # Grabs a tunneling distance map weight at a given location.
     def get_tunneling_weight_at(self, row: int, col: int) -> int:
         return self.tunn_distmap[row][col]

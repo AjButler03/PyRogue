@@ -1,7 +1,12 @@
+import logging
+
 import re
 from importlib import resources
 from .utility import Dice
 from .actor import *
+
+logger = logging.getLogger(__name__)
+
 
 # This file reads manual.txt,  monster_desc.txt, and item_desc.txt to get the manual pages, monster definitions, and item definitions, respectively.
 
@@ -23,10 +28,11 @@ def parse_manual_text(man_pages: list) -> bool:
         with resources.open_text("pyrogue.gamedata", "manual.txt") as file:
             file_lines = file.readlines()
             curr_line = 0
-            print("PARSEDESC: manual.txt opened... ", end="")
+            logger.debug("PARSEDESC: manual.txt opened... ")
+
     except FileNotFoundError:
         # File wasn't found, return False for failure
-        print("PARSEDESC: manual.txt not found")
+        logger.error("PARSEDESC: manual.txt not found")
         return False
 
     # Start reading the lines, first checking that the file header matches
@@ -34,11 +40,11 @@ def parse_manual_text(man_pages: list) -> bool:
     line = line.strip()
     pages_found = 0
     if line == "PYROGUE MANUAL PAGES TEXT FILE":
-        print("file header matches")
+        logger.debug("file header matches")
         # Header match; read text for all pages
         curr_line += 1
         line_count = len(file_lines)
-        print("PARSEDESC: manual.txt read with", line_count, "lines")
+        logger.debug(f"PARSEDESC: manual.txt read with {line_count} lines")
         while curr_line < line_count:
             line = file_lines[curr_line].strip()
             # Check for the beginning of a page
@@ -51,10 +57,8 @@ def parse_manual_text(man_pages: list) -> bool:
                     # Make sure that we don't read past end of file
                     if curr_line >= line_count:
                         # Did not find termination ".", so the file is not formatted correctly. Return False.
-                        print(
-                            "PARSEDESC: Manual page",
-                            pages_found + 1,
-                            "does not terminate correctly",
+                        logger.error(
+                            f"PARSEDESC: Manual page idx {pages_found} does not terminate correctly"
                         )
                         return False
                     else:
@@ -67,10 +71,10 @@ def parse_manual_text(man_pages: list) -> bool:
                 pages_found += 1
             curr_line += 1
         # If here without any error, then parsed successfully.
-        print("PARSEDESC: Found", pages_found, "manual pages")
+        logger.debug(f"PARSEDESC: Found {pages_found} manual pages")
         return True
     else:
-        print("header mismatch")
+        logger.error("PARSEDESC: Header mismatch in manual.txt")
         return False
 
 
@@ -81,10 +85,10 @@ def parse_monster_typedefs(monster_type_list: list) -> bool:
         with resources.open_text("pyrogue.gamedata", "monster_desc.txt") as file:
             file_lines = file.readlines()
             curr_line = 0  # To point to next line to look at
-            print("PARSEDESC: monster_desc.txt opened... ", end="")
+            logger.debug("PARSEDESC: monster_desc.txt opened... ")
     except FileNotFoundError:
         # File wasn't found; return False for failure
-        print("PARSEDESC: monster_desc.txt not found")
+        logger.error("PARSEDESC: monster_desc.txt not found")
         return False
 
     # Start reading the lines, first checking that file header matches
@@ -92,11 +96,11 @@ def parse_monster_typedefs(monster_type_list: list) -> bool:
     line = line.strip()
     types_found = 0
     if line == "PYROGUE MONSTER DESCRIPTION FILE":
-        print("file header matches")
+        logger.debug("file header matches")
         # Header matches; now read the monster descriptions
         curr_line += 1
         line_count = len(file_lines)
-        print("PARSEDESC: monster_desc.txt read with", line_count, "lines")
+        logger.debug(f"PARSEDESC: monster_desc.txt read with {line_count} lines")
         while curr_line < line_count:
             line = file_lines[curr_line].strip()
             # Check for beginning of monster definition
@@ -120,10 +124,8 @@ def parse_monster_typedefs(monster_type_list: list) -> bool:
                             # Check to make sure that we don't try and read past the end of the file
                             if curr_line >= line_count:
                                 # Did not find termination ".", so the file is not formatted correctly. Return False.
-                                print(
-                                    "PARSEDESC: Monster definition",
-                                    types_found + 1,
-                                    "has incorrect DESC field",
+                                logger.error(
+                                    f"PARSEDESC: Monster definition idx {types_found} has incorrect DESC field"
                                 )
                                 return False
                             else:
@@ -176,10 +178,8 @@ def parse_monster_typedefs(monster_type_list: list) -> bool:
                             speed = dice
                         else:
                             # Formatting error; return False for read failure
-                            print(
-                                "PARSEDESC: Monster definition",
-                                types_found + 1,
-                                "has incorrect SPEED field",
+                            logger.error(
+                                f"PARSEDESC: Monster definition idx {types_found} has incorrect SPEED field"
                             )
                             return False
                     elif line.startswith("HP"):
@@ -190,10 +190,8 @@ def parse_monster_typedefs(monster_type_list: list) -> bool:
                             hp = dice
                         else:
                             # Formatting error; return False for read failure
-                            print(
-                                "PARSEDESC: Monster definition",
-                                types_found + 1,
-                                "has incorrect HP field",
+                            logger.error(
+                                f"PARSEDESC: Monster definition idx {types_found} has incorrect HP field"
                             )
                             return False
                     elif line.startswith("DAM"):
@@ -204,11 +202,7 @@ def parse_monster_typedefs(monster_type_list: list) -> bool:
                             dam = dice
                         else:
                             # Formatting error; return False for read failure
-                            print(
-                                "PARSEDESC: Monster definition",
-                                types_found + 1,
-                                "has incorrect DAM field",
-                            )
+                            logger.error(f"PARSEDESC: Monster definition idx {types_found} has incorrect DAM field")
                             return False
                     elif line.startswith("SYMB"):
                         symb = line[5]  # 5th character will be the symbol
@@ -217,11 +211,7 @@ def parse_monster_typedefs(monster_type_list: list) -> bool:
                         match = re.fullmatch(r"RRTY (\d+)", line.strip())
                         if not match:
                             # return False for format mismatch
-                            print(
-                                "PARSEDESC: Monster definition",
-                                types_found + 1,
-                                "has incorrect RRTY field",
-                            )
+                            logger.error(f"PARSEDESC: Monster definition idx {types_found} has incorrect RRTY field")
                             return False
                         else:
                             rrty = int(match.group(1))
@@ -258,7 +248,7 @@ def parse_monster_typedefs(monster_type_list: list) -> bool:
                     types_found += 1
                 else:
                     # One or more fields were not found; return False, as there is an incomplete definition
-                    print("PARSEDESC: Monster def", types_found + 1, "incomplete")
+                    logger.error(f"PARSEDESC: Monster definition idx {types_found} is incomplete")
                     error = "     Missing fields: "
                     if name == None:
                         error += "NAME "
@@ -278,16 +268,16 @@ def parse_monster_typedefs(monster_type_list: list) -> bool:
                         error += "DAM "
                     if rrty == None:
                         error += "RRTY "
-                    print(error)
+                    logger.error(error)
                     return False
             curr_line += 1
 
-        print("PARSEDESC: Found", types_found, "Monster definitions")
+        logger.debug(f"PARSEDESC: Found {types_found} Monster definitions")
         return True  # True for success
     else:
         # Header does not match; file is probably in incorrect format
         # Return False for failure
-        print("header mismatch")
+        logger.error("Header mismatch")
         return False
 
 
@@ -298,10 +288,10 @@ def parse_item_typedefs(item_type_list: list) -> bool:
         with resources.open_text("pyrogue.gamedata", "item_desc.txt") as file:
             file_lines = file.readlines()
             curr_line = 0  # To point to next line to look at
-            print("PARSEDESC: item_desc.txt opened... ", end="")
+            logger.debug("PARSEDESC: item_desc.txt opened... ")
     except FileNotFoundError:
         # File wasn't found; return False for failure
-        print("PARSEDESC: item_desc.txt not found")
+        logger.error("PARSEDESC: item_desc.txt not found")
         return False
 
     # Start reading the lines, first checking that file header matches
@@ -309,11 +299,11 @@ def parse_item_typedefs(item_type_list: list) -> bool:
     line = line.strip()
     types_found = 0
     if line == "PYROGUE ITEM DESCRIPTION FILE":
-        print("file header matches")
+        logger.debug("file header matches")
         # Header matches; now read the monster descriptions
         curr_line += 1
         line_count = len(file_lines)
-        print("PARSEDESC: item_desc.txt read with", line_count, "lines")
+        logger.debug(f"PARSEDESC: item_desc.txt read with {line_count} lines")
         while curr_line < line_count:
             line = file_lines[curr_line].strip()
             # Check for beginning of monster definition
@@ -332,10 +322,8 @@ def parse_item_typedefs(item_type_list: list) -> bool:
                     elif line.startswith("TYPE"):
                         type_key = line[5:].strip()
                         if type_key not in item_type_opts:
-                            print(
-                                "PARSEDESC: Item definition",
-                                types_found + 1,
-                                'is unknown type "' + type_key + '"',
+                            logger.error(
+                                f"PARSEDESC: Item definition idx {types_found + 1} is unknown type '{type_key}'"
                             )
                             return False
                         else:
@@ -350,10 +338,8 @@ def parse_item_typedefs(item_type_list: list) -> bool:
                             # Check to make sure that we don't try and read past the end of the file
                             if curr_line >= line_count:
                                 # Did not find termination ".", so the file is not formatted correctly. Return False.
-                                print(
-                                    "PARSEDESC: Item definition",
-                                    types_found + 1,
-                                    "has incorrect DESC field",
+                                logger.error(
+                                    f"PARSEDESC: Item definition idx {types_found + 1} has incorrect DESC field"
                                 )
                                 return False
                             else:
@@ -377,10 +363,8 @@ def parse_item_typedefs(item_type_list: list) -> bool:
                             speed = dice
                         else:
                             # Formatting error; return False for read failure
-                            print(
-                                "PARSEDESC: Item definition",
-                                types_found + 1,
-                                "has incorrect SPEED field",
+                            logger.error(
+                                f"PARSEDESC: Item definition idx {types_found + 1} has incorrect SPEED field"
                             )
                             return False
                     elif line.startswith("HIT"):
@@ -391,10 +375,8 @@ def parse_item_typedefs(item_type_list: list) -> bool:
                             hp = dice
                         else:
                             # Formatting error; return False for read failure
-                            print(
-                                "PARSEDESC: Item definition",
-                                types_found + 1,
-                                "has incorrect HP field",
+                            logger.error(
+                                f"PARSEDESC: Item definition idx {types_found + 1} has incorrect HP field"
                             )
                             return False
                     elif line.startswith("DAM"):
@@ -405,10 +387,8 @@ def parse_item_typedefs(item_type_list: list) -> bool:
                             dam = dice
                         else:
                             # Formatting error; return False for read failure
-                            print(
-                                "PARSEDESC: Item definition",
-                                types_found + 1,
-                                "has incorrect DAM field",
+                            logger.error(
+                                f"PARSEDESC: Item definition idx {types_found + 1} has incorrect DAM field"
                             )
                             return False
                     elif line.startswith("ATTR"):
@@ -421,10 +401,8 @@ def parse_item_typedefs(item_type_list: list) -> bool:
                             attr = dice
                         else:
                             # Formatting error; return False for read failure
-                            print(
-                                "PARSEDESC: Item definition",
-                                types_found + 1,
-                                "has incorrect ATTR field",
+                            logger.error(
+                                f"PARSEDESC: Item definition idx {types_found + 1} has incorrect ATTR field"
                             )
                             return False
                     elif line.startswith("DEF"):
@@ -435,10 +413,8 @@ def parse_item_typedefs(item_type_list: list) -> bool:
                             defense = dice
                         else:
                             # Formatting error; return False for read failure
-                            print(
-                                "PARSEDESC: Item definition",
-                                types_found + 1,
-                                "has incorrect DEF field",
+                            logger.error(
+                                f"PARSEDESC: Item definition idx {types_found + 1} has incorrect DEF field"
                             )
                             return False
                     elif line.startswith("DODGE"):
@@ -451,10 +427,8 @@ def parse_item_typedefs(item_type_list: list) -> bool:
                             dodge = dice
                         else:
                             # Formatting error; return False for read failure
-                            print(
-                                "PARSEDESC: Item definition",
-                                types_found + 1,
-                                "has incorrect DODGE field",
+                            logger.error(
+                                f"PARSEDESC: Item definition idx {types_found + 1} has incorrect DODGE field"
                             )
                             return False
                     elif line.startswith("RRTY"):
@@ -462,10 +436,8 @@ def parse_item_typedefs(item_type_list: list) -> bool:
                         match = re.fullmatch(r"RRTY (\d+)", line.strip())
                         if not match:
                             # return False for format mismatch
-                            print(
-                                "PARSEDESC: item definition",
-                                types_found + 1,
-                                "has incorrect RRTY field",
+                            logger.error(
+                                f"PARSEDESC: Item definition idx {types_found + 1} has incorrect RRTY field"
                             )
                             return False
                         else:
@@ -514,7 +486,9 @@ def parse_item_typedefs(item_type_list: list) -> bool:
                     types_found += 1
                 else:
                     # One or more fields were not found; return False, as there is an incomplete definition
-                    print("PARSEDESC: Item def", types_found + 1, "incomplete")
+                    logger.error(
+                        f"PARSEDESC: Item definition idx {types_found + 1} is incomplete"
+                    )
                     error = "     Missing fields: "
                     if name == None:
                         error += "NAME "
@@ -540,32 +514,32 @@ def parse_item_typedefs(item_type_list: list) -> bool:
                         error += "RRTY "
                     if artifact == None:
                         error += "ART "
-                    print(error)
+                    logger.error(error)
                     return False
             curr_line += 1
 
-        print("PARSEDESC: Found", types_found, "Item definitions")
+        logger.info(f"PARSEDESC: Found {types_found} Item definitions")
         return True  # True for success
     else:
         # Header does not match; file is probably in incorrect format
         # Return False for failure
-        print("header mismatch")
+        logger.error("PARSEDESC: Header mismatch")
         return False
 
 
 # FOR TESTING PURPOSES
-def print_monst_defs(monster_type_list: list):
-    num = 1
-    for mdef in monster_type_list:
-        print("MONSTER TYPE DEFINITION", num)
-        print(mdef)
-        num += 1
+# def print_monst_defs(monster_type_list: list):
+#     num = 1
+#     for mdef in monster_type_list:
+#         print("MONSTER TYPE DEFINITION", num)
+#         print(mdef)
+#         num += 1
 
 
 # FOR TESTING PURPOSES
-def print_item_defs(item_type_list: list):
-    num = 1
-    for idef in item_type_list:
-        print("ITEM TYPE DEFINITION", num)
-        print(idef)
-        num += 1
+# def print_item_defs(item_type_list: list):
+#     num = 1
+#     for idef in item_type_list:
+#         print("ITEM TYPE DEFINITION", num)
+#         print(idef)
+#         num += 1

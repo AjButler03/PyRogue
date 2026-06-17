@@ -5,20 +5,22 @@ from .actor import *
 from .dungeon import *
 from .parsedesc import parse_monster_typedefs, parse_item_typedefs
 
+logger = logging.getLogger(__name__)
+
 
 # The Pyrogue_Game class handles all the high-level game logic and control.
 class Pyrogue_Game:
-
-    '''
+    """
     This is the Pyrogue_Game Constructor.
-    
+
     It has 3 required parameters, with 1 optional parameter:
     - mapsize_h (int, required): the height in cells of the dungeon map. Note that unusable outer border is included in this value.
     - mapsize_w (int, required): the width in cells of the dungeon map. Note that the unusable outer border is included in this value.
     - difficulty (float, required): the difficulty of the game, which modifies monster spawn rates. Higher is more difficult;
         minimum value is 0.01, with no theoretical maximum. Keeping to smaller whole digits on the high end is recommended, however.
     - enable_cheats (bool, optional): whether to enable cheat & debug modes. Default value is False.
-    '''
+    """
+
     def __init__(
         self,
         mapsize_h: int,
@@ -61,7 +63,7 @@ class Pyrogue_Game:
         self._init_generated_game()
 
         # To store important game msgs; combat, new dungeon, game start, etc
-        self.msg_log = ["GAME START"]
+        self.msg_log = []
 
         # Misc game control fields
         self.turnloop_started = False
@@ -69,9 +71,7 @@ class Pyrogue_Game:
         self.game_over = False  # Indicate game over
         self.game_exit = False  # Indicate that user intends to exit the game
 
-        # Start the turnloop for the game
-        self._start_turnloop()
-        print("=== GAME START ===")
+        logger.info("Game Initialized")
 
     # Nerfs speed value so that it doesn't become too overpowered.
     def _speed_nerf(self, base_speed: int) -> int:
@@ -116,14 +116,9 @@ class Pyrogue_Game:
                         monsterc += 1
                         self.monster_list.append(new_monster)
             attemptc += 1
-        print(
-            "MONSTERS:",
-            min_monsterc,
-            "Min monsters,",
-            attemptc,
-            "Placement attempts,",
-            monsterc,
-            "Placed",
+
+        logger.info(
+            f"Generated {monsterc} monsters with {attemptc} placement attempts (needed at least {min_monsterc} monsters)"
         )
 
     # Populates the item_map with a dungeon size proportionate number of items.
@@ -159,14 +154,9 @@ class Pyrogue_Game:
                         itemc += 1
                         self.item_list.append(new_item)
             attemptc += 1
-        print(
-            "ITEMS:",
-            min_itemc,
-            "Min items,",
-            attemptc,
-            "Placement attempts,",
-            itemc,
-            "Placed",
+
+        logger.info(
+            f"Generated {itemc} items with {attemptc} placement attempts (needed at least {min_itemc} items)"
         )
 
     # Resets the generation eligibility for item/monster type definitions
@@ -197,7 +187,7 @@ class Pyrogue_Game:
         # Ramp difficulty by 35%
         self.difficulty *= 1.35
 
-        print(f"GAME: New dungeon level with difficulty {self.difficulty}")
+        logger.info(f"New dungeon level with difficulty {self.difficulty}")
 
         # Init the dungeon itself
         self.dungeon = Dungeon(self.mapsize_h, self.mapsize_w)
@@ -269,7 +259,7 @@ class Pyrogue_Game:
             monster.set_currturn(monster.get_speed())
             # 9 to ensure that ALL monsters get a turn after player's first turn
             self.turn_pq.push(monster, monster.get_currturn())
-        # print("GAME: Turnloop started")
+        logger.info("Turnloop started")
 
     # Ends the game.
     def _end_game(self):
@@ -277,8 +267,11 @@ class Pyrogue_Game:
         # self._reset_gen_eligibility()
         # Relinquish control back to the main menu
 
-    # Indicates that the game needs to handle the next turn in the turnloop.
-    # This is both for players and monsters, so it may be called internally or externally.
+    '''
+    Progresses the game by a single turn, player or monster.
+    
+    TODO: Needs to handle if user attempts to use while cycling through monster turns. May involve hiding this behavior behind something else.
+    '''
     def next_turn(self):
         # next turn should do nothing if game_over or game_exit is true
         # Either condition indicates that the turnloop should no longer be active
@@ -293,7 +286,9 @@ class Pyrogue_Game:
             else:
                 message = "You have been defeated; Game Over"
             self.msg_log.append(message)
-            print("=== GAME OVER ===")
+            logger.info(f"     Message: \"{message}\"")
+            
+            logger.info("Game Over: Player died")
             self.game_over = True
             return
 
@@ -308,9 +303,7 @@ class Pyrogue_Game:
 
         if actor.is_alive():
             r, c = actor.get_pos()
-            # print(
-            #     f"TURN {actor.get_currturn()} for {actor.get_name()} at (r:{r:0d}, c: {c:0d}) with speed {actor.get_speed()}"
-            # )
+            logger.info(f"     Turn {actor.get_currturn()} for {actor.get_name()} at (r:{r:0d}, c: {c:0d}) with speed {actor.get_speed()}")
 
             if player_turn:
                 # Await player input to call its turn handeler
@@ -339,10 +332,13 @@ class Pyrogue_Game:
                 message = actor.get_name() + " dealt " + str(dmg) + " damage to you"
 
                 self.msg_log.append(message)
+                logger.info(f"     Message: \"{message}\"")
+                
         elif actor.is_boss():
             # Killed a boss monster; Game ends
             message = f"{actor.get_name()} (BOSS) defeated; Game Over"
-            print(message)
+            # print(message)
             self.msg_log.append(message)
-            print("=== GAME OVER ===")
+            logger.info(f"     Message: \"{message}\"")
+            logger.info("Game Over: Boss defeated")
             self.game_over = True
