@@ -1,28 +1,22 @@
 PyRogue v0.1.0 December 2025 By Andrew Butler
 Built to run using Python 3.12 with Tkinter library
 
-Pyrogue is an ASCII-based roguelike game built in Python.
-It is based on a C/C++ project from a University course I wrote, but completely
+PyRogue is an ASCII-based roguelike game built in Python.
+Requires Tkinter library for integrated UI.
+
+This project is based on a C/C++ project from a University course I wrote, but completely
 rewritten and overhauled to be more in line with what I wanted that project to be.
 The original C/C++ code can be found on the Legacy_C++ branch of the PyRogue repo.
 
-To run and play PyRogue, place PyRogue codebase wherever you would like on your system,
-navigate to that directory using command line, and run "pip install ."
-This will enable Pyrogue to run via either of the two commands, from any directory:
-  1. "pyrogue", if added as path variable
-  2. "python -m pyrogue"
+PyRogue can be started by directly running PyRogue/pyrogue as a module.
+On windows: python -m pyrogue
+On Linux: python3 -m pyrogue
 
 From there, you can navigate the menu using the arrow keys or using the movement keys below.
 You will have the option to start a game, alter game settings, view the game manual, view
 monster and item descriptions for monsters/items that will appear in the game, or quit.
 For more information on the game itself, be sure to check out the game manual.
 Have fun!
-
-New features with v0.1.0:
-    - Ranged combat using ranged weapons
-    - Monster PICKUP & DESTROY abilities
-    - Cheats toggle
-    - Package installation via pip
 
 The game has the following key binds:
 ===== MOVEMENT =====
@@ -57,7 +51,9 @@ The game has the following key binds:
   + : Restores player hitpoints & AMMO to current maximum.
 
 Known Issues:
+  - PyRogue was built in a Windows environment, and may exhibit strange behavior on Linux.
+    E.g., it does not play nicely with display scaling on the gnome desktop used by Ubuntu.
+    I have not fully explored what other issues may exist.
   - The game does not instantly end when win conditions are met.
   - Monsters with PASS and SMART will follow the tunneling distance map, which is not the most optimal path.
   - Item / Monster definition parser does not allow negative values, nor does it account for x+yd0. (0-sided dice).
-
