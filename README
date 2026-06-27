@@ -1,19 +1,37 @@
-PyRogue v0.2.0 Summer 2026 By Andrew Butler
+PyRogue v0.2.0 Summer 2026 (maybe?) By Andrew Butler
 Built with Python 3.14
 
-This is the core PyRogue game 'engine', if you want to call it something so fancy.
+Work in progress; the goal here is to update PyRogue to better accomdodate OOP beyond basic game elements;
+I.e., separate the game engine from the UI, so that UI can be modularized. One of the big shortcomings of 
+PyRogue as it exists is that the Tkinter UI is hardcoded into the game, and in general input is not handled
+in a very maintainable way. This intends to fix that.
 
-This package handles all the game logic, allows calls to influence the game, and is capable of giving the 
-current game state. It requires a frontend/UI implementation, as it does not include one on its own.
-
-This is the third itteration of this project; the first was a C/C++ series of assignments for one of my
-university classes, and the second was the same Python game logic seen here but with a hardcoded Tkinter-based
-UI. Both of these are still accessible on the 'Legacy_C++' and 'tkinter-ui' branches, respectively.
-Neither the C++ code nor the tkinter UI version will be receiving updates.
+This will lead to pyrogue having an independant game engine package, and a separate package that will act
+as the launchable game. This is largely a low-priority rework of PyRogue, so it may take a long time and will
+functionally still be mostly the same.
 
 Notes for myself:
-- selection and control options should be based on what they do; probably need to specify and convert to enums
-- Rendering methods need deleted and decoupled from existing code; will need to test that nothing breaks, although I think 
-    I will need a UI to do that. I guess that also means I should make the UI it's own thing as well.
+- Game Engine Functionality
+    - User-declarable next turn (melee attack, ranged attack, or move)
+        must handle scenario if not users' turn (request not in snyc with automatic turn loop)
+        will need to define basic input for these actions (an action datatype?)
+        will need detailed return information; attack/move result + maybe generated message
+            would generated messages be a UI or game engine responsibility?
+    - pyrogue package will need parsedesc accessible, pass results to game constructor
+    - inspect will need separate external method
+    - need external methods for picking up, equipping, dequipping, dropping, destroying items
+        should this include more granular control over inventory slots?
+    - internal print function to give basic information
+        what should printing the game look like? the map? map + items + monsters + player?
+        should this include things like the player's health, inventory, equipped items?
+    - need externally accessible getter for game state; break into separate aspects?
+        dungeon map, rockmap, monster/item locations, player/player's memory, player's viewdist
+- User Interface
+    - Try and save existing hardcoded UI or rebuild?
+        Either option will likely take a significant chunk of time
+    - still need to manage scaling, asyc rendering
+    - Fix for Linux scaling issue?
+- Misc
+    - Parsedesc needs to account for 0dxx
 
 
