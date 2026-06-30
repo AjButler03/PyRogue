@@ -1,7 +1,7 @@
 import random
 import math
 
-# This file contains a few utilitarian methods that the others will use.
+# This file contains a few utilitarian methods / classes that the others will use.
 
 
 def exp_chancetime(n, decay_rate):
@@ -119,6 +119,12 @@ class Dice:
 
     def roll(self) -> int:
         """Rolls the dice and returns the total value."""
+
+        # Before anything else: Check for zero rolls or zero sides
+        if self.rolls <= 0 or self.sides <= 0:
+            # Also account for negative base value 
+            return max(0, self.base) 
+
         total = self.base
         for _ in range(self.rolls):
             total += random.randint(1, self.sides)

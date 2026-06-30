@@ -5,7 +5,7 @@ from enum import Enum
 from .dungeon import *
 from .utility import *
 
-# This file contains the class information for 'actors' - Monsters, the player, and the various items.
+# This file contains the class information for 'actors' - the player, monsters, and items.
 
 # A monster can have any number of attributes. I will be indicating these using a bit field.
 # See the game manual (text in gamedata/manual.txt) for descriptions of what these are intended to do.
