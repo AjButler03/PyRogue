@@ -160,6 +160,6 @@ cython_debug/
 #.idea/
 
 # C/C++ files (For Legacy_C++ branch)
-*rogue
+# *rogue
 *.d
 *.o
